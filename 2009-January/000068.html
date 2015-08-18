@@ -1,0 +1,949 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r45 - trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2009-January/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r45%20-%20trunk&In-Reply-To=%3C200901241109.n0OB9igb008380%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000067.html">
+   
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r45 - trunk</H1>
+    <B>axeld at BerliOS</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r45%20-%20trunk&In-Reply-To=%3C200901241109.n0OB9igb008380%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r45 - trunk">axeld at mail.berlios.de
+       </A><BR>
+    <I>Sat Jan 24 12:09:44 CET 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000067.html">[Ignition-commits] r44 - trunk
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#68">[ date ]</a>
+              <a href="thread.html#68">[ thread ]</a>
+              <a href="subject.html#68">[ subject ]</a>
+              <a href="author.html#68">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: axeld
+Date: 2009-01-24 12:09:43 +0100 (Sat, 24 Jan 2009)
+New Revision: 45
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=45&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=45&amp;view=rev</A>
+
+Modified:
+   trunk/classes.c
+   trunk/edit.c
+   trunk/gadgets.c
+   trunk/ignition.c
+   trunk/io.c
+   trunk/prefs.c
+   trunk/printer.c
+   trunk/project.c
+   trunk/rexx.c
+   trunk/types.h
+   trunk/version.h
+   trunk/windows.c
+   trunk/windows.h
+Log:
+* Removed all demo and lite version support; they won't be needed anymore.
+
+
+Modified: trunk/classes.c
+===================================================================
+--- trunk/classes.c	2009-01-24 10:41:57 UTC (rev 44)
++++ trunk/classes.c	2009-01-24 11:09:43 UTC (rev 45)
+@@ -1336,16 +1336,16 @@
+ 
+ 
+ struct gClass *
+-MakeGClass(STRPTR name, UBYTE type, struct gClass *sgc, STRPTR label, STRPTR image, APTR dispatch,
+-	APTR draw, struct gInterface *gi, ULONG objsize)
++MakeGClass(STRPTR name, UBYTE type, struct gClass *sgc, STRPTR label,
++	STRPTR image, APTR dispatch, APTR draw, struct gInterface *gi,
++	ULONG objsize)
+ {
+ 	struct gClass *gc;
+ 
+ 	if (!(type &amp; GCT_ROOT) &amp;&amp; !sgc)
+ 		return NULL;
+ 
+-	if ((gc = AllocPooled(pool, sizeof(struct gClass))) != 0)
+-	{
++	if ((gc = AllocPooled(pool, sizeof(struct gClass))) != NULL) {
+ 		gc-&gt;gc_Node.in_Name = label;
+ 		gc-&gt;gc_Node.in_Type = type;
+ 		gc-&gt;gc_Node.in_Image = LoadImage(image);
+@@ -1377,41 +1377,37 @@
+ BOOL
+ LoadGClass(struct gClass *gc)
+ {
+-	BOOL ASM (*initGCSegment)(REG(a0, APTR), REG(a1, APTR *), REG(a2, APTR), REG(a3, APTR), REG(a6, APTR),
+-		REG(d0, APTR), REG(d1, APTR), REG(d2, APTR), REG(d3, APTR), REG(d4, long));
+-	BPTR dir,olddir,segment;
++	BOOL ASM (*initGCSegment)(REG(a0, APTR), REG(a1, APTR *), REG(a2, APTR),
++		REG(a3, APTR), REG(a6, APTR), REG(d0, APTR), REG(d1, APTR),
++		REG(d2, APTR), REG(d3, APTR), REG(d4, long));
++	BPTR dir, olddir, segment;
+ 
+ 	if (gc-&gt;gc_Segment || !gc-&gt;gc_ClassName)
+ 		return TRUE;
+ 
+-	if ((dir = Lock(CLASSES_PATH, ACCESS_READ)) != 0)
+-	{
++	if ((dir = Lock(CLASSES_PATH, ACCESS_READ)) != 0) {
+ 		olddir = CurrentDir(dir);
+-		if ((segment = LoadSeg(gc-&gt;gc_ClassName)) != 0)
+-		{
++		if ((segment = LoadSeg(gc-&gt;gc_ClassName)) != 0) {
+ 			initGCSegment = MKBADDR(segment) + sizeof(APTR);
+-			if (initGCSegment(gc, gClassFuncTable, pool, GfxBase, SysBase, MathIeeeDoubBasBase,
+-					MathIeeeDoubTransBase, UtilityBase, LocaleBase,
+-#ifdef IGNITION_LITE_EDITION
+-					MAKE_ID('I','G','L',0)))
+-#else
+-					MAKE_ID('I','G','N',0)))
+-#endif
++			if (initGCSegment(gc, gClassFuncTable, pool, GfxBase, SysBase,
++					MathIeeeDoubBasBase, MathIeeeDoubTransBase, UtilityBase,
++					LocaleBase, MAKE_ID('I','G','N',0)))
+ 				gc-&gt;gc_Segment = segment;
+-			else
+-			{
+-				ErrorRequest(GetString(&amp;gLocaleInfo, MSG_INIT_CLASS_ERR), gc-&gt;gc_ClassName);
++			else {
++				ErrorRequest(GetString(&amp;gLocaleInfo, MSG_INIT_CLASS_ERR),
++					gc-&gt;gc_ClassName);
+ 				UnLoadSeg(segment);
+ 			}
++		} else {
++			ErrorRequest(GetString(&amp;gLocaleInfo, MSG_CLASS_NOT_FOUND_ERR),
++				gc-&gt;gc_ClassName);
+ 		}
+-		else
+-			ErrorRequest(GetString(&amp;gLocaleInfo, MSG_CLASS_NOT_FOUND_ERR),gc-&gt;gc_ClassName);
+ 
+ 		CurrentDir(olddir);
+ 		UnLock(dir);
+ 	}
+-	if (!gc-&gt;gc_Segment)  // Klasse entfernen
+-	{
++	if (!gc-&gt;gc_Segment) {
++		// remove class
+ 		RemoveLocked((struct Node *)gc);
+ 		FreeGClass(gc);
+ 
+@@ -1438,7 +1434,7 @@
+ void
+ InitGClasses(void)
+ {
+-	struct gClass *gc,*dgc;
++	struct gClass *gc, *dgc;
+ 	struct AnchorPath ALIGNED ap;
+ 	BPTR dir, olddir, dat;
+ 	char t[512];
+@@ -1448,7 +1444,7 @@
+ 	MyNewList(&amp;gdiagrams);
+ 	MyNewList(&amp;intclasses);
+ 
+-	/*** initialize internal classes ***/
++	/* initialize internal classes */
+ 
+ 	if ((gc = MakeGClass(&quot;root&quot;, GCT_ROOT | GCT_INTERNAL, NULL, NULL, NULL, gRootDispatch, NULL, gRootInterface, sizeof(struct gObject))) != 0) {
+ 		if ((dgc = MakeGClass(&quot;diagram&quot;, GCT_ROOT | GCT_INTERNAL, gc, NULL, NULL, gDiagramDispatch, NULL, gDiagramInterface,
+@@ -1465,7 +1461,7 @@
+ 			MakeGClass(gcNames[i], gcTypes[i] | GCT_INTERNAL, FindGClass(gcSuper[i]), gcLabels[i], gcImages[i], gcDispatch[i], gcDraw[i], gcInterface[i], gcObjSize[i]);
+ 	}
+ 
+-	/*** externe Klassenbeschreibungen laden ***/
++	/* load external class descriptions */
+ 
+ 	if ((dir = Lock(CLASSES_PATH, ACCESS_READ)) != 0) {
+ 		olddir = CurrentDir(dir);
+
+Modified: trunk/edit.c
+===================================================================
+--- trunk/edit.c	2009-01-24 10:41:57 UTC (rev 44)
++++ trunk/edit.c	2009-01-24 11:09:43 UTC (rev 45)
+@@ -846,14 +846,6 @@
+ 			return;
+ 		}
+ 
+-#ifdef IGNITION_LITE_EDITION
+-		// the maximum table size is 30 x 50
+-		if (col &gt; 30)
+-			col = 30;
+-		if (row &gt; 50)
+-			row = 50;
+-#endif
+-
+ 		if (changed)
+ 			page-&gt;pg_Gad.DispPos = 0;
+ 		if (changed || col != page-&gt;pg_Gad.cp.cp_Col
+@@ -889,14 +881,6 @@
+ 	if (page-&gt;pg_Gad.DispPos != PGS_NONE)
+ 		FreeTabGadget(page);
+ 
+-#ifdef IGNITION_LITE_EDITION
+-		// the maximum table size is 30 x 50
+-		if (col &gt; 30)
+-			col = 30;
+-		if (row &gt; 50)
+-			row = 50;
+-#endif
+-
+ 	DeselectGObjects(page);
+ 	cp = &amp;page-&gt;pg_Gad.cp;
+ 	setCoordPkt(page, cp, col, row);
+
+Modified: trunk/gadgets.c
+===================================================================
+--- trunk/gadgets.c	2009-01-24 10:41:57 UTC (rev 44)
++++ trunk/gadgets.c	2009-01-24 11:09:43 UTC (rev 45)
+@@ -1,6 +1,6 @@
+ /* Create gadget routines for ignition
+  *
+- * Copyright 1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+@@ -1416,9 +1416,6 @@
+ 	gad = CreateGadget(CHECKBOX_KIND, gad, &amp;ngad,
+ 			GTCB_Scaled,	TRUE,
+ 			GTCB_Checked,	mp-&gt;mp_Flags &amp; MPF_SCRIPTS,
+-#ifdef IGNITION_LITE_EDITION
+-			GA_Disabled,		TRUE,
+-#endif
+             TAG_END);
+ 
+     ngad.ng_TopEdge += fontheight+7;
+@@ -1493,9 +1490,6 @@
+ 			GTLV_Labels,		wd-&gt;wd_ExtData[3],
+ 			GTLV_ShowSelected,	NULL,
+ 			GTLV_CallBack,		&amp;selectHook,
+-#ifdef IGNITION_LITE_EDITION
+-			GA_Disabled,		TRUE,
+-#endif
+             TAG_END);
+ 
+     i = (ngad.ng_LeftEdge += 6+ngad.ng_Width);
+
+Modified: trunk/ignition.c
+===================================================================
+--- trunk/ignition.c	2009-01-24 10:41:57 UTC (rev 44)
++++ trunk/ignition.c	2009-01-24 11:09:43 UTC (rev 45)
+@@ -1,6 +1,6 @@
+ /* Main application
+  *
+- * Copyright &#169;1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+@@ -539,7 +539,8 @@
+ }
+ 
+ 
+-uint32 IsOverProjSpecial(struct Window *win,int32 x,int32 y)
++uint32
++IsOverProjSpecial(struct Window *win, int32 x, int32 y)
+ {
+     struct winData *wd;
+     struct Prefs *pr;
+@@ -563,30 +564,23 @@
+ void
+ UpdateInteractive(struct Mappe *mp, bool refresh)
+ {
+-    struct Node *ln;
+-
+-#ifdef IGNITION_LITE_EDITION
+-	// lite edition doesn't have the interactive mode
+-	mp-&gt;mp_Flags &amp;= ~MPF_SCRIPTS;
+-#endif
+- 
+-    if (mp-&gt;mp_Flags &amp; MPF_SCRIPTS)
+-    {
+-        foreach(&amp;mp-&gt;mp_Pages,ln)
+-        {
++	struct Node *ln;
++	
++	if ((mp-&gt;mp_Flags &amp; MPF_SCRIPTS) != 0) {
++		foreach(&amp;mp-&gt;mp_Pages, ln) {
+ 			SetMark((struct Page *)ln, -1, 0, 0, 0);
+-            DeselectGObjects((struct Page *)ln);
+-        }
++			DeselectGObjects((struct Page *)ln);
++		}
+ 		RefreshMaskFields(mp, refresh);
+-    }
+-    if (mp-&gt;mp_Window)
+-    {
+-        if (mp-&gt;mp_Flags &amp; MPF_SCRIPTS)
+-            mp-&gt;mp_Window-&gt;Flags |= WFLG_RMBTRAP;
+-        else
+-            mp-&gt;mp_Window-&gt;Flags &amp;= ~WFLG_RMBTRAP;
++	}
++
++	if (mp-&gt;mp_Window) {
++		if (mp-&gt;mp_Flags &amp; MPF_SCRIPTS)
++			mp-&gt;mp_Window-&gt;Flags |= WFLG_RMBTRAP;
++		else
++			mp-&gt;mp_Window-&gt;Flags &amp;= ~WFLG_RMBTRAP;
+ 		DrawStatusFlags(mp, mp-&gt;mp_Window);
+-    }
++	}
+ }
+ 
+ 
+@@ -906,20 +900,18 @@
+ void
+ FreeWinIconObjs(struct Window *win,struct winData *wd)
+ {
+-    struct winObj *wo,*swo;
++	struct winObj *wo, *swo;
+ 
+-    for(wo = (APTR)wd-&gt;wd_Objs.mlh_Head;wo-&gt;wo_Node.mln_Succ;)
+-    {
+-        swo = (struct winObj *)wo-&gt;wo_Node.mln_Succ;
+-        if (wo-&gt;wo_Type == WOT_GADGET || wo-&gt;wo_Type == WOT_ICONIMG)
+-        {
+-            MyRemove(wo);
+-            DisposeObject(wo-&gt;wo_Obj);
+-            FreePooled(pool,wo,sizeof(struct winObj));
+-        }
+-        wo = swo;
+-    }
+-    wd-&gt;wd_ExtData[0] = NULL;
++	for (wo = (APTR)wd-&gt;wd_Objs.mlh_Head; wo-&gt;wo_Node.mln_Succ;) {
++		swo = (struct winObj *)wo-&gt;wo_Node.mln_Succ;
++		if (wo-&gt;wo_Type == WOT_GADGET || wo-&gt;wo_Type == WOT_ICONIMG) {
++			MyRemove(wo);
++			DisposeObject(wo-&gt;wo_Obj);
++			FreePooled(pool, wo, sizeof(struct winObj));
++		}
++		wo = swo;
++	}
++	wd-&gt;wd_ExtData[0] = NULL;
+ }
+ 
+ 
+
+Modified: trunk/io.c
+===================================================================
+--- trunk/io.c	2009-01-24 10:41:57 UTC (rev 44)
++++ trunk/io.c	2009-01-24 11:09:43 UTC (rev 45)
+@@ -1,6 +1,6 @@
+ /* I/O routines and the standard file format implementation (old and current)
+  *
+- * Copyright &#169;1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+@@ -2587,9 +2587,6 @@
+ 					calcflags = (calcflags &amp; ~CF_REQUESTER) | CF_SUSPEND; /* setzt Berechnung der Zellen aus */
+ 
+ 					if (!(rc = io-&gt;io_Load(dat, mp))) {
+-#ifdef IGNITION_LITE_EDITION
+-						mp-&gt;mp_Flags &amp;= ~MPF_SCRIPTS;
+-#endif
+ 						// initialize format template preferences
+ 						if (!IsListEmpty((struct List *)&amp;mp-&gt;mp_Prefs.pr_Formats))
+ 						{
+@@ -2637,28 +2634,6 @@
+ 									gDoMethod(go, GCM_INITAFTERLOAD);
+ 							}
+ 
+-#ifdef IGNITION_LITE_EDITION
+-							{
+-								struct tableField *next;
+-								bool any = false;
+-
+-								// the lite edition does only support a limited sheet size of 30x50
+-								tf = (struct tableField *)page-&gt;pg_Table.mlh_Head;
+-								while (tf-&gt;tf_Node.mln_Succ) {
+-									next = (struct tableField *)tf-&gt;tf_Node.mln_Succ;
+-
+-									if (tf-&gt;tf_Row &gt; 50 || tf-&gt;tf_Col &gt; 30) {
+-										RemoveCell(page, tf, true);
+-										FreeTableField(tf);
+-										any = true;
+-									}
+-
+-									tf = next;
+-								}
+-								if (any)
+-									ErrorRequest(GetString(&amp;gLocaleInfo, MSG_LITE_EDITION_CELL_LIMIT));
+-							}
+-#endif
+ 							foreach (&amp;page-&gt;pg_Table, tf)
+ 							{
+ 								// Gespeichert werden nur die internen kurzen Funktionsnamen
+@@ -2800,10 +2775,6 @@
+ int32
+ SaveProject(struct Mappe *mp, struct IOType *io, bool confirmOverwrite)
+ {
+-#ifdef IGNITION_DEMO
+-	NotAvailableInDemo();
+-	return 0;
+-#else
+ 	struct tableField *tf;
+ 	struct Page *page;
+ 	struct Node *ln;
+@@ -2971,7 +2942,6 @@
+ 		return rc;
+ 	}
+ 	return RC_WARN;
+-#endif	// !IGNITION_DEMO
+ }
+ 
+ 
+
+Modified: trunk/prefs.c
+===================================================================
+--- trunk/prefs.c	2009-01-24 10:41:57 UTC (rev 44)
++++ trunk/prefs.c	2009-01-24 11:09:43 UTC (rev 45)
+@@ -1,6 +1,6 @@
+ /* Preferences management and related functionality
+  *
+- * Copyright &#169;1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+@@ -489,21 +489,16 @@
+ 
+ 
+ void
+-AddPrefsModuleToTree(struct Prefs *pr, struct PrefsModule *pm, struct MinList *tree)
++AddPrefsModuleToTree(struct Prefs *pr, struct PrefsModule *pm,
++	struct MinList *tree)
+ {
+ 	struct TreeNode *tn;
+-	long   flags;
++	long flags;
+ 					
+ 	// In beginner mode, not all preferences are available
+ 	if (!pm || (gIsBeginner &amp;&amp; (pm-&gt;pm_Type == WDT_PREFCMDS || pm-&gt;pm_Type == WDT_PREFMENU || pm-&gt;pm_Type == WDT_PREFCONTEXT || pm-&gt;pm_Type == WDT_PREFKEYS)))
+ 		return;
+ 
+-#ifdef IGNITION_LITE_EDITION
+-	// in the lite edition, some modules are missing as well
+-	if (pm-&gt;pm_Type == WDT_PREFMENU || pm-&gt;pm_Type == WDT_PREFCONTEXT)
+-		return;
+-#endif
+-
+ 	flags = TNF_SORT;
+ 	if (pr != &amp;prefs &amp;&amp; pr != &amp;recycledprefs &amp;&amp; pm-&gt;pm_Flags &amp; (PMF_ADD | PMF_REPLACE))
+ 		flags |= (pm-&gt;pm_Flags &amp; PMF_ADD) ? TNF_ADD : TNF_REPLACE;
+
+Modified: trunk/printer.c
+===================================================================
+--- trunk/printer.c	2009-01-24 10:41:57 UTC (rev 44)
++++ trunk/printer.c	2009-01-24 11:09:43 UTC (rev 45)
+@@ -1,6 +1,6 @@
+ /* Print support implementation
+  *
+- * Copyright &#169;1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+@@ -1235,10 +1235,6 @@
+ void
+ PrintProject(struct List *list, struct wdtPrinter *wp, WORD unit, ULONG flags)
+ {
+-#ifdef IGNITION_DEMO
+-	NotAvailableInDemo();
+-	return;
+-#else
+ 	STRPTR error = NULL;
+ 
+ 	{
+@@ -1313,7 +1309,6 @@
+ 		ClosePrintWindow(wps);
+ 	}
+ 	SetBusy(FALSE, BT_APPLICATION);
+-#endif	// !IGNITION_DEMO
+ }
+ 
+ 
+
+Modified: trunk/project.c
+===================================================================
+--- trunk/project.c	2009-01-24 10:41:57 UTC (rev 44)
++++ trunk/project.c	2009-01-24 11:09:43 UTC (rev 45)
+@@ -1,6 +1,6 @@
+ /* Project related functions
+  *
+- * Copyright &#169;1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2008 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+@@ -355,11 +355,10 @@
+ 	if (ff != (APTR)~0L)
+ 		page-&gt;pg_Family = ff;		/* Auswahl f&#252;r folgende &#252;bernehmen */
+ 	if (height != ~0L) {
+-#ifndef IGNITION_LITE_EDITION
+ 		// limit maximal font size to 128 pt
+ 		if (height &gt; (128L &lt;&lt; 16)) {
+ 			height = 128L &lt;&lt; 16;
+-#else
++#if 0
+ 		// limit maximal font size to 72 pt (because of MorphOS broken ft2.library)
+ 		if (height &gt; (72L &lt;&lt; 16)) {
+ 			height = 72L &lt;&lt; 16;
+
+Modified: trunk/rexx.c
+===================================================================
+--- trunk/rexx.c	2009-01-24 10:41:57 UTC (rev 44)
++++ trunk/rexx.c	2009-01-24 11:09:43 UTC (rev 45)
+@@ -1,6 +1,6 @@
+ /* ARexx interface and implementation of exported functions
+  *
+- * Copyright &#169;1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+@@ -2680,7 +2680,7 @@
+ ULONG
+ rxPrefs(long *opts)
+ {
+-	long   flags = 0,i;
++	long flags = 0,i;
+ 
+ 	for(i = 0;i &lt; PREFS_REQ;i++)
+ 		flags |= (opts[i] &amp; 1) &lt;&lt; i;
+@@ -2688,24 +2688,17 @@
+ 	if (opts[PREFS_LOAD])
+ 		flags |= (opts[PREFS_ADD] ? PRF_ADDCONTENTS : 0) | (opts[PREFS_KEEP] ? PRF_KEEPOLDCONTENTS : 0);
+ 
+-	if (opts[PREFS_REQ])
+-	{
++	if (opts[PREFS_REQ]) {
+ 		struct Mappe *mp = NULL;
+-		long   type;
++		long type;
+ 
+ 		if (!opts[PREFS_GLOBAL] &amp;&amp; rxpage)
+ 			mp = rxpage-&gt;pg_Mappe;
+ 
+-		for (i = 0x10000; i; i &gt;&gt;= 1)
+-		{
++		for (i = 0x10000; i; i &gt;&gt;= 1) {
+ 			if ((flags &amp; i) == 0 || (type = GetPrefsModuleType(i)) == 0)
+ 				continue;
+ 
+-#ifdef IGNITION_LITE_EDITION
+-			// the lite edition doesn't contain all configuration possibilities
+-			if (type == WDT_PREFMENU)
+-				continue;
+-#endif
+ 			OpenAppWindow(type, WA_Data, mp, TAG_END);
+ 		}
+ 
+@@ -2715,43 +2708,39 @@
+ 	if (!(flags &amp; PRF_ALL))
+ 		flags |= PRF_ALL;
+ 
+-	if (opts[PREFS_LOAD] || opts[PREFS_SAVE])
+-	{
++	if (opts[PREFS_LOAD] || opts[PREFS_SAVE]) {
+ 		char dest[256], doit = FALSE;
+ 
+-		if (!opts[PREFS_REQ])
+-		{
++		if (!opts[PREFS_REQ]) {
+ 			if (!opts[PREFS_NAME])
+ 				strcpy(dest, CONFIG_PATH &quot;/ignition.prefs&quot;);
+ 			else
+ 				strcpy(dest, (STRPTR)opts[PREFS_NAME]);
+ 
+ 			doit = TRUE;
+-		}
+-		else if (AslRequestTags(fileReq, ASLFR_Window,		scr-&gt;FirstWindow,
+-										 ASLFR_TitleText,	 opts[PREFS_LOAD] ? GetString(&amp;gLocaleInfo, MSG_LOAD_PREFERENCES_TITLE) : GetString(&amp;gLocaleInfo, MSG_SAVE_PREFERENCES_TITLE),
+-										 ASLFR_InitialDrawer, CONFIG_PATH,
+-										 ASLFR_InitialFile,   &quot;ignition.prefs&quot;,
+-										 ASLFR_InitialPattern,&quot;#?.prefs&quot;,
+-										 ASLFR_DoSaveMode,	opts[PREFS_SAVE],
+-										 ASLFR_DoPatterns,	TRUE,
+-										 ASLFR_DrawersOnly,   FALSE,
+-										 TAG_END))
+-		{
++		} else if (AslRequestTags(fileReq,
++				ASLFR_Window,			scr-&gt;FirstWindow,
++				ASLFR_TitleText,		opts[PREFS_LOAD]
++					? GetString(&amp;gLocaleInfo, MSG_LOAD_PREFERENCES_TITLE)
++					: GetString(&amp;gLocaleInfo, MSG_SAVE_PREFERENCES_TITLE),
++				ASLFR_InitialDrawer,	CONFIG_PATH,
++				ASLFR_InitialFile,  	&quot;ignition.prefs&quot;,
++				ASLFR_InitialPattern,	&quot;#?.prefs&quot;,
++				ASLFR_DoSaveMode,		opts[PREFS_SAVE],
++				ASLFR_DoPatterns,		TRUE,
++				ASLFR_DrawersOnly,   	FALSE,
++				TAG_END)) {
+ 			strcpy(dest, fileReq-&gt;fr_Drawer);
+ 			AddPart(dest, fileReq-&gt;fr_File, 255);
+ 
+ 			doit = TRUE;
+ 		}
+ 
+-		if (doit)
+-		{
+-			if (opts[PREFS_LOAD])
+-			{
++		if (doit) {
++			if (opts[PREFS_LOAD]) {
+ 				LoadPrefs(&amp;prefs,dest,NULL,flags);
+ //		RefreshPrefsModules(&amp;prefs,flags);
+-			}
+-			else
++			} else
+ 				SavePrefs(&amp;prefs,dest,flags);
+ 		}
+ 	}
+@@ -3580,12 +3569,10 @@
+ 	AddIntCmd(rxCopy,		  ICF_PAGE,  &quot;COPY POS,UNIT/N/K&quot;);
+ 	AddIntCmd(rxCurrent,	   ICF_NONE,  &quot;CURRENT MAP=WINDOW/K,PAGE,NEXT/S,PREV/S,SHOW/S,NUM/N/K&quot;);
+ 	AddIntCmd(rxCut,		   ICF_PAGE,  &quot;CUT POS,TEXTONLY/S,UNIT/N/K&quot;);
+-#ifndef IGNITION_LITE_EDITION
+ 	AddIntCmd(rxDatabase,	  ICF_NONE,  &quot;DATABASE REQ/S&quot;);
+ 	AddIntCmd(rxDbCurrent,	 ICF_PAGE,  &quot;DBCURRENT NAME/A,NEXT/S,PREV/S,FIRST/S,LAST/S,PARENT,NUM/N/K&quot;);
+ 	AddIntCmd(rxDbNew,		 ICF_PAGE,  &quot;DBNEW NAME,PARENT,NOREFS/S&quot;);
+ 	AddIntCmd(rxDbSearch,	  ICF_PAGE,  &quot;DBSEARCH NAME,FILTER/K,INPUT/S,START/S,STOP/S,TOGGLE/S&quot;);
+-#endif
+ 	AddIntCmd(rxDelete,		ICF_PAGE,  &quot;DELETE POS,TEXTONLY/S&quot;);
+ 	AddIntCmd(rxDeletePage,	ICF_PAGE,  &quot;DELETEPAGE NAME&quot;);
+ 	AddIntCmd(rxDiagram,	   ICF_NONE,  &quot;DIAGRAM NAME,REQ/S&quot;);
+@@ -3608,9 +3595,7 @@
+ 	AddIntCmd(rxIndex,		 ICF_NONE,  &quot;INDEX REQ/S&quot;);
+ 	AddIntCmd(rxInsertFormula, ICF_PAGE,  &quot;INSERTFORMULA POS,NAME,TYPE/N/K,REQ/S&quot;);
+ 	AddIntCmd(rxInsertObject,  ICF_NONE,  &quot;INSERTOBJECT TYPE,REQ/S&quot;);
+-#ifndef IGNITION_LITE_EDITION
+ 	AddIntCmd(rxInteractive,   ICF_PAGE,  &quot;INTERACTIVE SET/S,TOGGLE/S,NONE/S&quot;);
+-#endif
+ 	AddIntCmd(rxLastError,	 ICF_MSG,   &quot;LASTERROR VAR&quot;);
+ 	AddIntCmd(rxLoad,		  ICF_NONE,  &quot;LOAD NAME,REQ/S,NEW/S,TYPE/K,TYPEREQ/S,OLDPATH/S&quot;);
+ 	AddIntCmd(rxLoadPicture,   ICF_PAGE,  &quot;LOADPICTURE NAME,REQ/S&quot;);
+@@ -3641,9 +3626,7 @@
+ 	AddIntCmd(rxRequestString, ICF_MSG,   &quot;REQUESTSTRING PROMPT,DEFAULT/K,VAR&quot;);
+ 	AddIntCmd(rxRequestNumber, ICF_MSG,   &quot;REQUESTNUMBER PROMPT,DEFAULT/K/N,VAR&quot;);
+ 	AddIntCmd(rxSave,		  ICF_PAGE,  &quot;SAVE NAME,REQ/S,TYPEREQ/S&quot;);
+-#ifndef IGNITION_LITE_EDITION
+ 	AddIntCmd(rxScript,		ICF_PAGE,  &quot;SCRIPT NAME,EXTERN/S,NEW/S,EDIT/S,DELETE/S,REQ/S&quot;);
+-#endif
+ 	AddIntCmd(rxSearch,		ICF_NONE,  &quot;SEARCH REQ/S,NEXT/S&quot;);
+ 	AddIntCmd(rxSelect,		ICF_PAGE,  &quot;SELECT POS,LEFT/S,RIGHT/S,ABOVE/S,BELOW/S,BLOCK/S&quot;);
+ 	AddIntCmd(rxSeparator,	 ICF_PAGE,  &quot;SEPARATOR POS,SET/S,TOGGLE/S,NONE/S&quot;);
+@@ -3755,7 +3738,6 @@
+ ULONG
+ RunRexxScript(UBYTE type, STRPTR name)
+ {
+-#ifndef IGNITION_LITE_EDITION
+ 	struct MsgPort *hostPort;
+ 	struct RexxScript *rxs = NULL;
+ 	struct RexxPort *rxp;
+@@ -3764,34 +3746,27 @@
+ 	if (!name)
+ 		return(RC_WARN);
+ 
+-	if (type == RXS_INTERN)
+-	{
+-		if (!(rxs = (APTR)FindTag(&amp;rxpage-&gt;pg_Mappe-&gt;mp_RexxScripts,name)))
+-		{
++	if (type == RXS_INTERN) {
++		if (!(rxs = (APTR)FindTag(&amp;rxpage-&gt;pg_Mappe-&gt;mp_RexxScripts,name))) {
+ 			ErrorRequest(GetString(&amp;gLocaleInfo, MSG_INTERNAL_SCRIPT_NOT_FOUND_ERR),name);
+ 			return(RC_WARN);
+ 		}
+ 	}
+-	if (!(rxp = MakeRexxPort()))
+-	{
++	if (!(rxp = MakeRexxPort())) {
+ 		ErrorRequest(GetString(&amp;gLocaleInfo, MSG_CREATE_SCRIPT_ENVIRONMENT_ERR));
+ 		return(RC_FAIL);
+ 	}
+ 	sendmsg = rxp-&gt;rxp_Message;
+ 
+-	if (rxs)
+-	{
++	if (rxs) {
+ 		sendmsg-&gt;rm_Args[0] = CreateArgstring(rxs-&gt;rxs_Data,strlen(rxs-&gt;rxs_Data));
+ 		sendmsg-&gt;rm_Action = RXCOMM | RXFF_STRING;
+-	}
+-	else
+-	{
++	} else {
+ 		sendmsg-&gt;rm_Args[0] = CreateArgstring(name,strlen(name));
+ 		sendmsg-&gt;rm_Action = RXCOMM;
+ 	}
+ 	Forbid();
+-	if (!(hostPort = FindPort(&quot;REXX&quot;)) &amp;&amp; !FindTask(&quot;RexxMaster&quot;))
+-	{
++	if (!(hostPort = FindPort(&quot;REXX&quot;)) &amp;&amp; !FindTask(&quot;RexxMaster&quot;)) {
+ 		Execute(&quot;SYS:System/RexxMast &gt;Nil:&quot;, NULL, NULL);
+ 		hostPort = FindPort(&quot;REXX&quot;);
+ 	}
+@@ -3799,12 +3774,11 @@
+ 		PutMsg(hostPort, (struct Message *)sendmsg);
+ 	Permit();
+ 
+-	if (!hostPort)
+-	{
++	if (!hostPort) {
+ 		ErrorRequest(GetString(&amp;gLocaleInfo, MSG_REXX_PORT_NOT_FOUND_ERR));
+ 		return RC_FAIL;
+ 	}
+-#endif
++
+ 	return RC_OK;
+ }
+ 
+@@ -3812,64 +3786,33 @@
+ long
+ handleEvent(struct Page *page,BYTE type,long col,long row)
+ {
+-#ifndef IGNITION_LITE_EDITION
+ 	struct Mappe *mp;
+-	char   /*name[256],*/button[10];
++	char /*name[256],*/button[10];
+ 
+ 	ignoreEvent = FALSE;
+ 	if (!page || !((mp = page-&gt;pg_Mappe)-&gt;mp_Flags &amp; MPF_SCRIPTS) || !mp-&gt;mp_Events[type].ev_Command || !(mp-&gt;mp_Events[type].ev_Flags &amp; EVF_ACTIVE))
+ 		return 0;
+ 
+-	if (type == EVT_LBUTTON || type == EVT_RBUTTON)
+-	{
++	if (type == EVT_LBUTTON || type == EVT_RBUTTON) {
+ 		if (imsg.Code &amp; IECODE_UP_PREFIX)
+ 			strcpy(button,&quot;up &quot;);
+ 		else
+ 			strcpy(button,&quot;down &quot;);
+-	}
+-	else
++	} else
+ 		strcpy(button,&quot;&quot;);
+ 
+ 	ProcessAppCmd(page,mp-&gt;mp_Events[type].ev_Command);
+ 							
+-#endif
+ 	return (long)ignoreEvent;
+ }
+ 
+ 		
+-#ifdef IGNITION_LITE_EDITION
+-static bool
+-AllowedLiteEditionRexxCommand(STRPTR t)
+-{
+-	const char *allowed[] = {&quot;load&quot;, &quot;save&quot;, &quot;close&quot;, &quot;new&quot;, &quot;print&quot;, &quot;quit&quot;, NULL};
+-	int length = cmdlen(t);
+-	int i;
+-	
+-	for (i = 0; allowed[i]; i++) {
+-		if (!strnicmp(t, allowed[i], length))
+-			return true;
+-	}
+-	
+-	return false;
+-}
+-#endif
+-
+-
+ void
+ handleRexx(struct RexxMsg *rxmsg)
+ {
+ 	D(bug(&quot;handleRexx() - %s\n  action: %lx - port: %s - ext: %s\n&quot;,rxmsg-&gt;rm_Args[0],rxmsg-&gt;rm_Action,rxmsg-&gt;rm_CommAddr,rxmsg-&gt;rm_FileExt));
+ 	D(bug(&quot;  task: %lx - replyport: %lx\n&quot;, rxmsg-&gt;rm_TaskBlock, rxmsg-&gt;rm_Node.mn_ReplyPort));
+ 
+-#ifdef IGNITION_LITE_EDITION
+-	// The lite edition does not have a full ARexx port
+-	if (strcmp(rxmsg-&gt;rm_FileExt, &quot;guide&quot;)) {
+-		// accept some commands
+-		if (!AllowedLiteEditionRexxCommand(rxmsg-&gt;rm_Args[0]))
+-			return;
+-	}
+-#endif
+- 
+ 	rxmsg-&gt;rm_Result1 = processIntCmd(rxmsg-&gt;rm_Args[0]);
+ 
+ 	if (rxmsg-&gt;rm_Action &amp; RXFF_RESULT &amp;&amp; !rxmsg-&gt;rm_Result1 &amp;&amp; !rxmsg-&gt;rm_Result2)
+
+Modified: trunk/types.h
+===================================================================
+--- trunk/types.h	2009-01-24 10:41:57 UTC (rev 44)
++++ trunk/types.h	2009-01-24 11:09:43 UTC (rev 45)
+@@ -1,6 +1,6 @@
+ /* Structures, definitions, etc.
+  *
+- * Copyright &#169;1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ #ifndef IGN_TYPES_H
+@@ -680,8 +680,4 @@
+ extern struct LocaleInfo gLocaleInfo;
+ extern bool   noabout;
+ 
+-#ifdef IGNITION_LITE_EDITION
+-extern char gSerial[];
+-#endif
+- 
+ #endif  /* IGN_TYPES_H */
+
+Modified: trunk/version.h
+===================================================================
+--- trunk/version.h	2009-01-24 10:41:57 UTC (rev 44)
++++ trunk/version.h	2009-01-24 11:09:43 UTC (rev 45)
+@@ -1,22 +1,18 @@
+ /* Version numbers
+  *
+- * Copyright &#169;2005-2008 pinc Software. All Rights Reserved.
++ * Copyright &#169;2005-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ #ifndef VERSION_H
+ #define VERSION_H
+ 
+ 
+-#ifndef IGNITION_LITE_EDITION
+-#	define SCREEN_TITLE &quot;ignition  &#169;1996-2008 Axel D&#246;rfler, pinc Software.&quot;
+-#else
+-#	define SCREEN_TITLE &quot;ignition Lite Edition &#169;1996-2008 Axel D&#246;rfler, pinc Software.&quot;
+-#endif
++#define SCREEN_TITLE &quot;ignition&quot;
+  
+ #define VERSION &quot;1.0 beta 1&quot;
+-#define INFODATE &quot;25. September 2008&quot;
+-#define IGNITION_COPYRIGHT &quot;Copyright &#169;1996-2008 pinc Software.&quot;
+-#define VERSTRING &quot;$VER: ignition &quot; VERSION &quot; (25.9.2008)&quot;
++#define INFODATE &quot;24. Januar 2009&quot;
++#define IGNITION_COPYRIGHT &quot;Copyright &#169;1996-2009 pinc Software.&quot;
++#define VERSTRING &quot;$VER: ignition &quot; VERSION &quot; (24.1.2009)&quot;
+ 
+ #endif	/* VERSION_H */
+ 
+
+Modified: trunk/windows.c
+===================================================================
+--- trunk/windows.c	2009-01-24 10:41:57 UTC (rev 44)
++++ trunk/windows.c	2009-01-24 11:09:43 UTC (rev 45)
+@@ -143,19 +143,7 @@
+ }
+ 
+ 
+-#ifdef IGNITION_DEMO
+ void
+-NotAvailableInDemo(void)
+-{
+-	DisplayBeep(NULL);
+-
+-	ErrorRequest(&quot;Diese Funktion ist in der Demo-Version leider nicht verf&#252;gbar.\n\n&quot;
+-		&quot;Sorry, this function is not available in demo mode.&quot;);
+-}
+-#endif
+-
+-
+-void
+ MakeLocaleLabels(const char *labels[], ULONG id, ...)
+ {
+ 	int i = 0;
+@@ -994,15 +982,7 @@
+ 		itext.ITextFont = &ta;
+ 
+ 	itext.FrontPen = 2;  itext.BackPen = 1;
+-#ifdef IGNITION_LITE_EDITION
+-	strcpy(buffer, &quot;Lite Edition &quot;);
+-	sprintf(buffer + strlen(buffer), GetString(&amp;gLocaleInfo, MSG_VERSION_INFO), VERSION);
+-#elif defined(IGNITION_DEMO)
+-	strcpy(buffer, &quot;Demo &quot;);
+-	sprintf(buffer + strlen(buffer), GetString(&amp;gLocaleInfo, MSG_VERSION_INFO), VERSION);
+-#else
+ 	sprintf(buffer, GetString(&amp;gLocaleInfo, MSG_VERSION_INFO), VERSION);
+-#endif
+ 	itext.IText = buffer;  PrintIText(win-&gt;RPort, &amp;itext, border - 5 - lborder - IntuiTextLength(&amp;itext), barheight + 55);
+ 	itext.IText = INFODATE;  PrintIText(win-&gt;RPort, &amp;itext, border - 5 - lborder - IntuiTextLength(&amp;itext), barheight + 66);
+ 	itext.FrontPen = 0;
+@@ -1012,24 +992,8 @@
+ 	itext.IText = &quot;<A HREF="http://www.pinc-software.de">http://www.pinc-software.de</A>&quot;;  PrintIText(win-&gt;RPort,&amp;itext,16+lborder,barheight+129);
+ 	itext.IText = &quot;eMail: <A HREF="https://lists.berlios.de/mailman/listinfo/ignition-commits">info at pinc-software.de</A>&quot;;  PrintIText(win-&gt;RPort,&amp;itext,16+lborder,barheight+141);
+ 
+-#ifdef IGNITION_LITE_EDITION
+-	itext.IText = GetString(&amp;gLocaleInfo, MSG_SERIAL_NUMBER_LABEL);  PrintIText(win-&gt;RPort, &amp;itext, 6 + lborder, barheight + 186);
+-	if (gSerial[0])
+-		itext.IText = gSerial;
+-	else
+-		itext.IText = GetString(&amp;gLocaleInfo, MSG_UNREGISTERED);
+-	PrintIText(win-&gt;RPort, &amp;itext, 6 + lborder, barheight + 197);
+-#elif defined(IGNITION_DEMO)
+-	itext.IText = &quot;Demo version for evaluation purposes only&quot;;  PrintIText(win-&gt;RPort, &amp;itext, 6 + lborder, barheight + 214);
+-#else
+-	//itext.IText = &quot;Martin \&quot;Mason\&quot; Merz's pers&#246;nliche Version&quot;;  PrintIText(win-&gt;RPort, &amp;itext, 6 + lborder, barheight + 213);
+-	//itext.IText = &quot;Axel Knabes pers&#246;nliche Version&quot;;  PrintIText(win-&gt;RPort, &amp;itext, 6 + lborder, barheight + 213);
+-	itext.IText = &quot;Vorabvorf&#252;hrversion :-)&quot;;  PrintIText(win-&gt;RPort, &amp;itext, 6 + lborder, barheight + 194);
+-#endif
+-	/*itext.IText = &quot;Lizensiert f&#252;r:&quot;;  PrintIText(win-&gt;RPort,&amp;itext,14,fontheight+175);
+-	itext.IText = &quot;Donald Duck&quot;;  PrintIText(win-&gt;RPort,&amp;itext,189-IntuiTextLength(&amp;itext),fontheight+175);
+-	itext.IText = &quot;Schnatgang 42&quot;;  PrintIText(win-&gt;RPort,&amp;itext,189-IntuiTextLength(&amp;itext),fontheight+186);
+-	itext.IText = &quot;12345 Entenhausen&quot;;  PrintIText(win-&gt;RPort,&amp;itext,189-IntuiTextLength(&amp;itext),fontheight+197);*/
++	itext.IText = &quot;Open Source Version&quot;;
++	PrintIText(win-&gt;RPort, &amp;itext, 6 + lborder, barheight + 194);
+ 
+ 	CloseFont(tf);
+ 	itext.FrontPen = 1;  itext.BackPen = 0;
+
+Modified: trunk/windows.h
+===================================================================
+--- trunk/windows.h	2009-01-24 10:41:57 UTC (rev 44)
++++ trunk/windows.h	2009-01-24 11:09:43 UTC (rev 45)
+@@ -1,5 +1,5 @@
+ /*
+- * Copyright &#169;1996-2009 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ #ifndef IGN_WINDOWS_H
+@@ -286,8 +286,4 @@
+ extern struct Gadget *CreatePopGadget(struct winData *wd,struct Gadget *gad,BOOL disabled);
+ extern void FreeBorderGadgets(struct Gadget *gad,struct Window *win);
+ 
+-#ifdef IGNITION_DEMO
+-extern void NotAvailableInDemo(void);
+-#endif
+- 
+ #endif  /* IGN_WINDOWS_H */
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000067.html">[Ignition-commits] r44 - trunk
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#68">[ date ]</a>
+              <a href="thread.html#68">[ thread ]</a>
+              <a href="subject.html#68">[ subject ]</a>
+              <a href="author.html#68">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

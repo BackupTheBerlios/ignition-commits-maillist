@@ -1,0 +1,672 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r22 - in trunk: . add-ons
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2008-December/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r22%20-%20in%20trunk%3A%20.%20add-ons&In-Reply-To=%3C200812201745.mBKHjRuX000615%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000037.html">
+   <LINK REL="Next"  HREF="000038.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r22 - in trunk: . add-ons</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r22%20-%20in%20trunk%3A%20.%20add-ons&In-Reply-To=%3C200812201745.mBKHjRuX000615%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r22 - in trunk: . add-ons">marust at mail.berlios.de
+       </A><BR>
+    <I>Sat Dec 20 18:45:27 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000037.html">[Ignition-commits] r21 - trunk/distribution/full/sheets
+</A></li>
+        <LI>Next message: <A HREF="000038.html">[Ignition-commits] r22 - in trunk: . add-ons
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#36">[ date ]</a>
+              <a href="thread.html#36">[ thread ]</a>
+              <a href="subject.html#36">[ subject ]</a>
+              <a href="author.html#36">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2008-12-20 18:45:18 +0100 (Sat, 20 Dec 2008)
+New Revision: 22
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=22&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=22&amp;view=rev</A>
+
+Added:
+   trunk/add-ons/gclass_variadic.c
+   trunk/add-ons/iotype_variadic.c
+Modified:
+   trunk/add-ons/gclass.c
+   trunk/add-ons/gclass.h
+   trunk/add-ons/gclass_protos.h
+   trunk/add-ons/iotype.c
+   trunk/add-ons/iotype.h
+   trunk/add-ons/mmakefile.src
+   trunk/classes.c
+   trunk/io.c
+   trunk/mmakefile.src
+Log:
+* Made add-ons class loading working on AROS.
+  All core functions are implemented as function pointers.
+  These pointers are initialized with the function table
+  pointer from the core. Only the variadic functions
+  are implemented as real functions. I think we can ommit
+  the SASC specific implementation of how the add-ons called
+  the core functions at all.
+* The address of the module initalisation function is obtained
+  as adr = MKBADDR(segment) + sizeof(APTR).
+  On i386-AROS BPTR is same type as APTR. The first function
+  in the segment is the address which follows after the return
+  value of LoadSeg().
+  
+
+
+Modified: trunk/add-ons/gclass.c
+===================================================================
+--- trunk/add-ons/gclass.c	2008-12-20 13:14:52 UTC (rev 21)
++++ trunk/add-ons/gclass.c	2008-12-20 17:45:18 UTC (rev 22)
+@@ -1,6 +1,6 @@
+ /* gClass base module for ignition
+  *
+- * Copyright &#239;&#191;&#189;1996-2008 pinc Software. All Rights Reserved.
++ * Copyright &#169;1996-2008 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the MIT License.
+  */
+ 
+@@ -13,17 +13,22 @@
+ #include &lt;libraries/gtdrag.h&gt;
+ #include &lt;libraries/iffparse.h&gt;
+ 
+-#include &lt;clib/exec_protos.h&gt;
+-#include &lt;clib/dos_protos.h&gt;
+-#include &lt;pragmas/exec_pragmas.h&gt;
+-#include &lt;pragmas/dos_pragmas.h&gt;
++#include &lt;proto/exec.h&gt;
++#include &lt;proto/dos.h&gt;
+ 
++#if defined(__SASC)
++#	include &lt;pragmas/exec_pragmas.h&gt;
++#	include &lt;pragmas/dos_pragmas.h&gt;
++#elif defined(__AROS__)
++#	include &lt;aros/symbolsets.h&gt;
++#endif
++
+ #include &lt;string.h&gt;
+ #include &lt;math.h&gt;
+ 
+ #include &quot;gclass.h&quot;
++#include &quot;gclass_protos.h&quot;
+ 
+-
+ struct __gClass {
+ 	struct ImageNode gc_Node;   /* name and icon, only for non-diagrams */
+ 	struct gClass *gc_Super;    /* super class */
+@@ -56,9 +61,16 @@
+ extern ULONG instanceSize;
+ extern const STRPTR superClass;
+ 
++#ifdef __AROS__
++// ensure that InitGClass becomes 1st function in segment
++BOOL PUBLIC
++InitGClass(REG(a0, struct __gClass *gc), REG(a1, TableEntry *table), REG(a2, APTR mainpool), REG(a3, APTR gfxbase),
++	REG(a6, struct ExecBase *ExecBase), REG(d0, APTR mathbase), REG(d1, APTR mathtrans), REG(d2, APTR utilitybase), REG(d3, APTR localebase),
++    REG(d4, long magic)) __attribute__((section(&quot;.aros.startup&quot;)));
++#endif
+ 
+ BOOL PUBLIC
+-InitGClass(REG(a0, struct __gClass *gc), REG(a1, APTR table), REG(a2, APTR mainpool), REG(a3, APTR gfxbase),
++InitGClass(REG(a0, struct __gClass *gc), REG(a1, TableEntry *table), REG(a2, APTR mainpool), REG(a3, APTR gfxbase),
+ 	REG(a6, struct ExecBase *ExecBase), REG(d0, APTR mathbase), REG(d1, APTR mathtrans), REG(d2, APTR utilitybase), REG(d3, APTR localebase),
+     REG(d4, long magic))
+ {
+@@ -86,6 +98,43 @@
+     gcBase = table;
+     pool = mainpool;
+ 
++	// Initialize function pointers
++	AllocStringLength = table[-1].func;
++	AllocString = table[-2].func;
++	FreeString = table[-3].func;
++	gDoMethodA = table[-4].func;
++	gDoSuperMethodA = table[-5].func;
++	SetHighColor = table[-6].func;
++	SetColors = table[-7].func;
++	FindColorPen = table[-8].func;
++	DrawRect = table[-9].func;
++	DrawLine = table[-10].func;
++	gAreaMove = table[-11].func;
++	gAreaDraw = table[-12].func;
++	gAreaEnd = table[-13].func;
++	GetDPI = table[-14].func;
++	GetOffset = table[-15].func;
++	FreeFontInfo = table[-16].func;
++	SetFontInfoA = table[-17].func;
++	CopyFontInfo = table[-18].func;
++	NewFontInfoA = table[-19].func;
++	DrawText = table[-20].func;
++	OutlineLength = table[-21].func;
++	OutlineHeight = table[-22].func;
++	pixel = table[-23].func;
++	mm = table[-24].func;
++	CreateTerm = table[-25].func;
++	DeleteTerm = table[-26].func;
++	CopyTerm = table[-27].func;
++	CalcTerm = table[-28].func;
++	gInsertRemoveCellsTablePos = table[-29].func;
++	gInsertRemoveCellsTerm = table[-30].func;
++	TintColor = table[-31].func;
++	gSuperDraw = table[-32].func;
++	gGetLink = table[-33].func;
++	SetLowColor = table[-34].func;
++	SetOutlineColor = table[-35].func;
++
+ 	if (!initClass(gc))
+ 		return FALSE;
+ 
+
+Modified: trunk/add-ons/gclass.h
+===================================================================
+--- trunk/add-ons/gclass.h	2008-12-20 13:14:52 UTC (rev 21)
++++ trunk/add-ons/gclass.h	2008-12-20 17:45:18 UTC (rev 22)
+@@ -27,6 +27,11 @@
+ #include &quot;cell.h&quot;
+ #endif
+ 
++typedef struct {
++	UWORD jsr;
++	APTR func;
++} TableEntry;
++
+ /*** class ***/
+ 
+ struct gClass
+
+Modified: trunk/add-ons/gclass_protos.h
+===================================================================
+--- trunk/add-ons/gclass_protos.h	2008-12-20 13:14:52 UTC (rev 21)
++++ trunk/add-ons/gclass_protos.h	2008-12-20 17:45:18 UTC (rev 22)
+@@ -14,60 +14,62 @@
+ #include &lt;exec/types.h&gt;
+ #endif
+ 
+-struct TablePos;
++#include &quot;gclass.h&quot;
+ 
+ /**/
+ /* memory */
+ /**/
+-STRPTR AllocStringLength(STRPTR string,long len);
+-STRPTR AllocString(STRPTR string);
+-void FreeString(STRPTR string);
++STRPTR (*AllocStringLength)(STRPTR string,long len);
++STRPTR (*AllocString)(STRPTR string);
++void (*FreeString)(STRPTR string);
+ /**/
+ /* method calling */
+ /**/
+-ULONG gDoMethodA(APTR go,Msg msg);
+-ULONG gDoMethod(APTR go,LONG data,...);
+-ULONG gDoSuperMethodA(struct gClass *gc,APTR go,Msg msg);
+-ULONG gDoSuperMethod(struct gClass *gc,APTR go,LONG data,...);
++ULONG (*gDoMethodA)(APTR go,Msg msg);
++ULONG (*gDoSuperMethodA)(struct gClass *gc,APTR go,Msg msg);
+ /**/
+ /* graphics */
+ /**/
+-void SetHighColor(struct RastPort *rp,ULONG color);
+-void SetColors(struct RastPort *rp,ULONG apenID,ULONG bpenID);
+-ULONG FindColorPen(UBYTE red,UBYTE green,UBYTE blue);
+-void DrawRect(struct RastPort *rp,long x,long y,long w,long h);
+-void DrawLine(struct RastPort *rp,ULONG dpi,long x1,long y1,long x2,long y2,ULONG points,UWORD flags);
+-void gAreaMove(LONG x,LONG y);
+-void gAreaDraw(LONG x,LONG y);
+-void gAreaEnd(struct RastPort *rp);
+-ULONG GetDPI(struct Page *page);
+-LONG GetOffset(struct Page *page,BOOL horiz);
++void (*SetHighColor)(struct RastPort *rp,ULONG color);
++void (*SetColors)(struct RastPort *rp,ULONG apenID,ULONG bpenID);
++ULONG (*FindColorPen)(UBYTE red,UBYTE green,UBYTE blue);
++void (*DrawRect)(struct RastPort *rp,long x,long y,long w,long h);
++void (*DrawLine)(struct RastPort *rp,ULONG dpi,long x1,long y1,long x2,long y2,ULONG points,UWORD flags);
++void (*gAreaMove)(LONG x,LONG y);
++void (*gAreaDraw)(LONG x,LONG y);
++void (*gAreaEnd)(struct RastPort *rp);
++ULONG (*GetDPI)(struct Page *page);
++LONG (*GetOffset)(struct Page *page,BOOL horiz);
+ /**/
+ /* fonts */
+ /**/
+-void FreeFontInfo(struct FontInfo *fi);
+-struct FontInfo *SetFontInfoA(struct FontInfo *fi,ULONG dpi,struct TagItem *ti);
+-struct FontInfo *SetFontInfo(struct FontInfo *fi,ULONG dpi,ULONG tag1,...);
+-struct FontInfo *CopyFontInfo(struct FontInfo *fi);
+-struct FontInfo *NewFontInfoA(struct FontInfo *fi,ULONG dpi,struct TagItem *ti);
+-void DrawText(struct RastPort *rp,struct FontInfo *fi,STRPTR t,long x,long y);
++void (*FreeFontInfo)(struct FontInfo *fi);
++struct FontInfo * (*SetFontInfoA)(struct FontInfo *fi,ULONG dpi,struct TagItem *ti);
++struct FontInfo * (*CopyFontInfo)(struct FontInfo *fi);
++struct FontInfo * (*NewFontInfoA)(struct FontInfo *fi,ULONG dpi,struct TagItem *ti);
++void (*DrawText)(struct RastPort *rp,struct FontInfo *fi,STRPTR t,long x,long y);
+ /**/
+ /* misc*/
+ /**/
+-ULONG OutlineLength(struct FontInfo *fi,STRPTR text,long len);
+-ULONG OutlineHeight(struct FontInfo *fi,STRPTR text,long len);
+-long pixel(struct Page *page,long mm,BOOL width);
+-long mm(struct Page *page,long pixel,BOOL width);
+-struct Term *CreateTerm(struct Page *page,STRPTR text);
+-void DeleteTerm(struct Term *term);
+-struct Term *CopyTerm(struct Term *term);
+-STRPTR CalcTerm(struct Page *page,STRPTR text,struct Term *term,STRPTR format);
+-void gInsertRemoveCellsTerm(struct gcpInReCells *gcpc,struct Page *page,STRPTR *term,struct Term *t);
+-void gInsertRemoveCellsTablePos(struct gcpInReCells *gcpc,struct Page *page,STRPTR *term,struct TablePos *tp);
+-ULONG TintColor(ULONG id,float tint);
+-void gSuperDraw(struct Page *page,ULONG dpi,struct RastPort *rp,struct gClass *gc,struct gObject *go,struct gBounds *gb);
+-struct gLink *gGetLink(struct gDiagram *gd,long col,long row);
+-void SetLowColor(struct RastPort *rp,ULONG color);
+-void SetOutlineColor(struct RastPort *rp,ULONG color);
++ULONG (*OutlineLength)(struct FontInfo *fi,STRPTR text,long len);
++ULONG (*OutlineHeight)(struct FontInfo *fi,STRPTR text,long len);
++long (*pixel)(struct Page *page,long mm,BOOL width);
++long (*mm)(struct Page *page,long pixel,BOOL width);
++struct Term * (*CreateTerm)(struct Page *page,STRPTR text);
++void (*DeleteTerm)(struct Term *term);
++struct Term * (*CopyTerm)(struct Term *term);
++STRPTR (*CalcTerm)(struct Page *page,STRPTR text,struct Term *term,STRPTR format);
++void (*gInsertRemoveCellsTerm)(struct gcpInReCells *gcpc,struct Page *page,STRPTR *term,struct Term *t);
++void (*gInsertRemoveCellsTablePos)(struct gcpInReCells *gcpc,struct Page *page,STRPTR *term,struct TablePos *tp);
++ULONG (*TintColor)(ULONG id,float tint);
++void (*gSuperDraw)(struct Page *page,ULONG dpi,struct RastPort *rp,struct gClass *gc,struct gObject *go,struct gBounds *gb);
++struct gLink * (*gGetLink)(struct gDiagram *gd,long col,long row);
++void (*SetLowColor)(struct RastPort *rp,ULONG color);
++void (*SetOutlineColor)(struct RastPort *rp,ULONG color);
+ 
++/* variadic functions must be real functions */
++ULONG gDoMethod(APTR go,LONG data,...);
++ULONG gDoSuperMethod(struct gClass *gc,APTR go,LONG data,...);
++struct FontInfo *SetFontInfo(struct FontInfo *fi,ULONG dpi,ULONG tag1,...);
++
+ #endif  /* CLIB_GCLASS_PROTOS_H */
+
+Added: trunk/add-ons/gclass_variadic.c
+===================================================================
+--- trunk/add-ons/gclass_variadic.c	2008-12-20 13:14:52 UTC (rev 21)
++++ trunk/add-ons/gclass_variadic.c	2008-12-20 17:45:18 UTC (rev 22)
+@@ -0,0 +1,22 @@
++/* Implementation of variadic &quot;library&quot; functions
++ *
++ * Copyright &#169;1996-2008 pinc Software. All Rights Reserved.
++ * Licensed under the terms of the MIT License.
++ */
++
++#include &quot;gclass_protos.h&quot;
++
++ULONG gDoMethod(APTR go, LONG data, ...)
++{
++	return gDoMethodA(go, &amp;data);
++}
++
++ULONG gDoSuperMethod(struct gClass *gc, APTR go, LONG data, ...)
++{
++	return gDoSuperMethod(gc, go, &amp;data);
++}
++
++struct FontInfo *SetFontInfo(struct FontInfo *fi, ULONG dpi, ULONG tag1, ...)
++{
++	return SetFontInfoA(fi, dpi, &amp;tag1);
++}
+
+
+Property changes on: trunk/add-ons/gclass_variadic.c
+___________________________________________________________________
+Name: svn:keywords
+   + Id Date Revision Author
+Name: svn:eol-style
+   + native
+
+Modified: trunk/add-ons/iotype.c
+===================================================================
+--- trunk/add-ons/iotype.c	2008-12-20 13:14:52 UTC (rev 21)
++++ trunk/add-ons/iotype.c	2008-12-20 17:45:18 UTC (rev 22)
+@@ -27,6 +27,7 @@
+ 
+ struct Mappe;
+ 
++#include &quot;iotype.h&quot;
+ #include &quot;SDI_compiler.h&quot;
+ 
+ // Must always be in sync with the definition in io.h !!!
+@@ -79,9 +80,16 @@
+ 
+ #define MAKE_ID(a,b,c,d) ((a &lt;&lt; 24) | (b &lt;&lt; 16) | (c &lt;&lt; 8) | d)
+ 
++#ifdef __AROS__
++// ensure that InitModule becomes 1st function in segment
++BOOL PUBLIC
++InitModule(REG(a0, struct IOType *io), REG(a1, TableEntry *table), REG(a2, APTR mainpool), REG(a3, APTR dosBase),
++	REG(a6, struct ExecBase *execBase), REG(d0, APTR mathBase), REG(d1, APTR mathtransBase), REG(d2, APTR utilityBase),
++	REG(d3, APTR localeBase), REG(d4, long magic)) __attribute__((section(&quot;.aros.startup&quot;)));
++#endif
+ 
+ BOOL PUBLIC
+-InitModule(REG(a0, struct IOType *io), REG(a1, APTR table), REG(a2, APTR mainpool), REG(a3, APTR dosBase),
++InitModule(REG(a0, struct IOType *io), REG(a1, TableEntry *table), REG(a2, APTR mainpool), REG(a3, APTR dosBase),
+ 	REG(a6, struct ExecBase *execBase), REG(d0, APTR mathBase), REG(d1, APTR mathtransBase), REG(d2, APTR utilityBase),
+ 	REG(d3, APTR localeBase), REG(d4, long magic))
+ {
+@@ -110,6 +118,23 @@
+ 	ioBase = table;
+ 	pool = mainpool;
+ 
++	// Initialize function table
++	ReportErrorA = table[-15].func;
++	NewPage = table[-14].func;
++	CalculatePageDPI = table[-13].func;
++	NewCell = table[-12].func;
++	UpdateCellText = table[-11].func;
++	SetTableSize = table[-10].func;
++	FindColorPen = table[-9].func;
++	AddPen = table[-8].func;
++	Coord2String = table[-7].func;
++	pixel = table[-6].func;
++	mm = table[-5].func;
++	AllocStringLength = table[-4].func;
++	AllocString = table[-3].func;
++	FreeString = table[-2].func;
++	ita = table[-1].func;
++
+ 	setPrefs(io-&gt;io_Prefs);
+ 
+ 	return TRUE;
+
+Modified: trunk/add-ons/iotype.h
+===================================================================
+--- trunk/add-ons/iotype.h	2008-12-20 13:14:52 UTC (rev 21)
++++ trunk/add-ons/iotype.h	2008-12-20 17:45:18 UTC (rev 22)
+@@ -38,6 +38,10 @@
+ #	include &quot;cell.h&quot;
+ #endif
+ 
++typedef struct {
++	UWORD jsr;
++	APTR func;
++} TableEntry;
+ 
+ /*** Project related ***/
+ 
+@@ -426,23 +430,25 @@
+ 
+ /***************************** interne Funktionen *******************************/
+ 
+-void   ReportError(STRPTR fmt,...);
+-void   ReportErrorA(STRPTR fmt,APTR args);
+-struct Page *NewPage(struct Mappe *mp);
+-void   CalculatePageDPI(struct Page *page);
+-struct Cell *NewCell(struct Page *page,LONG col,LONG row);
+-void   UpdateCellText(struct Page *,struct Cell *);
+-void   SetTableSize(struct Page *,LONG,LONG);
+-STRPTR Coord2String(BOOL,LONG,BOOL,LONG);
+-LONG   pixel(struct Page *,LONG,BOOL);
+-LONG   mm(struct Page *,LONG,BOOL);
+-ULONG  FindColorPen(UBYTE r,UBYTE g,UBYTE b);
+-struct colorPen *AddPen(STRPTR name,UBYTE r,UBYTE g,UBYTE b);
+-STRPTR AllocStringLength(STRPTR,LONG);
+-STRPTR AllocString(STRPTR);
+-void   FreeString(STRPTR);
+-STRPTR ita(double d,long komma ,UBYTE flags);
++void   (*ReportErrorA)(STRPTR fmt,APTR args);
++struct Page * (*NewPage)(struct Mappe *mp);
++void   (*CalculatePageDPI)(struct Page *page);
++struct Cell * (*NewCell)(struct Page *page,LONG col,LONG row);
++void   (*UpdateCellText)(struct Page *,struct Cell *);
++void   (*SetTableSize)(struct Page *,LONG,LONG);
++STRPTR (*Coord2String)(BOOL,LONG,BOOL,LONG);
++LONG   (*pixel)(struct Page *,LONG,BOOL);
++LONG   (*mm)(struct Page *,LONG,BOOL);
++ULONG  (*FindColorPen)(UBYTE r,UBYTE g,UBYTE b);
++struct colorPen * (*AddPen)(STRPTR name,UBYTE r,UBYTE g,UBYTE b);
++STRPTR (*AllocStringLength)(STRPTR,LONG);
++STRPTR (*AllocString)(STRPTR);
++void   (*FreeString)(STRPTR);
++STRPTR (*ita)(double d,long komma ,UBYTE flags);
+ 
++// variadic functions must be real functions
++void   ReportError(STRPTR fmt, ...);
++
+ #if defined(__SASC)
+ #	pragma tagcall ioBase ReportError 5a 9802
+ #	pragma libcall ioBase ReportErrorA 5a 9802
+
+Added: trunk/add-ons/iotype_variadic.c
+===================================================================
+--- trunk/add-ons/iotype_variadic.c	2008-12-20 13:14:52 UTC (rev 21)
++++ trunk/add-ons/iotype_variadic.c	2008-12-20 17:45:18 UTC (rev 22)
+@@ -0,0 +1,12 @@
++/* Implementation of variadic &quot;library&quot; functions
++ *
++ * Copyright &#169;1996-2008 pinc Software. All Rights Reserved.
++ * Licensed under the terms of the MIT License.
++ */
++
++#include &quot;iotype.h&quot;
++
++void ReportError(STRPTR fmt, ...)
++{
++	ReportErrorA(fmt, &amp;fmt + 1);
++}
+
+
+Property changes on: trunk/add-ons/iotype_variadic.c
+___________________________________________________________________
+Name: svn:keywords
+   + Id Date Revision Author
+Name: svn:eol-style
+   + native
+
+Modified: trunk/add-ons/mmakefile.src
+===================================================================
+--- trunk/add-ons/mmakefile.src	2008-12-20 13:14:52 UTC (rev 21)
++++ trunk/add-ons/mmakefile.src	2008-12-20 17:45:18 UTC (rev 22)
+@@ -4,7 +4,21 @@
+ 
+ include $(TOP)/config/make.cfg
+ 
+-#MM- contrib-ignition-addons : contrib-ignition-addon-turbocalc
++#MM- contrib-ignition-addons : \
++#MM  contrib-ignition-addon-area_diagram \
++#MM  contrib-ignition-addon-button \
++#MM  contrib-ignition-addon-checkbox \
++#MM  contrib-ignition-addon-circle_diagram \
++#MM  contrib-ignition-addon-column_diagram \
++#MM  contrib-ignition-addon-frame \
++#MM  contrib-ignition-addon-gradient \
++#MM  contrib-ignition-addon-line \
++#MM  contrib-ignition-addon-line_diagram \
++#MM  contrib-ignition-addon-rectangle \
++#MM  contrib-ignition-addon-text \
++#MM  contrib-ignition-addon-ascii \
++#MM  contrib-ignition-addon-csv \
++#MM  contrib-ignition-addon-turbocalc
+ 
+ #MM  contrib-ignition-addon-area_diagram : includes linklibs
+ #MM  contrib-ignition-addon-button : includes linklibs
+@@ -22,66 +36,66 @@
+ #MM  contrib-ignition-addon-csv : includes linklibs
+ #MM  contrib-ignition-addon-turbocalc : includes linklibs
+ 
+-TARGETDIR := $(AROS_CONTRIB)/Office/Ingition/add-ons
++TARGETDIR := $(AROS_CONTRIB)/Office/Ignition/add-ons
+ USER_INCLUDES := -I../libs/include -I..
+ 
+ 
+ #### gclass
+ 
+ %build_module_simple mmake=contrib-ignition-addon-area_diagram \
+-	modname=area_diagramm modtype=gc \
+-	files=&quot;gclass area_diagram&quot; moduledir=$(TARGETDIR) \
+-	uselibs=
++	modname=area_diagram modtype=gc \
++	files=&quot;gclass gclass_variadic area_diagram&quot; moduledir=$(TARGETDIR) \
++	uselibs=rom
+ 
+ %build_module_simple mmake=contrib-ignition-addon-button \
+ 	modname=button modtype=gc \
+ 	files=&quot;gclass button&quot; moduledir=$(TARGETDIR) \
+-	uselibs=
++	uselibs=rom
+ 
+ %build_module_simple mmake=contrib-ignition-addon-checkbox \
+ 	modname=checkbox modtype=gc \
+-	files=&quot;gclass checkbox&quot; moduledir=$(TARGETDIR) \
+-	uselibs=
++	files=&quot;gclass gclass_variadic checkbox&quot; moduledir=$(TARGETDIR) \
++	uselibs=rom
+ 
+ %build_module_simple mmake=contrib-ignition-addon-circle_diagram \
+ 	modname=circle_diagram modtype=gc \
+ 	files=&quot;gclass circle_diagram&quot; moduledir=$(TARGETDIR) \
+-	uselibs=
++	uselibs=rom
+ 
+ %build_module_simple mmake=contrib-ignition-addon-column_diagram \
+ 	modname=column_diagram modtype=gc \
+-	files=&quot;gclass column_diagram&quot; moduledir=$(TARGETDIR) \
+-	uselibs=
++	files=&quot;gclass gclass_variadic column_diagram&quot; moduledir=$(TARGETDIR) \
++	uselibs=rom
+ 
+ %build_module_simple mmake=contrib-ignition-addon-frame \
+ 	modname=frame modtype=gc \
+ 	files=&quot;gclass frame&quot; moduledir=$(TARGETDIR) \
+-	uselibs=
++	uselibs=rom
+ 
+ %build_module_simple mmake=contrib-ignition-addon-gradient \
+ 	modname=gradient modtype=gc \
+ 	files=&quot;gclass gradient&quot; moduledir=$(TARGETDIR) \
+-	uselibs=
++	uselibs=rom
+ 
+ %build_module_simple mmake=contrib-ignition-addon-line \
+ 	modname=line modtype=gc \
+ 	files=&quot;gclass line&quot; moduledir=$(TARGETDIR) \
+-	uselibs=
++	uselibs=rom
+ 
+ %build_module_simple mmake=contrib-ignition-addon-line_diagram \
+ 	modname=line_diagram modtype=gc \
+-	files=&quot;gclass line_diagram&quot; moduledir=$(TARGETDIR) \
+-	uselibs=
++	files=&quot;gclass gclass_variadic line_diagram&quot; moduledir=$(TARGETDIR) \
++	uselibs=rom
+ 
+ %build_module_simple mmake=contrib-ignition-addon-rectangle \
+ 	modname=rectangle modtype=gc \
+ 	files=&quot;gclass rectangle&quot; moduledir=$(TARGETDIR) \
+-	uselibs=
++	uselibs=rom
+ 
+ %build_module_simple mmake=contrib-ignition-addon-text \
+ 	modname=text modtype=gc \
+ 	files=&quot;gclass text&quot; moduledir=$(TARGETDIR) \
+-	uselibs=
++	uselibs=rom
+ 
+ 
+ #### iotype
+@@ -89,16 +103,16 @@
+ %build_module_simple mmake=contrib-ignition-addon-ascii \
+ 	modname=text modtype=io \
+ 	files=&quot;iotype ascii&quot; moduledir=$(TARGETDIR) \
+-	uselibs=
++	uselibs=rom
+ 
+ %build_module_simple mmake=contrib-ignition-addon-csv \
+ 	modname=csv modtype=io \
+-	files=&quot;iotype csv&quot; moduledir=$(TARGETDIR) \
+-	uselibs=
++	files=&quot;iotype iotype_variadic csv&quot; moduledir=$(TARGETDIR) \
++	uselibs=rom
+ 
+ %build_module_simple mmake=contrib-ignition-addon-turbocalc \
+ 	modname=turbocalc modtype=io \
+ 	files=&quot;iotype turbocalc&quot; moduledir=$(TARGETDIR) \
+-	uselibs=
++	uselibs=rom
+ 
+ %common
+
+Modified: trunk/classes.c
+===================================================================
+--- trunk/classes.c	2008-12-20 13:14:52 UTC (rev 21)
++++ trunk/classes.c	2008-12-20 17:45:18 UTC (rev 22)
+@@ -1389,7 +1389,7 @@
+ 		olddir = CurrentDir(dir);
+ 		if ((segment = LoadSeg(gc-&gt;gc_ClassName)) != 0)
+ 		{
+-			initGCSegment = MKBADDR(segment);
++			initGCSegment = MKBADDR(segment) + sizeof(APTR);
+ 			if (initGCSegment(gc, (UBYTE *)gClassFuncTable + gClassFuncTableSize, pool, GfxBase, SysBase, MathIeeeDoubBasBase,
+ 					MathIeeeDoubTransBase, UtilityBase, LocaleBase,
+ #ifdef IGNITION_LITE_EDITION
+
+Modified: trunk/io.c
+===================================================================
+--- trunk/io.c	2008-12-20 13:14:52 UTC (rev 21)
++++ trunk/io.c	2008-12-20 17:45:18 UTC (rev 22)
+@@ -2451,7 +2451,7 @@
+ 		olddir = CurrentDir(dir);
+ 		if ((segment = LoadSeg(io-&gt;io_Filename)) != 0)
+ 		{
+-			initIOSegment = MKBADDR(segment);
++			initIOSegment = MKBADDR(segment) + sizeof(APTR);
+ 			if (initIOSegment(io, (APTR)((UBYTE *)io_functable + sizeof(io_functable)), pool, DOSBase,
+ 					SysBase, MathIeeeDoubBasBase, MathIeeeDoubTransBase, UtilityBase, LocaleBase, MAKE_ID('I','G','N',0)))
+ 				io-&gt;io_Segment = segment;
+
+Modified: trunk/mmakefile.src
+===================================================================
+--- trunk/mmakefile.src	2008-12-20 13:14:52 UTC (rev 21)
++++ trunk/mmakefile.src	2008-12-20 17:45:18 UTC (rev 22)
+@@ -10,7 +10,7 @@
+ 
+ #MM contrib-ignition-bin : linklibs includes contrib-ignition-textedit \
+ #MM contrib-ignition-scroller contrib-ignition-gtdrag contrib-ignition-catalogs \
+-#MM contrib-ignition-descr
++#MM contrib-ignition-descr contrib-ignition-addons
+ 
+ EXE := Ignition
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000037.html">[Ignition-commits] r21 - trunk/distribution/full/sheets
+</A></li>
+	<LI>Next message: <A HREF="000038.html">[Ignition-commits] r22 - in trunk: . add-ons
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#36">[ date ]</a>
+              <a href="thread.html#36">[ thread ]</a>
+              <a href="subject.html#36">[ subject ]</a>
+              <a href="author.html#36">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

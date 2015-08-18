@@ -1,0 +1,1111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r34 - in trunk: . add-ons lib lib/safeclip	lib/safeclip/gcc-68k lib/safeclip/gcc-all	lib/safeclip/sasc-68k libs/textedit libs/textedit/include/gadgets
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2009-January/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r34%20-%20in%20trunk%3A%20.%20add-ons%20lib%20lib/safeclip%0A%09lib/safeclip/gcc-68k%20lib/safeclip/gcc-all%0A%09lib/safeclip/sasc-68k%20libs/textedit%20libs/textedit/include/gadgets&In-Reply-To=%3C200901211254.n0LCs584010802%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000049.html">
+   <LINK REL="Next"  HREF="000054.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r34 - in trunk: . add-ons lib lib/safeclip	lib/safeclip/gcc-68k lib/safeclip/gcc-all	lib/safeclip/sasc-68k libs/textedit libs/textedit/include/gadgets</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r34%20-%20in%20trunk%3A%20.%20add-ons%20lib%20lib/safeclip%0A%09lib/safeclip/gcc-68k%20lib/safeclip/gcc-all%0A%09lib/safeclip/sasc-68k%20libs/textedit%20libs/textedit/include/gadgets&In-Reply-To=%3C200901211254.n0LCs584010802%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r34 - in trunk: . add-ons lib lib/safeclip	lib/safeclip/gcc-68k lib/safeclip/gcc-all	lib/safeclip/sasc-68k libs/textedit libs/textedit/include/gadgets">marust at mail.berlios.de
+       </A><BR>
+    <I>Wed Jan 21 13:54:05 CET 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000049.html">[Ignition-commits] r33 - trunk
+</A></li>
+        <LI>Next message: <A HREF="000054.html">[Ignition-commits] r34 - in trunk: . add-ons lib lib/safeclip lib/safeclip/gcc-68k lib/safeclip/gcc-all lib/safeclip/sasc-68k libs/textedit libs/textedit/include/gadgets
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#50">[ date ]</a>
+              <a href="thread.html#50">[ thread ]</a>
+              <a href="subject.html#50">[ subject ]</a>
+              <a href="author.html#50">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2009-01-21 13:53:54 +0100 (Wed, 21 Jan 2009)
+New Revision: 34
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=34&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=34&amp;view=rev</A>
+
+Added:
+   trunk/lib/safeclip/
+   trunk/lib/safeclip/ReadMe.doc
+   trunk/lib/safeclip/gcc-68k/
+   trunk/lib/safeclip/gcc-68k/Makefile
+   trunk/lib/safeclip/gcc-68k/clip.s
+   trunk/lib/safeclip/gcc-68k/safeclip.c
+   trunk/lib/safeclip/gcc-68k/safeclip.h
+   trunk/lib/safeclip/gcc-all/
+   trunk/lib/safeclip/gcc-all/safeclip.c
+   trunk/lib/safeclip/gcc-all/safeclip.h
+   trunk/lib/safeclip/safeclip.guide
+   trunk/lib/safeclip/sasc-68k/
+   trunk/lib/safeclip/sasc-68k/clip.s
+   trunk/lib/safeclip/sasc-68k/safeclip.c
+   trunk/lib/safeclip/sasc-68k/safeclip.h
+   trunk/lib/safeclip/sasc-68k/smakefile
+Removed:
+   trunk/safeclip.c
+   trunk/safeclip.h
+Modified:
+   trunk/add-ons/gclass_protos.h
+   trunk/add-ons/line_diagram.c
+   trunk/libs/textedit/TextEdit_private.h
+   trunk/libs/textedit/include/gadgets/TextEdit.h
+   trunk/libs/textedit/pTextEdit.conf
+   trunk/mmakefile.src
+   trunk/windows.c
+Log:
+* Made Ignition compiling under AROS again.
+* Because of a double definition error for struct EditGData
+  it's now only a forward declaration in the public header.
+* Copied original SafeClip to lib/safeclip and renamed GCC
+  to gcc-68k and SASC to sasc-68k. Sorry, I can't test if
+  this is compilable.
+* Moved previous safeclip.[ch] to lib/safeclip/gcc-all.
+  (This is what is used for AROS)
+* Fixed some errors about illegal characters \302 and \240
+  in source code.
+* included &lt;stdbool.h&gt; for &quot;bool&quot; and &quot;true&quot;
+
+
+
+Modified: trunk/add-ons/gclass_protos.h
+===================================================================
+--- trunk/add-ons/gclass_protos.h	2009-01-20 16:41:27 UTC (rev 33)
++++ trunk/add-ons/gclass_protos.h	2009-01-21 12:53:54 UTC (rev 34)
+@@ -70,8 +70,8 @@
+ void (*SetOutlineColor)(struct RastPort *rp,ULONG color);
+ 
+ /* variadic functions must be real functions */
+-ULONG gDoMethod(APTR go,LONG data,...) VARARG68K;
+-ULONG gDoSuperMethod(struct gClass *gc,APTR go,LONG data,...) VARARG68K;
+-struct FontInfo *SetFontInfo(struct FontInfo *fi,ULONG dpi,ULONG tag1,...) VARARG68K;
++ULONG gDoMethod(APTR go,LONG data,...) VARARGS68K;
++ULONG gDoSuperMethod(struct gClass *gc,APTR go,LONG data,...) VARARGS68K;
++struct FontInfo *SetFontInfo(struct FontInfo *fi,ULONG dpi,ULONG tag1,...) VARARGS68K;
+ 
+ #endif  /* CLIB_GCLASS_PROTOS_H */
+
+Modified: trunk/add-ons/line_diagram.c
+===================================================================
+--- trunk/add-ons/line_diagram.c	2009-01-20 16:41:27 UTC (rev 33)
++++ trunk/add-ons/line_diagram.c	2009-01-21 12:53:54 UTC (rev 34)
+@@ -18,6 +18,7 @@
+ #include &quot;ignition_strings.h&quot;
+ 
+ #include &lt;string.h&gt;
++#include &lt;stdbool.h&gt;
+ 
+ struct gArea;
+ 
+@@ -27,7 +28,7 @@
+ 
+ struct gInterface interface[] = {
+ 	{GAA_Pseudo3D, &quot;Pseudo-3D&quot;, GIT_CHECKBOX, NULL, NULL},
+-	{0, NULL, 0, NULL,&#160;NULL}
++	{0, NULL, 0, NULL, NULL}
+ };
+ 
+ const STRPTR superClass = &quot;diagram&quot;;
+
+Added: trunk/lib/safeclip/ReadMe.doc
+===================================================================
+--- trunk/lib/safeclip/ReadMe.doc	2009-01-20 16:41:27 UTC (rev 33)
++++ trunk/lib/safeclip/ReadMe.doc	2009-01-21 12:53:54 UTC (rev 34)
+@@ -0,0 +1,25 @@
++Short:    Polygon/line clipping routines (68020+)
++Uploader: <A HREF="https://lists.berlios.de/mailman/listinfo/ignition-commits">pak at star.sr.bham.ac.uk</A> (Peter Knight)
++Author:   <A HREF="https://lists.berlios.de/mailman/listinfo/ignition-commits">pak at star.sr.bham.ac.uk</A> (Peter Knight)
++Type:     gfx/misc
++Version:  1.0
++
++Description
++-----------
++An easy to use suite of routines that provides an interface to the system 
++rendering functions, but with the added bonus that all drawing operations are 
++clipped against a specified rectangular region. MUCH better at clipping 
++filled polygons than the system routines (the size of the polygon can be up to 
++2^31 pixels). 
++
++Includes full source and object files for both SAS/C and GCC.
++
++Requires
++--------
++o WB 2.0 (or better).
++o 68020 (or better).
++
++
++
++
++
+
+Added: trunk/lib/safeclip/gcc-68k/Makefile
+===================================================================
+--- trunk/lib/safeclip/gcc-68k/Makefile	2009-01-20 16:41:27 UTC (rev 33)
++++ trunk/lib/safeclip/gcc-68k/Makefile	2009-01-21 12:53:54 UTC (rev 34)
+@@ -0,0 +1,23 @@
++# Target: demo
++
++# Flags
++CC = gcc
++CFLAGS = -O -m68020 -noixemul
++LDFLAGS = -L. -s
++
++# Objects
++OBJ = demo.o safeclip.o clip.o
++
++.s.o: 
++	gasp $*.s &gt; t.s
++	as -o $*.o t.s
++	rm -f t.s
++
++demo: $(OBJ)
++	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJ)
++
++$(OBJ): safeclip.h
++
++
++
++
+
+
+Property changes on: trunk/lib/safeclip/gcc-68k/Makefile
+___________________________________________________________________
+Name: svn:keywords
+   + Id Date Revision Author
+Name: svn:eol-style
+   + native
+
+Added: trunk/lib/safeclip/gcc-68k/clip.s
+===================================================================
+--- trunk/lib/safeclip/gcc-68k/clip.s	2009-01-20 16:41:27 UTC (rev 33)
++++ trunk/lib/safeclip/gcc-68k/clip.s	2009-01-21 12:53:54 UTC (rev 34)
+@@ -0,0 +1,355 @@
++|
++| Name:        clip.s 
++| Description: Routines for clipping line segments and filled polygons
++| Author:      <A HREF="https://lists.berlios.de/mailman/listinfo/ignition-commits">pak at star.sr.bham.ac.uk</A> (Peter Knight)
++| Notes:       Requires 68020+
++|
++
++.EXPORT	_lineclip
++.EXPORT	_clip2d
++.EXPORT _CLP_xmin
++.EXPORT _CLP_ymin
++.EXPORT _CLP_xmax
++.EXPORT _CLP_ymax
++
++| Clip to x boundary
++.MACRO  CLIPX
++        movem.l (a0),d2-d5              | get (x1,y1) and (x2,y2)
++        sub.l   d2,d4                   | x2-x1
++        sub.l   d3,d5                   | y2-y1
++        sub.l   d6,d2                   | x1-xint
++        muls.l  d2,d7:d5
++        divs.l  d4,d7:d5
++        sub.l   d5,d3                   | y intercept
++        move.l  d6,(a1)+                | save x intercept
++        move.l  d3,(a1)+                | save y intercept
++.ENDM
++
++| Clip to y boundary
++.MACRO  CLIPY
++        movem.l (a0),d2-d5              | get (x1,y1) and (x2,y2)
++        sub.l   d2,d4                   | x2-x1
++        sub.l   d3,d5                   | y2-y1
++        sub.l   d6,d3                   | y1-xint
++        muls.l  d3,d7:d4
++        divs.l  d5,d7:d4
++        sub.l   d4,d2                   | x intercept
++        move.l  d2,(a1)+                | save x intercept
++        move.l  d6,(a1)+                | save y intercept
++.ENDM
++
++|                
++| lineclip - Clip line segment to viewport
++|
++| on entry:
++| a0.l - address of vertices.
++|
++| on exit:
++| d0.l - TRUE if some part of line drawn, else FALSE
++| all other registers preserved
++|
++_lineclip:
++        movem.l d1-d7/a0-a5,-(sp)       | Save registers.
++
++| Bad return code
++	moveq	#0,d0
++
++| Duplicate first end point
++	move.l	(a0),16(a0)
++	move.l	4(a0),20(a0) 
++
++| Clip against xmin
++	move.l	_CLP_xmin,d6
++	cmp.l	(a0),d6
++	ble.s   ok1
++	cmp.l	8(a0),d6
++	bgt	quit
++	move.l	a0,a1
++	CLIPX
++	bra.s	ok2
++ok1:
++	cmp.l	8(a0),d6
++	ble.s	ok2
++	lea	8(a0),a1
++	CLIPX
++
++| Clip against xmax
++ok2:
++	move.l	_CLP_xmax,d6
++	cmp.l	(a0),d6
++	bge.s	ok3
++	cmp.l	8(a0),d6
++	blt	quit
++	move.l	a0,a1
++	CLIPX
++	bra.s	ok4
++ok3:
++	cmp.l	8(a0),d6
++	bge.s	ok4
++	lea	8(a0),a1
++	CLIPX
++
++| Clip against ymin
++ok4:
++	move.l	_CLP_ymin,d6
++	cmp.l	4(a0),d6
++	ble.s	ok5
++	cmp.l	12(a0),d6
++	bgt	quit
++	move.l	a0,a1
++	CLIPY
++	bra.s	ok6
++ok5:
++	cmp.l	12(a0),d6
++	ble.s	ok6
++	lea	8(a0),a1
++	CLIPY
++
++| Clip against ymax
++ok6:
++	move.l	_CLP_ymax,d6
++	cmp.l	4(a0),d6
++	bge.s	ok7
++	cmp.l	12(a0),d6
++	blt	quit
++	move.l	a0,a1
++	CLIPY
++	bra.s	ok8
++ok7:
++	cmp.l	12(a0),d6
++	bge.s	ok8
++	lea	8(a0),a1
++	CLIPY
++ok8:
++	moveq	#1,d0
++quit:
++        movem.l (sp)+,d1-d7/a0-a5
++        rts
++
++
++|                
++| clip2d - Clip 2-d polygon to viewport
++|
++| on entry:
++| d0.w - number of vertices
++| a0.l - address of vertices.
++| a1.l - address of draw buffer.
++|
++| on exit:
++| d0.w - number of vertices in clipped polygon
++| all other registers preserved
++|
++_clip2d:
++        movem.l d1-d7/a0-a5,-(sp)       | Save registers.
++
++| Save address of draw buffer.
++	move.l	a0,a5
++        move.l  a1,a4
++	exg	d0,d1
++        
++| Clip against xmin.
++        subq.w  #2,d1
++        move.w  d1,d0                   | d0 is from count
++        move.l	a5,a0                   | from buffer
++        move.l	a4,a1                   | to buffer is a1
++        moveq   #0,d1                   | d1 is to count
++        move.l  _CLP_xmin,d6            | d6 is XMIN.
++        cmp.l   (a0),d6
++        bge.s   xmin_loop
++        move.l  (a0),(a1)+
++        addq.w  #1,d1
++        move.l  4(a0),(a1)+
++xmin_loop:
++        cmp.l   (a0),d6
++        blt.s   xmin_over
++        cmp.l   8(a0),d6
++        bge.s   xmin_skip
++	CLIPX
++	addq.w	#1,d1
++        bra.s   xmin_next
++xmin_over:
++        cmp.l   8(a0),d6
++        blt.s   xmin_next
++	CLIPX
++	addq.w	#1,d1
++        bra.s   xmin_skip
++xmin_next:
++        lea     8(a0),a2
++        move.l  (a2)+,(a1)+
++        addq.w  #1,d1
++        move.l  (a2)+,(a1)+
++xmin_skip:
++        lea     8(a0),a0
++        dbra    d0,xmin_loop
++        tst.w   d1
++        beq     exit 
++	move.l	a4,a0
++        move.l  (a0)+,d5
++        move.l  (a0)+,d6
++        lea     -8(a1),a2
++        cmp.l   (a2)+,d5
++        bne.s   xmin_close
++        cmp.l   (a2)+,d6
++        beq.s   clipxmax
++xmin_close:
++        move.l  d5,(a1)+
++        addq.w  #1,d1
++        move.l  d6,(a1)+ 
++        
++| Clip against xmax.
++clipxmax:
++        subq.w  #2,d1
++        move.w  d1,d0                   | d0 is from count
++        move.l	a4,a0                   | from buffer
++        move.l	a5,a1                   | to buffer is a1
++        moveq   #0,d1                   | d1 is to count
++        move.l  _CLP_xmax,d6            | d6 is xmax
++        cmp.l   (a0),d6
++        blt.s   xmax_loop
++        move.l  (a0),(a1)+
++        addq.w  #1,d1
++        move.l  4(a0),(a1)+
++xmax_loop:
++        cmp.l   (a0),d6
++        bge.s   xmax_over
++        cmp.l   8(a0),d6
++        blt.s   xmax_skip
++	CLIPX
++	addq.w	#1,d1
++        bra.s   xmax_next
++xmax_over:
++        cmp.l   8(a0),d6
++        bge.s   xmax_next
++	CLIPX
++	addq.w	#1,d1
++        bra.s   xmax_skip
++xmax_next:
++        lea     8(a0),a2
++        move.l  (a2)+,(a1)+
++        addq.w  #1,d1
++        move.l  (a2)+,(a1)+
++xmax_skip:
++        lea     8(a0),a0
++        dbra    d0,xmax_loop
++        tst.w   d1
++        beq     exit	
++	move.l	a5,a0
++        move.l  (a0)+,d5
++        move.l  (a0)+,d6
++        lea     -8(a1),a2
++        cmp.l   (a2)+,d5
++        bne.s   xmax_close
++        cmp.l   (a2)+,d6
++        beq.s   clipymin
++xmax_close:
++        move.l  d5,(a1)+
++        addq.w  #1,d1
++        move.l  d6,(a1)+
++        
++| Clip against ymin.
++clipymin:
++        subq.w  #2,d1
++        move.w  d1,d0                   | d0 is from count
++        move.l	a5,a0                   | from buffer
++        move.l	a4,a1                   | to buffer is a1
++        moveq   #0,d1                   | d1 is to count
++        move.l  _CLP_ymin,d6            | d6 is ymin
++	cmp.l   4(a0),d6
++        bge.s   ymin_loop
++        move.l  (a0),(a1)+
++        addq.w  #1,d1
++        move.l  4(a0),(a1)+
++ymin_loop:
++        cmp.l   4(a0),d6
++        blt.s   ymin_over
++        cmp.l   12(a0),d6
++        bge.s   ymin_skip
++	CLIPY
++	addq.w	#1,d1
++        bra.s   ymin_next
++ymin_over:
++        cmp.l   12(a0),d6
++        blt.s   ymin_next
++	CLIPY
++	addq.w	#1,d1
++        bra.s   ymin_skip
++ymin_next:
++        lea     8(a0),a2
++        move.l  (a2)+,(a1)+
++        addq.w  #1,d1
++        move.l  (a2)+,(a1)+
++ymin_skip:
++        lea     8(a0),a0
++        dbra    d0,ymin_loop
++        tst.w   d1
++        beq     exit
++	move.l	a4,a0
++        move.l  (a0)+,d5
++        move.l  (a0)+,d6
++        lea     -8(a1),a2
++        cmp.l   (a2)+,d5
++        bne.s   ymin_close
++        cmp.l   (a2)+,d6
++        beq.s   clipymax
++ymin_close:
++        move.l  d5,(a1)+
++        addq.w  #1,d1
++        move.l  d6,(a1)+
++        
++| Clip against ymax.
++clipymax:
++        subq.w  #2,d1
++        move.w  d1,d0                   | d0 is from count
++        move.l  a4,a0                   | from buffer
++        move.l  a5,a1                   | to buffer is a1
++        moveq   #0,d1                   | d1 is to count
++        move.l  _CLP_ymax,d6            | d6 is ymax
++        cmp.l   4(a0),d6
++        blt.s   ymax_loop
++        move.l  (a0),(a1)+
++        addq.w  #1,d1
++        move.l  4(a0),(a1)+
++ymax_loop:
++        cmp.l   4(a0),d6
++        bge.s   ymax_over
++        cmp.l   12(a0),d6
++        blt.s   ymax_skip
++	CLIPY
++	addq.w	#1,d1
++        bra.s   ymax_next
++ymax_over:
++        cmp.l   12(a0),d6
++        bge.s   ymax_next
++	CLIPY
++	addq.w	#1,d1
++        bra.s   ymax_skip
++ymax_next:
++        lea     8(a0),a2
++        move.l  (a2)+,(a1)+
++        addq.w  #1,d1
++        move.l  (a2)+,(a1)+
++ymax_skip:
++        lea     8(a0),a0
++        dbra    d0,ymax_loop
++        tst.w   d1
++        beq.s   exit
++        move.l	a5,a0
++        move.l  (a0)+,d5
++        move.l  (a0)+,d6
++        lea     -8(a1),a2
++        cmp.l   (a2)+,d5
++        bne.s   ymax_close
++        cmp.l   (a2)+,d6
++        beq.s   exit
++ymax_close:
++        move.l  d5,(a1)+
++        addq.w  #1,d1
++        move.l  d6,(a1)+
++        
++| Restore registers and exit.
++exit:
++	move.l	d1,d0
++        movem.l (sp)+,d1-d7/a0-a5
++        rts
++
++.END
+
+Added: trunk/lib/safeclip/gcc-68k/safeclip.c
+===================================================================
+--- trunk/lib/safeclip/gcc-68k/safeclip.c	2009-01-20 16:41:27 UTC (rev 33)
++++ trunk/lib/safeclip/gcc-68k/safeclip.c	2009-01-21 12:53:54 UTC (rev 34)
+@@ -0,0 +1,235 @@
++/****h* Autodoc/safeclip.c [1.0] *
++*  NAME
++*    safeclip.c
++*  FUNCTION
++*    Interface to system rendering routines, but with clipping.
++*  AUTHOR
++*    Peter Knight: All programming.
++*    &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/ignition-commits">pak at star.sr.bham.ac.uk</A>&gt;
++*  CREATION DATE
++*    24-Mar-96
++*  COPYRIGHT
++*    No restriction (Public Domain).
++*    Use these routines as you wish in your programs (a 
++*    mention in the credits would be nice, but it's up to
++*    you).
++**********
++*/
++
++#include &lt;exec/types.h&gt;
++#include &lt;exec/memory.h&gt;
++#include &lt;proto/exec.h&gt;
++#include &lt;proto/graphics.h&gt;
++
++#include &quot;safeclip.h&quot;
++
++/* Global variables. */
++LONG CLP_xmin, CLP_ymin, CLP_xmax, CLP_ymax;
++LONG (*CLP_vert)[2] = NULL, (*CLP_wrk)[2] = NULL;
++LONG CLP_nvert = 0, CLP_nvertmax;
++LONG CLP_lastx, CLP_lasty;
++
++/****i* safeclip.c/Clip2d
++* NAME
++*   Clip2d
++* SYNOPSIS
++*   res = Clip2d (n)
++*   LONG Clip2d (LONG)
++* FUNCTION
++*   C interface to ASM routine for clipping filled polygons.
++* INPUTS
++*   n - Number of vertices in polygon
++* RESULTS
++*   res - Number of vertices in clipped polygon
++* SEE ALSO
++*/
++static __inline LONG
++Clip2d (LONG n)
++{
++  register LONG _res __asm(&quot;d0&quot;);
++  register LONG *a0 __asm(&quot;a0&quot;) = &amp;CLP_vert[0][0];
++  register LONG *a1 __asm(&quot;a1&quot;) = CLP_wrk[0];
++  register LONG d0 __asm(&quot;d0&quot;) = n;
++  __asm (&quot;jsr _clip2d&quot;
++	 : &quot;=r&quot; (_res)
++	 : &quot;r&quot; (a0), &quot;r&quot; (a1), &quot;r&quot; (d0)
++	 : &quot;d0&quot;, &quot;memory&quot;);
++  return _res;
++}
++/*********/
++
++/****i* safeclip.c/ClipLine
++* NAME
++*   ClipLine
++* SYNOPSIS
++*   res = ClipLine ()
++*   LONG ClipLine (VOID)
++* FUNCTION
++*   C interface to ASM routine for clipping line segments.
++* INPUTS
++* RESULTS
++*   res - TRUE if any part of line was drawn, otherwise FALSE.
++* SEE ALSO
++*/
++static __inline LONG
++ClipLine (VOID)
++{
++  register LONG _res __asm(&quot;d0&quot;);
++  register LONG *a0 __asm(&quot;a0&quot;) = &amp;CLP_vert[0][0];
++  __asm (&quot;jsr _lineclip&quot;
++	 : &quot;=r&quot; (_res)
++	 : &quot;r&quot; (a0)
++	 : &quot;d0&quot;, &quot;memory&quot;);
++  return _res;
++}
++/*********/
++
++/****** safeclip.c/SafeAreaEnd
++* NAME
++*   SafeAreaEnd
++* SYNOPSIS
++*        SafeAreaEnd (rp)
++*   VOID SafeAreaEnd (struct RastPort *)
++* FUNCTION
++*   Process buffer AreaDraw() instructions
++* INPUTS
++*   rp - Pointer to RastPort on which to draw.
++* RESULTS
++* SEE ALSO
++*   SafeAreaDraw
++*/
++VOID
++SafeAreaEnd (struct RastPort *rp)
++{
++  if (CLP_nvert)
++    {
++      WORD i;
++      SafeAreaDraw (CLP_vert[0][0], CLP_vert[0][1]);  /* ensure shape is closed */
++      CLP_nvert = Clip2d (CLP_nvert);
++      AreaMove (rp, CLP_vert[0][0], CLP_vert[0][1]);
++      for (i = 1; i &lt; CLP_nvert; i++)
++	AreaDraw (rp, CLP_vert[i][0], CLP_vert[i][1]);
++      AreaEnd (rp);
++      CLP_nvert = 0;
++    }
++}
++/*********/
++
++/****** safeclip.c/SafeRectFill
++* NAME
++*   SafeRectFill
++* SYNOPSIS
++*        SafeRectFill (rp, x1, y1, x2, y2)
++*   VOID SafeRectFill (struct RastPort *, LONG, LONG, LONG, LONG)
++* FUNCTION
++*   Draw a filled rectangle
++* INPUTS
++*   rp - Pointer to RastPort on which to draw.
++*   (x1,y1) - Coordinates of upper left corner
++*   (x2,y2) - Coordinates of lower right corner
++* RESULTS
++* SEE ALSO
++*/
++VOID
++SafeRectFill (struct RastPort *rp, LONG x1, LONG y1, LONG x2, LONG y2)
++{
++  SafeAreaDraw (x1, y1);
++  SafeAreaDraw (x2, y1);
++  SafeAreaDraw (x2, y2);
++  SafeAreaDraw (x1, y2);
++  SafeAreaEnd (rp);
++}
++/*********/
++
++/****** safeclip.c/SafeDraw
++* NAME
++*   SafeDraw
++* SYNOPSIS
++*        SafeDraw (rp, x, y)
++*   VOID SafeDraw (struct RastPort *, LONG, LONG)
++* FUNCTION
++*   Move from previous point to new point and draw line.
++* INPUTS
++*   rp - Pointer to RastPort on which to draw.
++*   (x,y) - Coordinates of point to draw to
++* RESULTS
++* SEE ALSO
++*   SafeMove
++*/
++VOID
++SafeDraw (struct RastPort *rp, LONG x, LONG y)
++{
++  CLP_vert[0][0] = CLP_lastx;
++  CLP_vert[0][1] = CLP_lasty;
++  CLP_vert[1][0] = x;
++  CLP_vert[1][1] = y;
++  if (ClipLine ())
++    {
++      Move (rp, CLP_vert[0][0], CLP_vert[0][1]);
++      Draw (rp, CLP_vert[1][0], CLP_vert[1][1]);
++    }
++  CLP_lastx = x;
++  CLP_lasty = y;
++}
++/*********/
++
++/****** safeclip.c/SafeInit
++* NAME
++*   SafeInit
++* SYNOPSIS
++*   res = SafeInit (nvertmax)
++*   ULONG SafeInit (ULONG)
++* FUNCTION
++*   Initialise clipping routines
++* INPUTS
++*   nvertmax - Maximum number of vertices per polygon that you will use
++* RESULTS
++*   res - FALSE if everything was OK, otherwise TRUE
++* SEE ALSO
++*   SafeClose
++*/
++ULONG
++SafeInit (ULONG nvertmax)
++{
++  CLP_nvertmax = nvertmax;
++  if (!(CLP_vert = (LONG (*)[2]) AllocVec (8 * CLP_nvertmax, MEMF_PUBLIC)))
++    return 1;
++  if (!(CLP_wrk = (LONG (*)[2]) AllocVec (8 * CLP_nvertmax, MEMF_PUBLIC)))
++    {
++      FreeVec (CLP_vert);
++      CLP_vert = 0;
++      return 2;
++    }
++  return 0;
++}
++/*********/
++
++/****** safeclip.c/SafeClose
++* NAME
++*   SafeClose
++* SYNOPSIS
++*        SafeClose ()
++*   VOID SafeClose (VOID)
++* FUNCTION
++*   Free memory allocated by SafeInit()
++* INPUTS
++* RESULTS
++* SEE ALSO
++*   SafeInit
++*/
++VOID
++SafeClose (VOID)
++{
++  if (CLP_wrk)
++    {
++      FreeVec (CLP_wrk);
++      CLP_wrk = 0;
++    }
++  if (CLP_vert)
++    {
++      FreeVec (CLP_vert);
++      CLP_vert = 0;
++    }
++}
++/*********/
++
+
+
+Property changes on: trunk/lib/safeclip/gcc-68k/safeclip.c
+___________________________________________________________________
+Name: svn:keywords
+   + Id Date Revision Author
+Name: svn:eol-style
+   + native
+
+Added: trunk/lib/safeclip/gcc-68k/safeclip.h
+===================================================================
+--- trunk/lib/safeclip/gcc-68k/safeclip.h	2009-01-20 16:41:27 UTC (rev 33)
++++ trunk/lib/safeclip/gcc-68k/safeclip.h	2009-01-21 12:53:54 UTC (rev 34)
+@@ -0,0 +1,246 @@
++/****h* Autodoc/safeclip.h [1.0] *
++*  NAME
++*    safeclip.h
++*  FUNCTION
++*    Interface to system rendering routines, but with clipping.
++*  AUTHOR
++*    Peter Knight: All programming.
++*    &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/ignition-commits">pak at star.sr.bham.ac.uk</A>&gt;
++*  CREATION DATE
++*    24-Mar-96
++*  COPYRIGHT
++*    No restriction (Public Domain).
++*    Use these routines as you wish in your programs (a 
++*    mention in the credits would be nice, but it's up to
++*    you).
++**********
++*/
++
++#include &lt;exec/types.h&gt;
++#include &lt;proto/graphics.h&gt;
++
++/* Prototypes for functions from safeclip.c */
++ULONG SafeInit (ULONG nvertmax);
++VOID SafeClose (VOID);
++VOID SafeAreaEnd (struct RastPort *rp);
++VOID SafeRectFill (struct RastPort *rp, LONG x1, LONG y1, LONG x2, LONG y2);
++VOID SafeDraw (struct RastPort *rp, LONG x, LONG y);
++
++/****** safeclip.h/SafeSetLimits
++* NAME
++*   SafeSetLimits
++* SYNOPSIS
++*        SafeSetLimits (x1, y1, x2, y2)
++*   VOID SafeSetLimits (LONG, LONG, LONG, LONG)
++* FUNCTION
++*   Set limits of clipping rectangle
++* INPUTS
++*   (x1,y1) - Coordinates of upper left of clipping rectangle
++*   (x2,y2) - Coordinates of lower right of clipping rectangle
++* RESULTS
++* SEE ALSO
++*/
++static __inline VOID
++SafeSetLimits (LONG x1, LONG y1, LONG x2, LONG y2)
++{
++  extern LONG CLP_xmin, CLP_ymin, CLP_xmax, CLP_ymax;
++  CLP_xmin = x1;
++  CLP_ymin = y1;
++  CLP_xmax = x2;
++  CLP_ymax = y2;
++}
++/*********/
++
++/****** safeclip.h/SafeAreaDraw
++* NAME
++*   SafeAreaDraw
++* SYNOPSIS
++*        SafeAreaDraw (x, y)
++*   VOID SafeAreaDraw (LONG, LONG)
++* FUNCTION
++*   Add a vertex to polygon vertex list.
++* INPUTS
++*   (x,y) - Coordinates of new vertex
++* RESULTS
++* SEE ALSO
++*   safeclip.c/SafeAreaEnd 
++*/
++static __inline VOID
++SafeAreaDraw (LONG x, LONG y)
++{
++  extern LONG CLP_nvert, CLP_nvertmax, (*CLP_vert)[2];
++  if (CLP_nvert &lt; CLP_nvertmax)
++    {
++      CLP_vert[CLP_nvert][0] = x;
++      CLP_vert[CLP_nvert][1] = y;
++      CLP_nvert++;
++    }
++}
++/*********/
++
++/****** safeclip.h/SafeMove
++* NAME
++*   SafeMove
++* SYNOPSIS
++*        SafeMove (x, y)
++*   VOID SafeMove (LONG, LONG)
++* FUNCTION
++*   Move drawing pen to new position.
++* INPUTS
++*   (x,y) - Coordinates of new point.
++* RESULTS
++* SEE ALSO
++*   safeclip.c/SafeDraw
++*/
++static __inline VOID
++SafeMove (LONG x, LONG y)
++{
++  extern LONG CLP_lastx, CLP_lasty;
++  CLP_lastx = x;
++  CLP_lasty = y;
++}
++/*********/
++
++/****** safeclip.h/SafeSetRast
++* NAME
++*   SafeSetRast
++* SYNOPSIS
++*        SafeSetRast (rp, pen)
++*   VOID SafeSetRast (struct RastPort *, UBYTE)
++* FUNCTION
++*   Set the entire clipping region to a certain colour.
++* INPUTS
++*   rp - Pointer to RastPort
++*   pen - Pen number to fill region with.
++* RESULTS
++* SEE ALSO
++*/
++static __inline VOID
++SafeSetRast (struct RastPort *rp, UBYTE pen)
++{
++  extern LONG CLP_xmin, CLP_ymin, CLP_xmax, CLP_ymax;
++  UBYTE oldPen = rp-&gt;FgPen;   /* should use GetAPen() if v39+ */
++  SetAPen (rp, pen);
++  RectFill (rp, CLP_xmin, CLP_ymin, CLP_xmax, CLP_ymax);
++  SetAPen (rp, oldPen);
++}
++/*********/
++
++/****** safeclip.h/SafeWritePixel
++* NAME
++*   SafeWritePixel
++* SYNOPSIS
++*        SafeWritePixel (rp, x, y)
++*   VOID SafeWritePixel (struct RastPort *, LONG, LONG)
++* FUNCTION
++*   Set the colour of an individual pixel.
++* INPUTS
++*   rp - Pointer to RastPort
++*   (x,y) - Coordinates of pixel
++* RESULTS
++* SEE ALSO
++*/
++static __inline VOID
++SafeWritePixel (struct RastPort *rp, LONG x, LONG y)
++{
++  extern LONG CLP_xmin, CLP_xmax, CLP_ymin, CLP_ymax;
++  if (x &gt;= CLP_xmin &amp;&amp; x &lt;= CLP_xmax &amp;&amp; y &gt;= CLP_ymin &amp;&amp; y &lt;= CLP_ymax)
++    WritePixel (rp, x, y);
++}
++/*********/
++
++/****** safeclip.h/SafeBltBitMapRastPort
++* NAME
++*   SafeBltBitMapRastPort
++* SYNOPSIS
++*        SafeBltBitMapRastPort (srcbm, srcx, srcy,
++*                               destrp, destx, desty.
++*                               sizex, sizey, minterm)
++*   VOID SafeBltBitMapRastPort (struct BitMap *, LONG, LONG,
++*                               struct RastPort *, LONG, LONG,
++*                               LONG, LONG, UBYTE)
++* FUNCTION
++*   Blit a rectangle region from a BitMap to a RastPort.
++* INPUTS
++*   srcbm - Pointer to source BitMap
++*   (srcx,srcy) - Coordinates of upper left of source rectangle.
++*   destrp - Pointer to destination RastPort
++*   (destx,desty) - Coordinates of upper left of destination rectangle.
++*   sizex, sizey - Size of source rectangle
++*   minterm - Minterm for blitter to use during copy
++* RESULTS
++* SEE ALSO
++*   SafeBltMaskBitMapRastPort
++*/
++static __inline VOID
++SafeBltBitMapRastPort (struct BitMap *srcbm, LONG srcx, LONG srcy,
++		       struct RastPort *destrp, LONG destx, LONG desty,
++		       LONG sizex, LONG sizey, UBYTE minterm)
++{
++  extern LONG CLP_xmin, CLP_xmax, CLP_ymin, CLP_ymax;
++  LONG xlo = destx, xhi = destx + sizex - 1;
++  LONG ylo = desty, yhi = desty + sizey - 1;
++  if (xlo &lt; CLP_xmin) xlo = CLP_xmin;
++  if (ylo &lt; CLP_ymin) ylo = CLP_ymin;
++  if (xhi &gt; CLP_xmax) xhi = CLP_xmax;
++  if (yhi &gt; CLP_ymax) yhi = CLP_ymax;
++  if (xlo &lt;= xhi &amp;&amp; ylo &lt;= yhi &amp;&amp; 
++      xlo &gt;= CLP_xmin &amp;&amp; xhi &lt;= CLP_xmax &amp;&amp; 
++      ylo &gt;= CLP_ymin &amp;&amp; yhi &lt;= CLP_ymax)
++    {
++      BltBitMapRastPort (srcbm, srcx + (xlo - destx), srcy + (ylo - desty),
++			 destrp, xlo, ylo,
++			 (xhi - xlo) + 1, (yhi - ylo) + 1,
++			 minterm);
++    }
++}
++/*********/
++
++/****** safeclip.h/SafeBltMaskBitMapRastPort
++* NAME
++*   SafeBltMaskBitMapRastPort
++* SYNOPSIS
++*        SafeBltMaskBitMapRastPort (srcbm, srcx, srcy,
++*                               destrp, destx, desty.
++*                               sizex, sizey, minterm, bltmask)
++*   VOID SafeBltMaskBitMapRastPort (struct BitMap *, LONG, LONG,
++*                               struct RastPort *, LONG, LONG,
++*                               LONG, LONG, UBYTE, PLANEPTR)
++* FUNCTION
++*   Blit a rectangle region from a BitMap to a RastPort through
++*   a single plane mask.
++* INPUTS
++*   srcbm - Pointer to source BitMap
++*   (srcx,srcy) - Coordinates of upper left of source rectangle.
++*   destrp - Pointer to destination RastPort
++*   (destx,desty) - Coordinates of upper left of destination rectangle.
++*   sizex, sizey - Size of source rectangle
++*   minterm - Minterm for blitter to use during copy
++*   bltmask - Pointer to single plane mask
++* RESULTS
++* SEE ALSO
++*   SafeBltBitMapRastPort
++*/
++static __inline VOID
++SafeBltMaskBitMapRastPort (struct BitMap *srcbm, LONG srcx, LONG srcy,
++			   struct RastPort *destrp, LONG destx, LONG desty,
++			   LONG sizex, LONG sizey, UBYTE minterm, PLANEPTR bltmask)
++{
++  extern LONG CLP_xmin, CLP_xmax, CLP_ymin, CLP_ymax;
++  LONG xlo = destx, xhi = destx + sizex - 1, ylo = desty, yhi = desty + sizey - 1;
++  if (xlo &lt; CLP_xmin) xlo = CLP_xmin;
++  if (ylo &lt; CLP_ymin) ylo = CLP_ymin;
++  if (xhi &gt; CLP_xmax) xhi = CLP_xmax;
++  if (yhi &gt; CLP_ymax) yhi = CLP_ymax;
++  if (xlo &lt;= xhi &amp;&amp; ylo &lt;= yhi &amp;&amp; 
++      xlo &gt;= CLP_xmin &amp;&amp; xhi &lt;= CLP_xmax &amp;&amp; 
++      ylo &gt;= CLP_ymin &amp;&amp; yhi &lt;= CLP_ymax)
++    {
++      BltMaskBitMapRastPort (srcbm, srcx + (xlo - destx), srcy + (ylo - desty),
++			     destrp, xlo, ylo,
++			     (xhi - xlo) + 1, (yhi - ylo) + 1,
++			     minterm, bltmask);
++    }
++}
++/*********/
++
+
+
+Property changes on: trunk/lib/safeclip/gcc-68k/safeclip.h
+___________________________________________________________________
+Name: svn:keywords
+   + Id Date Revision Author
+Name: svn:eol-style
+   + native
+
+Copied: trunk/lib/safeclip/gcc-all/safeclip.c (from rev 33, trunk/safeclip.c)
+
+Copied: trunk/lib/safeclip/gcc-all/safeclip.h (from rev 33, trunk/safeclip.h)
+
+Added: trunk/lib/safeclip/safeclip.guide
+===================================================================
+--- trunk/lib/safeclip/safeclip.guide	2009-01-20 16:41:27 UTC (rev 33)
++++ trunk/lib/safeclip/safeclip.guide	2009-01-21 12:53:54 UTC (rev 34)
+@@ -0,0 +1,502 @@
+<A HREF="https://lists.berlios.de/mailman/listinfo/ignition-commits">+ at database</A> robodoc.guide
+<A HREF="https://lists.berlios.de/mailman/listinfo/ignition-commits">+ at author</A> J.v.Weert and F.N.C.Slothouber
++@(c)
+<A HREF="https://lists.berlios.de/mailman/listinfo/ignition-commits">+ at node</A> Main safeclip.doc
++@{b}TABLE OF CONTENTS@{ub}
++@{&quot;Autodoc/safeclip.c&quot; Link &quot;safeclip.c&quot;}
++@{&quot;safeclip.c/SafeAreaEnd&quot; Link &quot;SafeAreaEnd&quot;}
++@{&quot;safeclip.c/SafeClose&quot; Link &quot;SafeClose&quot;}
++@{&quot;safeclip.c/SafeDraw&quot; Link &quot;SafeDraw&quot;}
++@{&quot;safeclip.c/SafeInit&quot; Link &quot;SafeInit&quot;}
++@{&quot;safeclip.c/SafeRectFill&quot; Link &quot;SafeRectFill&quot;}
++@{&quot;safeclip.h/SafeAreaDraw&quot; Link &quot;SafeAreaDraw&quot;}
++@{&quot;safeclip.h/SafeBltBitMapRastPort&quot; Link &quot;SafeBltBitMapRastPort&quot;}
++@{&quot;safeclip.h/SafeBltMaskBitMapRastPort&quot; Link &quot;SafeBltMaskBitMapRastPort&quot;}
+
+[... truncated: 1487 lines follow ...]
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000049.html">[Ignition-commits] r33 - trunk
+</A></li>
+	<LI>Next message: <A HREF="000054.html">[Ignition-commits] r34 - in trunk: . add-ons lib lib/safeclip lib/safeclip/gcc-68k lib/safeclip/gcc-all lib/safeclip/sasc-68k libs/textedit libs/textedit/include/gadgets
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#50">[ date ]</a>
+              <a href="thread.html#50">[ thread ]</a>
+              <a href="subject.html#50">[ subject ]</a>
+              <a href="author.html#50">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

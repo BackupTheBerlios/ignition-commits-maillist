@@ -1,0 +1,165 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r19 - trunk/add-ons
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2008-December/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r19%20-%20trunk/add-ons&In-Reply-To=%3C200812162311.mBGNBeGn010196%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000030.html">
+   <LINK REL="Next"  HREF="000032.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r19 - trunk/add-ons</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r19%20-%20trunk/add-ons&In-Reply-To=%3C200812162311.mBGNBeGn010196%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r19 - trunk/add-ons">marust at mail.berlios.de
+       </A><BR>
+    <I>Wed Dec 17 00:11:40 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000030.html">[Ignition-commits] r18 - trunk/add-ons
+</A></li>
+        <LI>Next message: <A HREF="000032.html">[Ignition-commits] r20 - in trunk: . add-ons libs/include
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31">[ date ]</a>
+              <a href="thread.html#31">[ thread ]</a>
+              <a href="subject.html#31">[ subject ]</a>
+              <a href="author.html#31">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2008-12-17 00:11:38 +0100 (Wed, 17 Dec 2008)
+New Revision: 19
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=19&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=19&amp;view=rev</A>
+
+Modified:
+   trunk/add-ons/csv.c
+   trunk/add-ons/iotype.h
+   trunk/add-ons/turbocalc.c
+Log:
+* Renamed Error() to ReportError() because dos.library has
+  already an Error() function with a different purpose.
+* Compiler warning removed.
+
+
+Modified: trunk/add-ons/csv.c
+===================================================================
+--- trunk/add-ons/csv.c	2008-12-16 22:19:05 UTC (rev 18)
++++ trunk/add-ons/csv.c	2008-12-16 23:11:38 UTC (rev 19)
+@@ -11,10 +11,6 @@
+ 
+ const STRPTR __version = &quot;$VER: csv.io 0.7 (4.3.2001)&quot;;
+ 
+-#ifdef DEBUG
+-  void kprintf(STRPTR,...);
+-# define bug kprintf
+-#endif
+ 
+ #define PREFS_GUESS -1L
+ #define PREFS_ASK -2L
+@@ -102,7 +98,7 @@
+     *s = '&amp;';
+ 
+   if (!ok)
+-    Error(&quot;Fehlerhafte Voreinstellungen.&quot;);
++    ReportError(&quot;Fehlerhafte Voreinstellungen.&quot;);
+ 
+   return(TRUE);
+ }
+@@ -129,7 +125,7 @@
+       return(RETURN_FAIL);
+   }
+   if (FRead(file,buffer,1,size) != size)
+-    Error(&quot;Fehler beim Lesen der Datei.&quot;);
++    ReportError(&quot;Fehler beim Lesen der Datei.&quot;);
+ 
+   if (loadprefs == PREFS_GUESS)
+   {
+@@ -148,11 +144,11 @@
+     j = count[0] &gt; count[1] ? 0 : 1;
+     k = count[2] &gt; count[3] ? 2 : 3;
+     sep = count[j] &gt; count[k] ? separator[j] : separator[k];
+-    //Error(&quot;Trenner: %d.&quot;,count[j] &gt; count);
++    //ReportError(&quot;Trenner: %d.&quot;,count[j] &gt; count);
+   }
+   else if (loadprefs == PREFS_ASK)
+   {
+-    Error(&quot;Not yet implemented.&quot;);
++    ReportError(&quot;Not yet implemented.&quot;);
+   }
+   else
+     sep = loadprefs;
+
+Modified: trunk/add-ons/iotype.h
+===================================================================
+--- trunk/add-ons/iotype.h	2008-12-16 22:19:05 UTC (rev 18)
++++ trunk/add-ons/iotype.h	2008-12-16 23:11:38 UTC (rev 19)
+@@ -426,8 +426,8 @@
+ 
+ /***************************** interne Funktionen *******************************/
+ 
+-void   Error(STRPTR fmt,...);
+-void   ErrorA(STRPTR fmt,APTR args);
++void   ReportError(STRPTR fmt,...);
++void   ReportErrorA(STRPTR fmt,APTR args);
+ struct Page *NewPage(struct Mappe *mp);
+ void   CalculatePageDPI(struct Page *page);
+ struct Cell *NewCell(struct Page *page,LONG col,LONG row);
+@@ -444,8 +444,8 @@
+ STRPTR ita(double d,long komma ,UBYTE flags);
+ 
+ #if defined(__SASC)
+-#	pragma tagcall ioBase Error 5a 9802
+-#	pragma libcall ioBase ErrorA 5a 9802
++#	pragma tagcall ioBase ReportError 5a 9802
++#	pragma libcall ioBase ReportErrorA 5a 9802
+ #	pragma libcall ioBase NewPage 54 801
+ #	pragma libcall ioBase CalculatePageDPI 4e 801
+ #	pragma libcall ioBase NewCell 48 10803
+
+Modified: trunk/add-ons/turbocalc.c
+===================================================================
+--- trunk/add-ons/turbocalc.c	2008-12-16 22:19:05 UTC (rev 18)
++++ trunk/add-ons/turbocalc.c	2008-12-16 23:11:38 UTC (rev 19)
+@@ -132,7 +132,7 @@
+ 						col = *(UWORD *)cell, row = *(UWORD *)(cell+2), cell += 4;
+ 					else
+ 						col = *(ULONG *)cell, row = *(ULONG *)(cell+4), cell += 8;
+-					if (c = NewCell(page,col+1,row+1))
++					if ((c = NewCell(page, col + 1,row + 1)) != 0)
+ 					{
+ 						b = *cell++;
+ 						if (b == TCT_TEXT)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000030.html">[Ignition-commits] r18 - trunk/add-ons
+</A></li>
+	<LI>Next message: <A HREF="000032.html">[Ignition-commits] r20 - in trunk: . add-ons libs/include
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31">[ date ]</a>
+              <a href="thread.html#31">[ thread ]</a>
+              <a href="subject.html#31">[ subject ]</a>
+              <a href="author.html#31">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

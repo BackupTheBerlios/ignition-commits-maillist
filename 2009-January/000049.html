@@ -1,0 +1,587 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r33 - trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2009-January/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r33%20-%20trunk&In-Reply-To=%3C200901201641.n0KGfRn4018317%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000048.html">
+   <LINK REL="Next"  HREF="000050.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r33 - trunk</H1>
+    <B>axeld at BerliOS</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r33%20-%20trunk&In-Reply-To=%3C200901201641.n0KGfRn4018317%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r33 - trunk">axeld at mail.berlios.de
+       </A><BR>
+    <I>Tue Jan 20 17:41:27 CET 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000048.html">[Ignition-commits] r32 - trunk/add-ons
+</A></li>
+        <LI>Next message: <A HREF="000050.html">[Ignition-commits] r34 - in trunk: . add-ons lib lib/safeclip	lib/safeclip/gcc-68k lib/safeclip/gcc-all	lib/safeclip/sasc-68k libs/textedit libs/textedit/include/gadgets
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#49">[ date ]</a>
+              <a href="thread.html#49">[ thread ]</a>
+              <a href="subject.html#49">[ subject ]</a>
+              <a href="author.html#49">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: axeld
+Date: 2009-01-20 17:41:27 +0100 (Tue, 20 Jan 2009)
+New Revision: 33
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=33&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=33&amp;view=rev</A>
+
+Modified:
+   trunk/classes.c
+   trunk/clip.c
+   trunk/diagram.c
+   trunk/gadgets.c
+   trunk/graphic.c
+   trunk/handlewindows.c
+   trunk/table.c
+   trunk/windows.c
+Log:
+* Minor cleanup.
+
+
+Modified: trunk/classes.c
+===================================================================
+--- trunk/classes.c	2009-01-20 16:40:42 UTC (rev 32)
++++ trunk/classes.c	2009-01-20 16:41:27 UTC (rev 33)
+@@ -1,7 +1,7 @@
+ /* Several graphics base classes
+  *
+- * Copyright &#169;1996-2007 pinc Software. All Rights Reserved.
+- * Licensed under the terms of the GNU General Public License, version 2.
++ * Copyright 1996-2007 pinc Software. All Rights Reserved.
++ * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+ 
+@@ -761,7 +761,7 @@
+ 			rc = TRUE;
+ 			break;
+ 		case GCM_COMMAND:
+-			/* Befehl ausf&#252;hren */
++			/* Execute command */
+ 			ProcessAppCmd(go-&gt;go_Page,go-&gt;go_Command);
+ 			break;
+ 		case GCM_SAVE:
+@@ -779,7 +779,7 @@
+ }
+ 
+ 
+-/*************************************** embedded object ***************************************/
++/******************************* embedded object *****************************/
+ 
+ 
+ struct gInterface gEmbeddedInterface[] = {
+
+Modified: trunk/clip.c
+===================================================================
+--- trunk/clip.c	2009-01-20 16:40:42 UTC (rev 32)
++++ trunk/clip.c	2009-01-20 16:41:27 UTC (rev 33)
+@@ -1,6 +1,6 @@
+ /* Clipboard functionality
+  *
+- * Copyright &#169;1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2008 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+
+Modified: trunk/diagram.c
+===================================================================
+--- trunk/diagram.c	2009-01-20 16:40:42 UTC (rev 32)
++++ trunk/diagram.c	2009-01-20 16:41:27 UTC (rev 33)
+@@ -1,6 +1,6 @@
+ /* 3D and diagram functions
+  *
+- * Copyright &#169;1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+@@ -190,7 +190,7 @@
+ #endif
+  
+ 
+-long gtfcol,gtfrow;
++long gtfcol, gtfrow;
+ 
+ /** Gibt die Zellen einer Tabelle in der f&#252;r Diagramme richtigen
+  *  Reihenfolge zur&#252;ck.
+@@ -1813,16 +1813,15 @@
+ }
+ 
+ 
+-/** Setzt Parameter eines Diagramms und stellt &#196;nderungen im Aussehen
+- *  im Vorschaufenster oder auf der Seite an.
+- *  Zus&#228;tzlich werden alle Gadgets des Diagramm-Fensters auf den
+- *  aktuellen Stand gebracht.
+- *
+- *  @param win Fenster des Diagramms (WDT_DIAGRAM)
+- *  @param gd das Diagramm
+- *  @param ti die zu &#228;ndernden Attribute
+- */
++/*!	Sets the attributes of a diagram, and makes the changes of the diagram
++	visible on either the preview window or directly the page.
++	Additionally, all gadgets in the diagram window are updated to the current
++	values.
+ 
++	@param win the diagram window (WDT_DIAGRAM)
++	@param gd the diagram
++	@param ti the attributes to change
++*/
+ void
+ SetDiagramAttrsA(struct Window *win, struct gDiagram *gd, struct TagItem *ti)
+ {
+@@ -1832,16 +1831,14 @@
+ 	if (!win || !gd)
+ 		return;
+ 
+-	if (wd-&gt;u.diagram.wd_OldDiagram != NULL)
+-	{
++	if (wd-&gt;u.diagram.wd_OldDiagram != NULL) {
+ 		// If we are only altering an existing diagram, we direct the changes
+ 		// to the standard call which will generate an UndoNode for us
+ 		SetGObjectAttrsA(gd-&gt;gd_Object.go_Page, gd, ti);
+ 		return;
+ 	}
+ 
+-	if ((rc = gDoMethod(gd, GCM_SET, ti)) &amp;&amp; rc &amp; GCPR_REDRAW)
+-	{
++	if ((rc = gDoMethod(gd, GCM_SET, ti)) &amp;&amp; rc &amp; GCPR_REDRAW) {
+ 		RefreshGObjectBounds(wd-&gt;wd_Data, gd);
+ 		RefreshDiagram(gd);
+ 	}
+
+Modified: trunk/gadgets.c
+===================================================================
+--- trunk/gadgets.c	2009-01-20 16:40:42 UTC (rev 32)
++++ trunk/gadgets.c	2009-01-20 16:41:27 UTC (rev 33)
+@@ -1,6 +1,6 @@
+ /* Create gadget routines for ignition
+  *
+- * Copyright &#169;1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2008 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+
+Modified: trunk/graphic.c
+===================================================================
+--- trunk/graphic.c	2009-01-20 16:40:42 UTC (rev 32)
++++ trunk/graphic.c	2009-01-20 16:41:27 UTC (rev 33)
+@@ -1,6 +1,6 @@
+ /* General and 2D graphics routines
+  *
+- * Copyright &#169;1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2008 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+
+Modified: trunk/handlewindows.c
+===================================================================
+--- trunk/handlewindows.c	2009-01-20 16:40:42 UTC (rev 32)
++++ trunk/handlewindows.c	2009-01-20 16:41:27 UTC (rev 33)
+@@ -1,6 +1,6 @@
+ /* window-handling routines
+  *
+- * Copyright &#169;1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2008 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+
+Modified: trunk/table.c
+===================================================================
+--- trunk/table.c	2009-01-20 16:40:42 UTC (rev 32)
++++ trunk/table.c	2009-01-20 16:41:27 UTC (rev 33)
+@@ -1,6 +1,6 @@
+ /* Table related functions
+  *
+- * Copyright &#169;1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2008 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+
+Modified: trunk/windows.c
+===================================================================
+--- trunk/windows.c	2009-01-20 16:40:42 UTC (rev 32)
++++ trunk/windows.c	2009-01-20 16:41:27 UTC (rev 33)
+@@ -1,6 +1,6 @@
+ /* windows related routines
+  *
+- * Copyright &#169;1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+@@ -1040,17 +1040,14 @@
+ void
+ SetNamePosition(long *x, long *y)
+ {
+-	long hei = barheight+fontheight+12;
++	long hei = barheight + fontheight + 12;
+ 
+-	if (wd-&gt;wd_Type == WDT_PROJECT &amp;&amp; imsg.Class != IDCMP_MENUPICK)
+-	{
+-		*x = imsg.MouseX+win-&gt;LeftEdge-(scr-&gt;Width &gt;&gt; 2);
+-		*y = imsg.MouseY+win-&gt;TopEdge-(hei &gt;&gt; 1);
+-	}
+-	else
+-	{
++	if (wd-&gt;wd_Type == WDT_PROJECT &amp;&amp; imsg.Class != IDCMP_MENUPICK) {
++		*x = imsg.MouseX + win-&gt;LeftEdge - (scr-&gt;Width &gt;&gt; 2);
++		*y = imsg.MouseY + win-&gt;TopEdge - (hei &gt;&gt; 1);
++	} else {
+ 		*x = scr-&gt;Width &gt;&gt; 2;
+-		*y = (scr-&gt;Height-hei) &gt;&gt; 1;
++		*y = (scr-&gt;Height - hei) &gt;&gt; 1;
+ 	}
+ }
+ 
+@@ -1061,8 +1058,7 @@
+ 	struct RastPort *rp = win-&gt;RPort;
+ 	long   x,y;
+ 
+-	switch (wd-&gt;wd_Type)
+-	{
++	switch (wd-&gt;wd_Type) {
+ 		case WDT_PREFSCREEN:
+ 			DrawGroupBorder(rp,GetString(&amp;gLocaleInfo, MSG_SCREEN_BORDER),lborder,win-&gt;BorderTop+3,win-&gt;Width-lborder-rborder,fontheight*4+25);
+ 			DrawGroupBorder(rp,GetString(&amp;gLocaleInfo, MSG_MONITOR_BORDER),lborder,win-&gt;BorderTop+30+fontheight*4,win-&gt;Width-lborder-rborder,fontheight*2+11);
+@@ -1075,20 +1071,23 @@
+ 			break;
+ 		case WDT_PREFFORMAT:
+ 			x = ((struct Gadget *)wd-&gt;wd_ExtData[0])-&gt;Width + 6 + lborder;
+-			DrawGroupBorder(rp, GetString(&amp;gLocaleInfo, MSG_PROPERTIES_BORDER), x, win-&gt;BorderTop + fontheight + 9, win-&gt;Width - x - rborder, fontheight * 6 + 33);
+-			if ((gad = GadgetAddress(win, 9)) != 0)
+-			{
+-				ULONG komma;
++			DrawGroupBorder(rp, GetString(&amp;gLocaleInfo, MSG_PROPERTIES_BORDER),
++				x, win-&gt;BorderTop + fontheight + 9, win-&gt;Width - x - rborder,
++				fontheight * 6 + 33);
++			if ((gad = GadgetAddress(win, 9)) != 0) {
++				ULONG comma;
+ 
+-				GT_GetGadgetAttrs(gad,win,NULL,GTSL_Level,&amp;komma,TAG_END);
+-				DrawPointSliderValue(rp,gad,komma);
++				GT_GetGadgetAttrs(gad, win, NULL, GTSL_Level, &amp;comma, TAG_END);
++				DrawPointSliderValue(rp, gad, comma);
+ 			}
+-			if ((gad = GadgetAddress(win, 11)) != 0)
+-			{
++			if ((gad = GadgetAddress(win, 11)) != 0) {
+ 				x = gad-&gt;LeftEdge - 6;
+-				DrawGroupBorder(rp, GetString(&amp;gLocaleInfo, MSG_MARKED_BORDER), x, gad-&gt;TopEdge-fontheight - 2, win-&gt;Width - x - rborder, fontheight * 4 + 25);
++				DrawGroupBorder(rp, GetString(&amp;gLocaleInfo, MSG_MARKED_BORDER),
++					x, gad-&gt;TopEdge-fontheight - 2, win-&gt;Width - x - rborder,
++					fontheight * 4 + 25);
+ 				/*itext.IText = &quot;Negative Werte:&quot;;*/
+-				DrawColorField(rp,GadgetAddress(win,12),FindColorPen(0,0,0),TRUE);
++				DrawColorField(rp, GadgetAddress(win, 12),
++					FindColorPen(0, 0, 0), TRUE);
+ 			}
+ 			break;
+ 		case WDT_PREFFILE:
+@@ -1101,27 +1100,40 @@
+ 			DrawGroupBorder(rp,GetString(&amp;gLocaleInfo, MSG_MISC_BORDER),lborder,win-&gt;BorderTop+fontheight*6+43,win-&gt;Width-lborder-rborder,fontheight*4+25);
+ 			break;
+ 		case WDT_PREFCOLORS:
+-			if ((gad = GadgetAddress(win,2)) != 0)
+-			{
++			if ((gad = GadgetAddress(win, 2)) != 0) {
+ 				DrawGroupBorder(rp,GetString(&amp;gLocaleInfo, MSG_COLOR_BORDER),lborder,win-&gt;BorderTop+3,gad-&gt;LeftEdge-20-win-&gt;BorderLeft,gad-&gt;Height+fontheight*4+22);
+ 				DrawGroupBorder(rp,GetString(&amp;gLocaleInfo, MSG_PALETTE_BORDER),gad-&gt;LeftEdge-10,win-&gt;BorderTop+3,win-&gt;Width-gad-&gt;LeftEdge+10-rborder,gad-&gt;Height+fontheight*4+22);
+ 				showPrefColorsMode(win,0);
+ 			}
+ 			break;
+ 		case WDT_DEFINECMD:
+-			DrawGroupBorder(rp,NULL,lborder,win-&gt;BorderTop+3,win-&gt;Width-lborder-rborder,fontheight*3+25);
+-			DrawGroupBorder(rp,GetString(&amp;gLocaleInfo, MSG_COMMANDS_BORDER),lborder,win-&gt;BorderTop+30+fontheight*3,win-&gt;Width-lborder-rborder,fontheight*8+15);
+-			DrawGroupBorder(rp,GetString(&amp;gLocaleInfo, MSG_OUTPUT_BORDER),lborder,win-&gt;BorderTop+47+fontheight*11,win-&gt;Width-lborder-rborder,fontheight*4+25);
+-			DrawBevelBox(rp,TLn(GetString(&amp;gLocaleInfo, MSG_NAME_GAD))+16+lborder,barheight+15+fontheight,boxwidth*2,fontheight*2+8,GT_VisualInfo,vi,GTBB_Recessed,TRUE,TAG_END);
++			DrawGroupBorder(rp, NULL, lborder, win-&gt;BorderTop + 3,
++				win-&gt;Width - lborder - rborder, fontheight * 3 + 25);
++			DrawGroupBorder(rp, GetString(&amp;gLocaleInfo, MSG_COMMANDS_BORDER),
++				lborder, win-&gt;BorderTop + 30 + fontheight * 3,
++				win-&gt;Width - lborder - rborder, fontheight * 8 + 15);
++			DrawGroupBorder(rp, GetString(&amp;gLocaleInfo, MSG_OUTPUT_BORDER),
++				lborder, win-&gt;BorderTop + 47 + fontheight * 11,
++				win-&gt;Width - lborder - rborder, fontheight * 4 + 25);
++			DrawBevelBox(rp, TLn(GetString(&amp;gLocaleInfo, MSG_NAME_GAD)) + 16
++					+ lborder,
++				barheight + 15 + fontheight, boxwidth * 2, fontheight * 2 + 8,
++				GT_VisualInfo, vi, GTBB_Recessed, TRUE, TAG_END);
+ 			itext.IText = GetString(&amp;gLocaleInfo, MSG_ICON_LABEL);
+-			PrintIText(rp,&amp;itext,8+lborder,barheight+(3*fontheight)/2+18);
+-			if (wd-&gt;wd_Data)
+-			{
+-				x = TLn(GetString(&amp;gLocaleInfo, MSG_NAME_GAD))+18+lborder;
+-				if (((struct AppCmd *)wd-&gt;wd_Data)-&gt;ac_Node.in_Image)
+-				{
+-					makeClip(win,x,barheight+16+fontheight,boxwidth*2-5,fontheight*2+5);
+-					DrawImage(rp,((struct AppCmd *)wd-&gt;wd_Data)-&gt;ac_Node.in_Image,x-2-(((struct AppCmd *)wd-&gt;wd_Data)-&gt;ac_Node.in_Image-&gt;Width &gt;&gt; 1)+boxwidth,barheight+19+2*fontheight-(((struct AppCmd *)wd-&gt;wd_Data)-&gt;ac_Node.in_Image-&gt;Height &gt;&gt; 1));
++			PrintIText(rp, &amp;itext, 8 + lborder,
++				barheight + (3 * fontheight) / 2 + 18);
++			if (wd-&gt;wd_Data) {
++				x = TLn(GetString(&amp;gLocaleInfo, MSG_NAME_GAD)) + 18 + lborder;
++				if (((struct AppCmd *)wd-&gt;wd_Data)-&gt;ac_Node.in_Image) {
++					makeClip(win, x, barheight + 16 + fontheight,
++						boxwidth * 2 - 5, fontheight * 2 + 5);
++					DrawImage(rp,
++						((struct AppCmd *)wd-&gt;wd_Data)-&gt;ac_Node.in_Image,
++						x - 2 - (((struct AppCmd *)wd-&gt;wd_Data)
++							-&gt;ac_Node.in_Image-&gt;Width &gt;&gt; 1) + boxwidth,
++						barheight + 19 + 2 * fontheight
++							- (((struct AppCmd *)wd-&gt;wd_Data)-&gt;ac_Node.in_Image
++								-&gt;Height &gt;&gt; 1));
+ 					freeClip(win);
+ 				}
+ 			}
+@@ -1129,24 +1141,30 @@
+ 		case WDT_OBJECT:
+ 		{
+ 			struct gGadget *gg;
+-			long   lines = max((long)wd-&gt;wd_ExtData[2],4);
++			long lines = max((long)wd-&gt;wd_ExtData[2], 4);
+ 
+-			DrawGroupBorder(rp,GetString(&amp;gLocaleInfo, MSG_POSITION_BORDER),lborder,y = barheight+fontheight+10,(x = (long)wd-&gt;wd_ExtData[3])-4-lborder,fontheight+4+(fontheight+7)*lines);
+-			if (wd-&gt;wd_ExtData[2])
+-				DrawGroupBorder(rp,GetString(&amp;gLocaleInfo, MSG_MISC_BORDER),x,y,win-&gt;Width-x-rborder,fontheight+4+(fontheight+7)*lines);
++			DrawGroupBorder(rp,GetString(&amp;gLocaleInfo, MSG_POSITION_BORDER),
++				lborder, y = barheight + fontheight&#194;&#160;+ 10,
++				(x = (long)wd-&gt;wd_ExtData[3]) - 4 - lborder,
++				fontheight + 4 + (fontheight + 7) * lines);
++			if (wd-&gt;wd_ExtData[2]) {
++				DrawGroupBorder(rp, GetString(&amp;gLocaleInfo, MSG_MISC_BORDER),
++					x, y, win-&gt;Width - x - rborder,
++					fontheight + 4 + (fontheight + 7) * lines);
++			}
+ 
+-			for(gg = (APTR)((struct List *)wd-&gt;wd_ExtData[4])-&gt;lh_Head;gg-&gt;gg_Node.mln_Succ;gg = (APTR)gg-&gt;gg_Node.mln_Succ)
+-			{
+-				if (gg-&gt;gg_Type == GIT_PEN)
+-				{
++			for (gg = (APTR)((struct List *)wd-&gt;wd_ExtData[4])-&gt;lh_Head;
++					gg-&gt;gg_Node.mln_Succ; gg = (APTR)gg-&gt;gg_Node.mln_Succ) {
++				if (gg-&gt;gg_Type == GIT_PEN) {
+ 					struct gInterface *gi;
+ 
+-					for(gi = ((struct gObject *)wd-&gt;wd_Data)-&gt;go_Class-&gt;gc_Interface;gi &amp;&amp; gi-&gt;gi_Tag;gi++)
+-					{
+-						if (gg-&gt;gg_Tag == gi-&gt;gi_Tag)
+-						{
++					for (gi = ((struct gObject *)wd-&gt;wd_Data)-&gt;go_Class
++							-&gt;gc_Interface; gi &amp;&amp; gi-&gt;gi_Tag; gi++) {
++						if (gg-&gt;gg_Tag == gi-&gt;gi_Tag) {
+ 							itext.IText = GetGLabel(gi);
+-							PrintIText(rp,&amp;itext,gg-&gt;gg_Gadget-&gt;LeftEdge-8-2*boxwidth-IntuiTextLength(&amp;itext),gg-&gt;gg_Gadget-&gt;TopEdge+3);
++							PrintIText(rp, &amp;itext, gg-&gt;gg_Gadget-&gt;LeftEdge - 8
++									- 2 * boxwidth - IntuiTextLength(&amp;itext),
++								gg-&gt;gg_Gadget-&gt;TopEdge + 3);
+ 						}
+ 					}
+ 				}
+@@ -1158,13 +1176,15 @@
+ 			struct gObject *go = wd-&gt;wd_ExtData[0];
+ 			struct gClass *gc;
+ 
+-			SetAPen(rp, FindColor(scr-&gt;ViewPort.ColorMap, 0xffffffff, 0xffffffff, 0xffffffff, -1));
+-			RectFill(rp, win-&gt;BorderLeft, win-&gt;BorderTop, x = win-&gt;Width - 2 - win-&gt;BorderRight, y = win-&gt;Height - 2 - win-&gt;BorderBottom);
++			SetAPen(rp, FindColor(scr-&gt;ViewPort.ColorMap,
++				0xffffffff, 0xffffffff, 0xffffffff, -1));
++			RectFill(rp, win-&gt;BorderLeft, win-&gt;BorderTop,
++				x = win-&gt;Width - 2 - win-&gt;BorderRight,
++				y = win-&gt;Height - 2 - win-&gt;BorderBottom);
+ 			EraseRect(rp, x + 1, win-&gt;BorderTop, x + 1, y);
+ 			EraseRect(rp, win-&gt;BorderLeft, y + 1, x, y + 1);
+ 
+-			if (go &amp;&amp; (gc = go-&gt;go_Class)-&gt;gc_Draw)
+-			{
++			if (go &amp;&amp; (gc = go-&gt;go_Class)-&gt;gc_Draw) {
+ 				struct gBounds gb;
+ 
+ 				SetGRastPort(rp);
+@@ -1180,8 +1200,7 @@
+ 			break;
+ 		}
+ 		case WDT_BORDER:
+-			if ((gad = GadgetAddress(win, 1)) != 0)
+-			{
++			if ((gad = GadgetAddress(win, 1)) != 0) {
+ 				DrawGroupBorder(rp, GetString(&amp;gLocaleInfo, MSG_PRESETS_BORDER), lborder, win-&gt;BorderTop + 3, win-&gt;Width - lborder - rborder, gad-&gt;TopEdge - win-&gt;BorderTop - 6);
+ 				DrawBevelBox(rp, lborder, gad-&gt;TopEdge + 4 + fontheight, win-&gt;Width - lborder - rborder, fontheight*2 + 19, GT_VisualInfo, vi, GTBB_Recessed, TRUE, TAG_END);
+ 			}
+@@ -1277,8 +1296,7 @@
+ bool
+ WindowIsProjectDependent(long type)
+ {
+-	switch (type)
+-	{
++	switch (type) {
+ 		case WDT_PAGE:
+ 		case WDT_DOCUMENT:
+ 		case WDT_DIAGRAM:
+@@ -1301,15 +1319,14 @@
+ 	APTR   data = (APTR)GetTagData(WA_Data, 0, ti);
+ 
+ 	*rwin = NULL;
+-	switch (type)
+-	{
++	switch (type) {
+ 		case WDT_PROJECT:
+ 		case WDT_DEFINECMD:
+ 			break;
+ 		case WDT_OBJECT:
+-			for (win = scr-&gt;FirstWindow;win;win = win-&gt;NextWindow)
+-			{
+-				if (win-&gt;UserPort == iport &amp;&amp; ((struct winData *)win-&gt;UserData)-&gt;wd_Type == type
++			for (win = scr-&gt;FirstWindow;win;win = win-&gt;NextWindow) {
++				if (win-&gt;UserPort == iport
++					&amp;&amp; ((struct winData *)win-&gt;UserData)-&gt;wd_Type == type
+ 					&amp;&amp; ((struct winData *)win-&gt;UserData)-&gt;wd_Data == data)
+ 					break;
+ 			}
+@@ -1318,35 +1335,38 @@
+ 		{
+ 			struct gDiagram *current = (APTR)GetTagData(WA_CurrentDiagram, 0, ti);
+ 
+-			for (win = scr-&gt;FirstWindow; win; win = win-&gt;NextWindow)
+-			{
++			for (win = scr-&gt;FirstWindow; win; win = win-&gt;NextWindow) {
+ 				struct winData *wd = (APTR)win-&gt;UserData;
+ 
+-				if (win-&gt;UserPort == iport &amp;&amp; wd-&gt;wd_Type == type &amp;&amp; wd-&gt;u.diagram.wd_CurrentDiagram == current)
++				if (win-&gt;UserPort == iport &amp;&amp; wd-&gt;wd_Type == type
++					&amp;&amp; wd-&gt;u.diagram.wd_CurrentDiagram == current)
+ 					break;
+ 			}
+ 			break;
+ 		}
+ 		default:
+-			if (type != WDT_PREFS &amp;&amp; IsPrefsWindow(type))
+-			{
+-				for (win = scr-&gt;FirstWindow;win;win = win-&gt;NextWindow)
+-				{
+-					if (win-&gt;UserPort == iport &amp;&amp; ((struct winData *)win-&gt;UserData)-&gt;wd_Type == type &amp;&amp; ((struct winData *)win-&gt;UserData)-&gt;wd_Data == data)
++			if (type != WDT_PREFS &amp;&amp; IsPrefsWindow(type)) {
++				for (win = scr-&gt;FirstWindow; win != NULL;
++						win = win-&gt;NextWindow) {
++					if (win-&gt;UserPort == iport
++						&amp;&amp; ((struct winData *)win-&gt;UserData)-&gt;wd_Type == type
++						&amp;&amp; ((struct winData *)win-&gt;UserData)-&gt;wd_Data == data)
+ 						break;
+ 				}
+-			}
+-			else
++			} else
+ 				win = GetAppWindow(type);
++			break;
+ 	}
+-	if (win)
+-	{
++
++	if (win) {
+ 		long active;
+ 
+ 		wd = (struct winData *)win-&gt;UserData;
+ 		active = GetTagData(WA_Page, ~0L, ti);
+-		if (active != ~0L &amp;&amp; wd-&gt;wd_PageHandlingGadget)
+-			SetGadgetAttrs(wd-&gt;wd_PageHandlingGadget, win, NULL, PAGEGA_Active, active, TAG_END);
++		if (active != ~0L &amp;&amp; wd-&gt;wd_PageHandlingGadget) {
++			SetGadgetAttrs(wd-&gt;wd_PageHandlingGadget, win, NULL,
++				PAGEGA_Active, active, TAG_END);
++		}
+ 
+ 		WindowToFront(win);
+ 		ActivateWindow(win);
+@@ -1354,20 +1374,18 @@
+ 		*rwin = win;
+ 		return FALSE;
+ 	}
+-	if (WindowIsProjectDependent(type))
+-	{
+-		if (!rxpage)
+-		{
++	if (WindowIsProjectDependent(type)) {
++		if (!rxpage) {
+ 			ErrorRequest(GetString(&amp;gLocaleInfo, MSG_NO_PROJECT_ERR));
+ 			return FALSE ;
+ 		}
+-		switch (type)
+-		{
++
++		switch (type) {
+ 			case WDT_MASK:
+ 			case WDT_FILTER:
+ 			case WDT_INDEX:
+-				if (IsListEmpty((struct List *)&amp;rxpage-&gt;pg_Mappe-&gt;mp_Databases))
+-				{
++				if (IsListEmpty((struct List *)&amp;rxpage-&gt;pg_Mappe
++						-&gt;mp_Databases)) {
+ 					ErrorRequest(GetString(&amp;gLocaleInfo, MSG_NO_DATABASE_ERR));
+ 					return FALSE;
+ 				}
+@@ -1389,18 +1407,18 @@
+ {
+ 	struct Window *win;
+ 	struct winData *wd;
+-	bool   error = false, reopened = false;
+-	int32  idcmp, flags, x, y, minWidth = -1L, minHeight = -1L;
++	bool error = false, reopened = false;
++	int32 idcmp, flags, x, y, minWidth = -1L, minHeight = -1L;
+ 	CONST_STRPTR title;
+ 
+ 	ObtainSemaphore(&amp;gWindowSemaphore);
+ 
+-	if (!TestOpenAppWindow(&amp;win, type, (struct TagItem *)&amp;tag1))
+-	{
++	if (!TestOpenAppWindow(&amp;win, type, (struct TagItem *)&amp;tag1)) {
+ 		ReleaseSemaphore(&amp;gWindowSemaphore);
+ 		return win;
+ 	}
+-	title = (STRPTR)GetTagData(WA_Title, (ULONG)GetString(&amp;gLocaleInfo, MSG_IGNITION_REQUEST_TITLE), (struct TagItem *)&amp;tag1);
++	title = (STRPTR)GetTagData(WA_Title, (ULONG)GetString(&amp;gLocaleInfo,
++		MSG_IGNITION_REQUEST_TITLE), (struct TagItem *)&amp;tag1);
+ 
+ 	if ((wd = (struct winData *)GetTagData(WA_WinData, 0, (struct TagItem *)&amp;tag1)) != 0)
+ 		reopened = true;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000048.html">[Ignition-commits] r32 - trunk/add-ons
+</A></li>
+	<LI>Next message: <A HREF="000050.html">[Ignition-commits] r34 - in trunk: . add-ons lib lib/safeclip	lib/safeclip/gcc-68k lib/safeclip/gcc-all	lib/safeclip/sasc-68k libs/textedit libs/textedit/include/gadgets
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#49">[ date ]</a>
+              <a href="thread.html#49">[ thread ]</a>
+              <a href="subject.html#49">[ subject ]</a>
+              <a href="author.html#49">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

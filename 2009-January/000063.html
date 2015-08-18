@@ -1,0 +1,109 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r39 - trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2009-January/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r39%20-%20trunk&In-Reply-To=%3C51257067919-BeMail%40zon%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000062.html">
+   <LINK REL="Next"  HREF="000066.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r39 - trunk</H1>
+    <B>Axel D&#246;rfler</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r39%20-%20trunk&In-Reply-To=%3C51257067919-BeMail%40zon%3E"
+       TITLE="[Ignition-commits] r39 - trunk">axeld at pinc-software.de
+       </A><BR>
+    <I>Sat Jan 24 00:08:51 CET 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000062.html">[Ignition-commits] r39 - trunk
+</A></li>
+        <LI>Next message: <A HREF="000066.html">[Ignition-commits] r39 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#63">[ date ]</a>
+              <a href="thread.html#63">[ thread ]</a>
+              <a href="subject.html#63">[ subject ]</a>
+              <a href="author.html#63">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Matthias Rustler &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/ignition-commits">mrustler at gmx.de</A>&gt; wrote:
+&gt;<i> Am Freitag, den 23.01.2009, 20:41 +0100 schrieb Axel D&#246;rfler:
+</I>&gt;<i> &gt; <A HREF="https://lists.berlios.de/mailman/listinfo/ignition-commits">marust at mail.berlios.de</A> wrote:
+</I>&gt;<i> &gt; &gt; +			if (f == (APTR)~0L)
+</I>&gt;<i> &gt; &gt; +				break;
+</I>&gt;<i> &gt; &gt; +
+</I>&gt;<i> &gt; &gt;  			if (f &amp;&amp; f != (APTR)~0L &amp;&amp; f-&gt;f_Code)
+</I>&gt;<i> &gt; A look a bit deeper would have shown just another possible NULL 
+</I>&gt;<i> &gt; dereference, and also, the check in the line above is now partially 
+</I>&gt;<i> &gt; superfluous. Fixed that in r41 now, though.
+</I>&gt;<i> Of course, it would be better if *you* fix the bugs.
+</I>
+Why would it be better? I don't think it matters who fixes what, as 
+long as it's fixed. I just don't have the time to fix all the bugs, 
+anymore, obviously.
+I'm just wondering why this didn't crash earlier for me :-)
+
+&gt;<i> I have now a segfault for probably the same reason as above:
+</I>&gt;<i> 
+</I>&gt;<i> Wenn a cell contains an error message like #err-args and I try to 
+</I>&gt;<i> close
+</I>&gt;<i> Ignition and click &quot;no&quot; in the safety requester:
+</I>&gt;<i> 
+</I>&gt;<i> #0  0xb7e4c25b in strlen () from /lib/tls/i686/cmov/libc.so.6
+</I>&gt;<i> #1  0x0805df17 in Dos_FPuts (file=0xb5f190e8, string=0x1b &lt;Address 
+</I>&gt;<i> 0x1b
+</I>&gt;<i> out of bounds&gt;, DOSBase=0xb5e5901c) at fputs.c:54
+</I>&gt;<i> #2  0xb6518cd0 in SaveSession (name=0xb65f1ff0
+</I>&gt;<i> &quot;config/ignition.session&quot;) at ignition.c:1446
+</I>&gt;<i> #3  0xb6519866 in CloseApp () at ignition.c:1701
+</I>&gt;<i> #4  0xb651c9bc in main (argc=1, argv=0xb5e67390) at ignition.c:2572
+</I>&gt;<i> 
+</I>&gt;<i> Frame #2:
+</I>&gt;<i> FPuts(file,(char *)&amp;((struct Function *)ln-&gt;ln_Name)-&gt;f_ID);
+</I>&gt;<i> 
+</I>&gt;<i> (gdb) print *ln
+</I>&gt;<i> $1 = {ln_Succ = 0xb5e6ed9c, ln_Pred = 0xb5e6ed98, ln_Name = 
+</I>&gt;<i> 0xffffffff
+</I>&gt;<i> &lt;Address 0xffffffff out of bounds&gt;, ln_Type = 0 '\0', ln_Pri = 0 '\
+</I>&gt;<i> 0'}
+</I>&gt;<i> 
+</I>&gt;<i> Is it enough to check for (APTR)~0L?
+</I>
+Not that I would remember, but it seems that shouldn't hurt :-)
+
+Bye,
+   Axel.
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000062.html">[Ignition-commits] r39 - trunk
+</A></li>
+	<LI>Next message: <A HREF="000066.html">[Ignition-commits] r39 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#63">[ date ]</a>
+              <a href="thread.html#63">[ thread ]</a>
+              <a href="subject.html#63">[ subject ]</a>
+              <a href="author.html#63">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,1122 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r50 - in trunk: . libs/gtdrag libs/gtdrag/aros	libs/gtdrag/aros/include libs/gtdrag/aros/include/clib	libs/gtdrag/aros/include/defines	libs/gtdrag/aros/include/proto libs/scroller	libs/scroller/aros libs/scroller/aros/include	libs/scroller/aros/include/clib libs/scroller/aros/include/defines	libs/scroller/aros/include/proto libs/textedit	libs/textedit/aros libs/textedit/aros/include	libs/textedit/aros/include/clib libs/textedit/aros/include/defines	libs/textedit/aros/include/proto locale
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2009-April/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r50%20-%20in%20trunk%3A%20.%20libs/gtdrag%20libs/gtdrag/aros%0A%09libs/gtdrag/aros/include%20libs/gtdrag/aros/include/clib%0A%09libs/gtdrag/aros/include/defines%0A%09libs/gtdrag/aros/include/proto%20libs/scroller%0A%09libs/scroller/aros%20libs/scroller/aros/include%0A%09libs/scroller/aros/include/clib%20libs/scroller/aros/include/defines%0A%09libs/scroller/aros/include/proto%20libs/textedit%0A%09libs/textedit/aros%20libs/textedit/aros/include%0A%09libs/textedit/aros/include/clib%20libs/textedit/aros/include/defines%0A%09libs/textedit/aros/include/proto%20locale&In-Reply-To=%3C200904212248.n3LMmes2015257%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000075.html">
+   <LINK REL="Next"  HREF="000078.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r50 - in trunk: . libs/gtdrag libs/gtdrag/aros	libs/gtdrag/aros/include libs/gtdrag/aros/include/clib	libs/gtdrag/aros/include/defines	libs/gtdrag/aros/include/proto libs/scroller	libs/scroller/aros libs/scroller/aros/include	libs/scroller/aros/include/clib libs/scroller/aros/include/defines	libs/scroller/aros/include/proto libs/textedit	libs/textedit/aros libs/textedit/aros/include	libs/textedit/aros/include/clib libs/textedit/aros/include/defines	libs/textedit/aros/include/proto locale</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r50%20-%20in%20trunk%3A%20.%20libs/gtdrag%20libs/gtdrag/aros%0A%09libs/gtdrag/aros/include%20libs/gtdrag/aros/include/clib%0A%09libs/gtdrag/aros/include/defines%0A%09libs/gtdrag/aros/include/proto%20libs/scroller%0A%09libs/scroller/aros%20libs/scroller/aros/include%0A%09libs/scroller/aros/include/clib%20libs/scroller/aros/include/defines%0A%09libs/scroller/aros/include/proto%20libs/textedit%0A%09libs/textedit/aros%20libs/textedit/aros/include%0A%09libs/textedit/aros/include/clib%20libs/textedit/aros/include/defines%0A%09libs/textedit/aros/include/proto%20locale&In-Reply-To=%3C200904212248.n3LMmes2015257%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r50 - in trunk: . libs/gtdrag libs/gtdrag/aros	libs/gtdrag/aros/include libs/gtdrag/aros/include/clib	libs/gtdrag/aros/include/defines	libs/gtdrag/aros/include/proto libs/scroller	libs/scroller/aros libs/scroller/aros/include	libs/scroller/aros/include/clib libs/scroller/aros/include/defines	libs/scroller/aros/include/proto libs/textedit	libs/textedit/aros libs/textedit/aros/include	libs/textedit/aros/include/clib libs/textedit/aros/include/defines	libs/textedit/aros/include/proto locale">marust at mail.berlios.de
+       </A><BR>
+    <I>Wed Apr 22 00:48:40 CEST 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000075.html">[Ignition-commits] r49 - trunk/config
+</A></li>
+        <LI>Next message: <A HREF="000078.html">[Ignition-commits] r50 - in trunk: . libs/gtdrag libs/gtdrag/aros libs/gtdrag/aros/include libs/gtdrag/aros/include/clib libs/gtdrag/aros/include/defines libs/gtdrag/aros/include/proto libs/scroller libs/scroller/aros libs/scroller/aros/include libs/scroller/aros/include/clib  libs/scroller/aros/include/defines libs/scroller/aros/include/proto libs/textedit libs/textedit/aros libs/textedit/aros/include libs/textedit/aros/include/clib  libs/textedit/aros/include/defines libs/textedit/aros/include/proto locale
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#77">[ date ]</a>
+              <a href="thread.html#77">[ thread ]</a>
+              <a href="subject.html#77">[ subject ]</a>
+              <a href="author.html#77">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2009-04-22 00:48:16 +0200 (Wed, 22 Apr 2009)
+New Revision: 50
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=50&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=50&amp;view=rev</A>
+
+Added:
+   trunk/libs/gtdrag/aros/
+   trunk/libs/gtdrag/aros/gtdrag_autoinit.c
+   trunk/libs/gtdrag/aros/gtdrag_end.c
+   trunk/libs/gtdrag/aros/gtdrag_start.c
+   trunk/libs/gtdrag/aros/gtdrag_stubs.c
+   trunk/libs/gtdrag/aros/include/
+   trunk/libs/gtdrag/aros/include/clib/
+   trunk/libs/gtdrag/aros/include/clib/gtdrag_protos.h
+   trunk/libs/gtdrag/aros/include/defines/
+   trunk/libs/gtdrag/aros/include/defines/gtdrag.h
+   trunk/libs/gtdrag/aros/include/gtdrag_libdefs.h
+   trunk/libs/gtdrag/aros/include/proto/
+   trunk/libs/gtdrag/aros/include/proto/gtdrag.h
+   trunk/libs/scroller/aros/
+   trunk/libs/scroller/aros/include/
+   trunk/libs/scroller/aros/include/clib/
+   trunk/libs/scroller/aros/include/clib/pScroller_protos.h
+   trunk/libs/scroller/aros/include/defines/
+   trunk/libs/scroller/aros/include/defines/pScroller.h
+   trunk/libs/scroller/aros/include/pScroller_libdefs.h
+   trunk/libs/scroller/aros/include/proto/
+   trunk/libs/scroller/aros/include/proto/pScroller.h
+   trunk/libs/scroller/aros/pScroller_end.c
+   trunk/libs/scroller/aros/pScroller_start.c
+   trunk/libs/textedit/aros/
+   trunk/libs/textedit/aros/include/
+   trunk/libs/textedit/aros/include/clib/
+   trunk/libs/textedit/aros/include/clib/pTextEdit_protos.h
+   trunk/libs/textedit/aros/include/defines/
+   trunk/libs/textedit/aros/include/defines/pTextEdit.h
+   trunk/libs/textedit/aros/include/pTextEdit_libdefs.h
+   trunk/libs/textedit/aros/include/proto/
+   trunk/libs/textedit/aros/include/proto/pTextEdit.h
+   trunk/libs/textedit/aros/pTextEdit_end.c
+   trunk/libs/textedit/aros/pTextEdit_start.c
+   trunk/libs/textedit/aros/pTextEdit_stubs.c
+   trunk/locale/C_h_orig.sd
+Removed:
+   trunk/mmakefile.src
+Modified:
+   trunk/Makefile
+Log:
+First steps for the switch from AROS metamake to GNU makefiles:
+* gtdrag, scroller, textedit: copied files which were generated
+  by the build system into &quot;aros&quot; subdirectories.
+* Changed Makefile. It is based on a makefile which I have found
+  in codesets.library on Sourceforge. Note that this file has to
+  be fixed for other systems than AROS.
+* Main mmakefile.src deleted
+* Added C_h_orig.sd for FlexCat
+
+
+
+Modified: trunk/Makefile
+===================================================================
+--- trunk/Makefile	2009-04-17 16:58:59 UTC (rev 49)
++++ trunk/Makefile	2009-04-21 22:48:16 UTC (rev 50)
+@@ -3,84 +3,345 @@
+ ## Copyright 1996-2009 pinc Software. All Rights Reserved.
+ ## Licensed under the terms of the GNU General Public License, version 3.
+ 
+-#CFLAGS         = nostkchk afp math=i ign=147
+-CFLAGS          = nostkchk afp math=i code=f data=f ign=79+147 utillib
+-#LFLAGS         = sc sd nd noicons
+-LFLAGS          = sc sd noicons
+ 
+-#OPTIMIZE       = opt opttime
+-OPTIMIZE        = noopt
+-CPU             = 68020
+-#CPU            = any
+-DEFINES	        =
+-INCLUDES		= idir=libs/include idir=libs
+-DEBUG			= dbg=l def=DEBUG def=GDEBUG
+-#DEBUG			= dbg=l def=DEBUG
+-#DEBUG			= nodbg
+-LIBS			= lib:scmieee.lib lib:scnb.lib lib:amiga.lib lib:debug.lib lib:clip.o lib/safeclip.o
+-GST				= include:allnb.gst
++###########################################################################
++# I've borrowed some ideas from the Makefile for &quot;codesets.library&quot;.
++# Note that this works currently only for AROS !
+ 
+-all:              ignition addons guides
+ 
+-start:            ignition
+-	run ignition
++###########################################################################
++# This makefile is a very generic one. It tries to identify both, the host
++# and the target operating system for which Ignition should be compiled.
++# However, this auto-detection can be easily overridden by directly
++# specifying an option on the commandline while calling 'make'.
++#
++# Example:
++#
++# # to explicitly compile for AmigaOS3
++# &gt; make OS=os3
++#
++# # to compile for AmigaOS4 but without debugging
++# &gt; make OS=os4 DEBUG=
++#
+ 
+-addons:
+-	@cd add-ons; make -f Makefile all
++#############################################
++# find out the HOST operating system
++# on which this makefile is run
++HOST ?= $(shell uname)
++ifeq ($(HOST), AmigaOS)
++  ifeq ($(shell uname -m), powerpc)
++    HOST = AmigaOS4
++  endif
++  ifeq ($(shell uname -m), ppc)
++    HOST = AmigaOS4
++  endif
++endif
+ 
+-ignition_strings.o ignition_strings.h:	locale/ignition.cd
+-	CatComp DESCRIPTOR home:source/ignition/locale/ignition.cd CFILE ignition_strings.h OBJFILE ignition_strings.o
++# if no host is identifed (no uname tool)
++# we assume a AmigaOS build
++ifeq ($(HOST),)
++  HOST = AmigaOS
++endif
+ 
+-help/deutsch/ignition.guide: help/deutsch/ignition.in.guide
+-	sc help/deutsch/ignition.in.guide $(DEFINES) pponly objname=help/deutsch/ignition.guide
+-	flush
++#############################################
++# now we find out the target OS for
++# which we are going to compile Ignition in case
++# the caller didn't yet define OS himself
++ifndef (OS)
++  ifeq ($(HOST), AmigaOS4)
++    OS = os4
++  else
++  ifeq ($(HOST), AmigaOS)
++    OS = os3
++  else
++  ifeq ($(HOST), MorphOS)
++    OS = mos
++  else
++  ifeq ($(HOST), AROS)
++    # now we find out which CPU system aros will be used
++    ifeq ($(shell uname -m), powerpc)
++      OS = aros-ppc
++    endif
++	 ifeq ($(shell uname -m), ppc)
++      OS = aros-ppc
++    endif
++	 ifeq ($(shell uname -m), i386)
++      OS = aros-i386
++    endif
++	 ifeq ($(shell uname -m), i686)
++      OS = aros-i686
++    endif
++	 ifeq ($(shell uname -m), x86_64)
++      OS = aros-x86_64
++    endif
++  else
++    OS = os4
++  endif
++  endif
++  endif
++  endif
++endif
+ 
+-help/english/ignition.guide: help/english/ignition.in.guide
+-	sc help/english/ignition.in.guide $(DEFINES) pponly objname=help/english/ignition.guide
+-	flush
++#############################################
++# define common commands we use in this
++# makefile. Please note that each of them
++# might be overridden on the commandline.
+ 
+-guides:	help/english/ignition.guide help/deutsch/ignition.guide
++# common commands
++FLEX    = flex
++FC      = FlexCat
++EXPR    = expr
++DATE    = date
++RM      = delete force
++RMDIR   = delete force all
++MKDIR   = makedir
++CHMOD   = protect FLAGS=rwed
++CP      = copy
++CC      = gcc
++STRIP   = strip
++OBJDUMP = objdump
+ 
+-catalogs:
+-	@echo &quot;Creating ignition catalogs &amp; flushing memory&quot;
+-	@CatComp DESCRIPTOR locale/ignition.cd TRANSLATION locale/ignition_english.ct CATALOG LOCALE:Catalogs/english/ignition.catalog &gt;nil:
+-	@copy LOCALE:Catalogs/english/ignition.catalog distribution/full/locale/english/catalogs/english/
+-	@copy LOCALE:Catalogs/english/ignition.catalog distribution/lite/locale/english/catalogs/english/
+-	@flush
++# path definitions
++CDUP  = /
++CDTHIS=
+ 
+-clean:
+-	delete \#?.o
++# override some variables for non-native builds (cross-compiler)
++ifneq ($(HOST), AmigaOS)
++ifneq ($(HOST), AmigaOS4)
++ifneq ($(HOST), MorphOS)
+ 
+-OBJS =	ignition.o prefs.o prefsio.o edit.o table.o cell.o calc.o font.o \
++  # when we end up here this is either a unix or Aros host
++  # so lets use unix kind of commands
++  RM    = rm -f
++  RMDIR = rm -rf
++  MKDIR = mkdir -p
++  CHMOD = chmod 755
++  CP    = cp -f
++
++  CDUP  = ../
++  CDTHIS= ./
++
++endif
++endif
++endif
++
++###########################################################################
++# CPU and DEBUG can be defined outside, defaults to above
++# using e.g. &quot;make DEBUG= CPU=-mcpu=603e&quot; produces optimized non-debug
++# PPC-603e version
++#
++# OPTFLAGS are disabled by DEBUG normally!
++#
++# ignored warnings are:
++# none - because we want to compile with -Wall all the time
++
++# Common Directories
++PREFIX   = $(CDTHIS)
++OBJDIR   = .obj_$(OS)
++VPATH    = $(OBJDIR)
++
++# target definition
++TARGET   = Ignition_$(OS)
++
++# Common compiler/linker flags
++WARN     = -W -Wall
++OPTFLAGS = -O2 -fomit-frame-pointer -funroll-loops
++DEBUG    = -DDEBUG -O0
++DEBUGSYM = -gstabs
++CFLAGS   = -Ilibs -Ilibs/include \
++            $(CPU) $(WARN) $(OPTFLAGS) $(DEBUG) $(DEBUGSYM) $(USER_CFLAGS)
++LDFLAGS  = $(CPU) $(DEBUGSYM)
++LDLIBS   =
++
++# different options per target OS
++ifeq ($(OS), os4)
++
++  ##############################
++  # AmigaOS4
++
++  # Compiler/link/strip commands
++  ifneq ($(HOST), AmigaOS4)
++    CC      = ppc-amigaos-gcc
++    STRIP   = ppc-amigaos-strip
++    OBJDUMP = ppc-amigaos-objdump
++  endif
++
++  # Compiler/Linker flags
++  CRT      = newlib
++  CPU      = -mcpu=powerpc
++  WARN     += -Wdeclaration-after-statement -Wdisabled-optimization
++  REDEFINE =
++  CFLAGS   += -mcrt=$(CRT) -D__USE_INLINE__ -D__NEW_TIMEVAL_DEFINITION_USED__ \
++              $(REDEFINE) -Wa,-mregnames
++  LDFLAGS  += -mcrt=$(CRT)
++
++else
++ifeq ($(OS), os3)
++
++  ##############################
++  # AmigaOS3
++
++  # Compiler/link/strip commands
++  ifneq ($(HOST), AmigaOS)
++    CC      = m68k-amigaos-gcc
++    STRIP   = m68k-amigaos-strip
++    OBJDUMP = m68k-amigaos-objdump
++  endif
++
++  # Compiler/Linker flags
++  CPU      = -m68020-60 -msoft-float
++  CFLAGS  += -noixemul
++  LDFLAGS += -noixemul
++  LDLIBS  += -ldebug
++
++else
++ifeq ($(OS), mos)
++
++  ##############################
++  # MorphOS
++
++  # Compiler/link/strip commands
++  ifneq ($(HOST), MorphOS)
++    CC      = ppc-morphos-gcc
++    STRIP   = ppc-morphos-strip
++    OBJDUMP = ppc-morphos-objdump
++  endif
++
++  # Compiler/Linker flags
++  CPU     = -mcpu=powerpc
++  CFLAGS  += -noixemul
++  LDFLAGS += -noixemul
++  LDLIBS  += -ldebug
++
++  OBJS = stubs-morphos.o
++
++else
++ifeq ($(OS), aros-i386)
++
++  ##############################
++  # AROS (i386)
++
++  ifneq ($(HOST), AROS)
++    CC      = i386-aros-gcc
++    STRIP   = i386-aros-strip
++    OBJDUMP = i386-aros-objdump
++  endif
++
++  # Compiler/Linker flags
++  CFLAGS += -Ilib/safeclip/generic \
++            -Ilibs/gtdrag/aros/include -Ilibs/gtdrag/include \
++            -Ilibs/scroller/aros/include -Ilibs/scroller/include \
++            -Ilibs/textedit/aros/include -Ilibs/textedit/include \
++            -Wno-pointer-sign -UDEBUG -fno-stack-protector
++  OBJS   += lib/safeclip/generic/safeclip.o
++  LDLIBS += -lrexxsyslib -lmathieeedoubbas -lmathieeedoubtrans
++
++else
++ifeq ($(OS), aros-ppc)
++
++  ##############################
++  # AROS (PPC)
++
++  ifneq ($(HOST), AROS)
++    CC      = ppc-aros-gcc
++    STRIP   = ppc-aros-strip
++    OBJDUMP = ppc-aros-objdump
++  endif
++
++  # Compiler/Linker flags
++  CFLAGS += -Wno-pointer-sign
++  LDLIBS +=
++
++else
++ifeq ($(OS), aros-x86_64)
++
++  ##############################
++  # AROS (x86_64)
++
++  ifneq ($(HOST), AROS)
++    CC      = x86_64-aros-gcc
++    STRIP   = x86_64-aros-strip
++    OBJDUMP = x86_64-aros-objdump
++  endif
++
++  # Compiler/Linker flags
++  CFLAGS += -Wno-pointer-sign
++  LDLIBS +=
++
++endif
++endif
++endif
++endif
++endif
++endif
++
++###########################################################################
++# Here starts all stuff that is common for all target platforms and
++# hosts.
++
++OBJS +=	ignition.o prefs.o prefsio.o edit.o table.o cell.o calc.o font.o \
+ 		functions.o handlewindows.o gadgets.o initwindows.o images.o windows.o \
+ 		objects.o debug.o rexx.o support.o project.o io.o classes.o \
+ 		handleprefs.o color.o reference.o prefsgadgets.o graphic.o clip.o \
+-		undo.o hooks.o database.o pointer.o ignition_strings.o boopsi.o \
+-		diagram.o printer.o lock.o cmd.o menu.o popper.o screen.o search.o
++		undo.o hooks.o database.o pointer.o boopsi.o \
++		diagram.o printer.o lock.o cmd.o menu.o popper.o screen.o search.o \
++		libs/compatibility.o locale.o
+ 
+-windows.o:        windows.c windefs.h version.h
+-screen.o:         version.h types.h
+-classes.o:        classes.c classes.h
+-diagram.o:        diagram.c graphic.h
++# main target
++.PHONY: all
++all: $(OBJDIR) $(TARGET)
+ 
+-ignition:         ignition_strings.h $(OBJS)
+-	@echo &quot;linking...&quot;
+-	@slink with lib:utillib.with \
+-		from lib:c.o $(OBJS) \
+-		to $@ \
+-		lib $(LIBS) \
+-		$(LFLAGS)
++# make the object directories
++$(OBJDIR):
++	@echo &quot;  MK $@&quot;
++	@$(MKDIR) $(OBJDIR)
++	@$(MKDIR) $(OBJDIR)/libs
++	@$(MKDIR) $(OBJDIR)/lib/safeclip/generic
+ 
+-.c.o:
+-	@echo &quot;compiling $*.c&quot;
+-	@sc $(OPTIMIZE) $(CFLAGS) $(INCLUDES) $(DEFINES) $(DEBUG) gst=$(GST) cpu=$(CPU) $*.c
++# for compiling single .c files
++%.o: %.c
++	@echo &quot;  CC $&lt;&quot;
++	$(CC) $(CFLAGS) -c $&lt; -o $(OBJDIR)/$@
+ 
+-.c.oo:
+-	sc $(CFLAGS) $(INCLUDES) $(DEBUG) cpu=$(CPU) gst=$(GST) objname=$*.oo $*.c
++ignition_strings.h: locale/ignition.cd
++	$(FC) $&lt; $@=locale/C_h_orig.sd
+ 
+-.c.ooo:
+-	sc $(OPTIMIZE) $(CFLAGS) $(INCLUDES) $(DEBUG) gst=$(GST) cpu=any objname=$*.ooo $*.c
++# for linking the target
++$(TARGET): $(OBJS)
++	@echo &quot;  LD $@.debug&quot;
++	@$(CC) $(LDFLAGS) -o $@.debug $(addprefix $(OBJDIR)/,$(OBJS)) $(LDLIBS)
++	@echo &quot;  LD $@&quot;
++	@$(STRIP) --strip-unneeded --remove-section .comment -o $@ $@.debug
++	@$(CHMOD) $@
+ 
+-.asm.o:
+-	asm -D -DCPU_$(CPU) -u $*.asm
++# cleanup target
++.PHONY: clean
++clean:
++	-$(RM) $(TARGET) $(TARGET).debug $(addprefix $(OBJDIR)/,$(OBJS))
+ 
++# clean all including .obj directory
++.PHONY: cleanall
++cleanall: clean
++	-$(RMDIR) $(OBJDIR)
++
++# clean all stuff, including our autotools
++.PHONY: distclean
++distclean: cleanall
++	-$(RMDIR) $(TARGET).*
++
++
++## DEPENDENCY GENERATION ##############
++
++Makefile.dep: ;
++	@echo &quot;WARNING: Makefile.dep missing. Please run 'make depend'&quot;
++
++.PHONY: depend
++depend:
++	@echo &quot;  MK Makefile.dep&quot;
++	@echo &quot;# AUTOGENERATED! DO NOT EDIT!!!&quot; &gt;Makefile.dep
++	@$(CC) -MM $(CFLAGS) $(patsubst %.o,%.c, $(OBJS)) &gt;&gt;Makefile.dep
++	@echo &quot;# AUTOGENERATED! DO NOT EDIT!!!&quot; &gt;&gt;Makefile.dep
++
++## DEPENDENCY INCLUDE #################
++
++-include Makefile.dep
+
+Added: trunk/libs/gtdrag/aros/gtdrag_autoinit.c
+===================================================================
+--- trunk/libs/gtdrag/aros/gtdrag_autoinit.c	2009-04-17 16:58:59 UTC (rev 49)
++++ trunk/libs/gtdrag/aros/gtdrag_autoinit.c	2009-04-21 22:48:16 UTC (rev 50)
+@@ -0,0 +1,9 @@
++/*
++    *** Automatically generated from '/home/mazze/projects/AROS/local/ignition/libs/gtdrag/gtdrag.conf'. Edits will be lost. ***
++    Copyright &#169; 1995-2009, The AROS Development Team. All rights reserved.
++*/
++
++#include &lt;proto/gtdrag.h&gt;
++#include &lt;aros/symbolsets.h&gt;
++
++ADD2LIBS((CONST_STRPTR)&quot;gtdrag.library&quot;,3, struct Library *, GTDragBase);
+
+
+Property changes on: trunk/libs/gtdrag/aros/gtdrag_autoinit.c
+___________________________________________________________________
+Name: svn:keywords
+   + Id Date Revision Author
+Name: svn:eol-style
+   + LF
+
+Added: trunk/libs/gtdrag/aros/gtdrag_end.c
+===================================================================
+--- trunk/libs/gtdrag/aros/gtdrag_end.c	2009-04-17 16:58:59 UTC (rev 49)
++++ trunk/libs/gtdrag/aros/gtdrag_end.c	2009-04-21 22:48:16 UTC (rev 50)
+@@ -0,0 +1,2 @@
++#include &quot;gtdrag_libdefs.h&quot;
++int GM_UNIQUENAME(End)(void) {return 0;}
+
+
+Property changes on: trunk/libs/gtdrag/aros/gtdrag_end.c
+___________________________________________________________________
+Name: svn:keywords
+   + Id Date Revision Author
+Name: svn:eol-style
+   + LF
+
+Added: trunk/libs/gtdrag/aros/gtdrag_start.c
+===================================================================
+--- trunk/libs/gtdrag/aros/gtdrag_start.c	2009-04-17 16:58:59 UTC (rev 49)
++++ trunk/libs/gtdrag/aros/gtdrag_start.c	2009-04-21 22:48:16 UTC (rev 50)
+@@ -0,0 +1,453 @@
++/*
++    *** Automatically generated from '/home/mazze/projects/AROS/local/ignition/libs/gtdrag/gtdrag.conf'. Edits will be lost. ***
++    Copyright &#169; 1995-2009, The AROS Development Team. All rights reserved.
++*/
++#include &lt;exec/types.h&gt;
++#include &lt;exec/libraries.h&gt;
++#include &lt;exec/resident.h&gt;
++#include &lt;aros/libcall.h&gt;
++#include &lt;aros/asmcall.h&gt;
++#include &lt;aros/symbolsets.h&gt;
++#include &lt;dos/dos.h&gt;
++
++#include &quot;gtdrag_libdefs.h&quot;
++
++#ifdef SysBase
++#undef SysBase
++#endif
++
++#include &lt;proto/exec.h&gt;
++#include &lt;proto/alib.h&gt;
++#ifndef __AROS__
++struct ExecBase *SysBase = NULL;
++#endif
++
++#include &lt;exec/exec.h&gt;
++#include &lt;utility/utility.h&gt;
++#include &lt;intuition/intuition.h&gt;
++#include &lt;intuition/gadgetclass.h&gt;
++#include &lt;libraries/gtdrag.h&gt;
++#ifndef GM_SEGLIST_FIELD
++static BPTR GM_UNIQUENAME(seglist);
++#define GM_SEGLIST_FIELD(lh) (GM_UNIQUENAME(seglist))
++#endif
++#define LIBBASESIZE sizeof(LIBBASETYPE)
++AROS_LD1(struct IntuiMessage *, GTD_GetIMsg,
++         AROS_LDA(struct MsgPort *, mp, A0),
++         LIBBASETYPEPTR, GTDragBase, 5, Gtdrag
++);
++AROS_LD1(void, GTD_ReplyIMsg,
++         AROS_LDA(struct IntuiMessage *, msg, A0),
++         LIBBASETYPEPTR, GTDragBase, 6, Gtdrag
++);
++AROS_LD1(struct IntuiMessage *, GTD_FilterIMsg,
++         AROS_LDA(struct IntuiMessage *, msg, A0),
++         LIBBASETYPEPTR, GTDragBase, 7, Gtdrag
++);
++AROS_LD1(struct IntuiMessage *, GTD_PostFilterIMsg,
++         AROS_LDA(struct IntuiMessage *, msg, A0),
++         LIBBASETYPEPTR, GTDragBase, 8, Gtdrag
++);
++AROS_LD2(int, GTD_AddAppA,
++         AROS_LDA(STRPTR, t, A0),
++         AROS_LDA(struct TagItem *, tag, A1),
++         LIBBASETYPEPTR, GTDragBase, 11, Gtdrag
++);
++AROS_LD0(void, GTD_RemoveApp,
++         LIBBASETYPEPTR, GTDragBase, 12, Gtdrag
++);
++AROS_LD2(void, GTD_AddWindowA,
++         AROS_LDA(struct Window *, win, A0),
++         AROS_LDA(struct TagItem *, tag, A1),
++         LIBBASETYPEPTR, GTDragBase, 13, Gtdrag
++);
++AROS_LD1(void, GTD_RemoveWindow,
++         AROS_LDA(struct Window *, win, A0),
++         LIBBASETYPEPTR, GTDragBase, 14, Gtdrag
++);
++AROS_LD4(void, GTD_AddGadgetA,
++         AROS_LDA(ULONG, type, D0),
++         AROS_LDA(struct Gadget *, gad, A0),
++         AROS_LDA(struct Window *, win, A1),
++         AROS_LDA(struct TagItem *, tag, A2),
++         LIBBASETYPEPTR, GTDragBase, 15, Gtdrag
++);
++AROS_LD1(void, GTD_RemoveGadget,
++         AROS_LDA(struct Gadget *, gad, A0),
++         LIBBASETYPEPTR, GTDragBase, 16, Gtdrag
++);
++AROS_LD1(void, GTD_RemoveGadgets,
++         AROS_LDA(struct Window *, win, A0),
++         LIBBASETYPEPTR, GTDragBase, 17, Gtdrag
++);
++AROS_LD2(void, GTD_SetAttrsA,
++         AROS_LDA(APTR, gad, A0),
++         AROS_LDA(struct TagItem *, tags, A1),
++         LIBBASETYPEPTR, GTDragBase, 18, Gtdrag
++);
++AROS_LD3(BOOL, GTD_GetAttr,
++         AROS_LDA(APTR, gad, A0),
++         AROS_LDA(ULONG, tag, D0),
++         AROS_LDA(ULONG *, storage, A1),
++         LIBBASETYPEPTR, GTDragBase, 19, Gtdrag
++);
++AROS_LD1(struct Hook *, GTD_GetHook,
++         AROS_LDA(ULONG, type, D0),
++         LIBBASETYPEPTR, GTDragBase, 20, Gtdrag
++);
++AROS_LD3(STRPTR, GTD_GetString,
++         AROS_LDA(struct ObjectDescription *, od, A0),
++         AROS_LDA(STRPTR, buf, D1),
++         AROS_LDA(LONG, len, D0),
++         LIBBASETYPEPTR, GTDragBase, 21, Gtdrag
++);
++AROS_LD2(BOOL, GTD_PrepareDrag,
++         AROS_LDA(struct Gadget *, gad, A0),
++         AROS_LDA(struct gpInput *, gpi, A1),
++         LIBBASETYPEPTR, GTDragBase, 22, Gtdrag
++);
++AROS_LD2(BOOL, GTD_BeginDrag,
++         AROS_LDA(struct Gadget *, gad, A0),
++         AROS_LDA(struct gpInput *, gpi, A1),
++         LIBBASETYPEPTR, GTDragBase, 23, Gtdrag
++);
++AROS_LD2(ULONG, GTD_HandleInput,
++         AROS_LDA(struct Gadget *, gad, A0),
++         AROS_LDA(struct gpInput *, gpi, A1),
++         LIBBASETYPEPTR, GTDragBase, 24, Gtdrag
++);
++AROS_LD1(void, GTD_StopDrag,
++         AROS_LDA(struct Gadget *, gad, A0),
++         LIBBASETYPEPTR, GTDragBase, 25, Gtdrag
++);
++AROS_LD2(void, FreeTreeList,
++         AROS_LDA(APTR, pool, A0),
++         AROS_LDA(struct TreeList *, tl, A1),
++         LIBBASETYPEPTR, GTDragBase, 26, Gtdrag
++);
++AROS_LD1(void, InitTreeList,
++         AROS_LDA(struct TreeList *, tl, A0),
++         LIBBASETYPEPTR, GTDragBase, 27, Gtdrag
++);
++AROS_LD2(void, FreeTreeNodes,
++         AROS_LDA(APTR, pool, A0),
++         AROS_LDA(struct MinList *, list, A1),
++         LIBBASETYPEPTR, GTDragBase, 28, Gtdrag
++);
++AROS_LD5(struct TreeNode *, AddTreeNode,
++         AROS_LDA(APTR, pool, A0),
++         AROS_LDA(struct MinList *, tree, A1),
++         AROS_LDA(STRPTR, name, A2),
++         AROS_LDA(struct Image *, im, A3),
++         AROS_LDA(UWORD, flags, D0),
++         LIBBASETYPEPTR, GTDragBase, 29, Gtdrag
++);
++AROS_LD2(void, CloseTreeNode,
++         AROS_LDA(struct MinList *, main, A0),
++         AROS_LDA(struct TreeNode *, tn, A1),
++         LIBBASETYPEPTR, GTDragBase, 30, Gtdrag
++);
++AROS_LD2(LONG, OpenTreeNode,
++         AROS_LDA(struct MinList *, main, A0),
++         AROS_LDA(struct TreeNode *, tn, A1),
++         LIBBASETYPEPTR, GTDragBase, 31, Gtdrag
++);
++AROS_LD2(LONG, ToggleTreeNode,
++         AROS_LDA(struct MinList *, main, A0),
++         AROS_LDA(struct TreeNode *, tn, A1),
++         LIBBASETYPEPTR, GTDragBase, 32, Gtdrag
++);
++AROS_LD1(struct TreeNode *, GetTreeContainer,
++         AROS_LDA(struct TreeNode *, tn, A0),
++         LIBBASETYPEPTR, GTDragBase, 33, Gtdrag
++);
++AROS_LD3(STRPTR, GetTreePath,
++         AROS_LDA(struct TreeNode *, tn, A0),
++         AROS_LDA(STRPTR, buffer, A1),
++         AROS_LDA(LONG, len, D0),
++         LIBBASETYPEPTR, GTDragBase, 34, Gtdrag
++);
++AROS_LD2(struct TreeNode *, FindTreePath,
++         AROS_LDA(struct MinList *, tree, A0),
++         AROS_LDA(STRPTR, path, A1),
++         LIBBASETYPEPTR, GTDragBase, 35, Gtdrag
++);
++AROS_LD2(struct TreeNode *, FindTreeSpecial,
++         AROS_LDA(struct MinList *, tree, A0),
++         AROS_LDA(APTR, special, A1),
++         LIBBASETYPEPTR, GTDragBase, 36, Gtdrag
++);
++AROS_LD2(struct TreeNode *, FindListSpecial,
++         AROS_LDA(struct MinList *, list, A0),
++         AROS_LDA(APTR, special, A1),
++         LIBBASETYPEPTR, GTDragBase, 37, Gtdrag
++);
++AROS_LD3(BOOL, ToggleTree,
++         AROS_LDA(struct Gadget *, gad, A0),
++         AROS_LDA(struct TreeNode *, tn, A1),
++         AROS_LDA(struct IntuiMessage *, msg, A2),
++         LIBBASETYPEPTR, GTDragBase, 38, Gtdrag
++);
++
++extern const int GM_UNIQUENAME(End);
++extern const APTR GM_UNIQUENAME(FuncTable)[];
++static const struct InitTable GM_UNIQUENAME(InitTable);
++
++extern const char GM_UNIQUENAME(LibName)[];
++extern const char GM_UNIQUENAME(LibID)[];
++extern const char GM_UNIQUENAME(Copyright)[];
++
++#define __freebase(lh)\
++do {\
++    UWORD negsize, possize;\
++    UBYTE *negptr = (UBYTE *)lh;\
++    negsize = ((struct Library *)lh)-&gt;lib_NegSize;\
++    negptr -= negsize;\
++    possize = ((struct Library *)lh)-&gt;lib_PosSize;\
++    FreeMem (negptr, negsize+possize);\
++} while(0)
++
++AROS_UFP3 (LIBBASETYPEPTR, GM_UNIQUENAME(InitLib),
++    AROS_UFPA(LIBBASETYPEPTR, lh, D0),
++    AROS_UFPA(BPTR, segList, A0),
++    AROS_UFPA(struct ExecBase *, sysBase, A6)
++);
++AROS_LP1(BPTR, GM_UNIQUENAME(ExpungeLib),
++    AROS_LPA(LIBBASETYPEPTR, extralh, D0),
++    LIBBASETYPEPTR, lh, 3, Gtdrag
++);
++
++struct Resident const GM_UNIQUENAME(ROMTag) =
++{
++    RTC_MATCHWORD,
++    (struct Resident *)&amp;GM_UNIQUENAME(ROMTag),
++    (APTR)&amp;GM_UNIQUENAME(End),
++    RESIDENTFLAGS,
++    VERSION_NUMBER,
++    NT_LIBRARY,
++    RESIDENTPRI,
++    (CONST_STRPTR)&amp;GM_UNIQUENAME(LibName)[0],
++    (CONST_STRPTR)&amp;GM_UNIQUENAME(LibID)[6],
++    (APTR)&amp;GM_UNIQUENAME(InitTable)
++};
++
++static struct InitTable
++{
++    IPTR              Size;
++    const APTR       *FuncTable;
++    struct DataTable *DataTable;
++    APTR              InitLibTable;
++}
++const GM_UNIQUENAME(InitTable) =
++{
++    LIBBASESIZE,
++    &amp;GM_UNIQUENAME(FuncTable)[0],
++    NULL,
++    (APTR)GM_UNIQUENAME(InitLib)
++};
++
++const char GM_UNIQUENAME(LibName)[] = MOD_NAME_STRING;
++const char GM_UNIQUENAME(LibID)[] = VERSION_STRING;
++const char GM_UNIQUENAME(Copyright)[] = COPYRIGHT_STRING;
++
++THIS_PROGRAM_HANDLES_SYMBOLSETS
++DECLARESET(INIT)
++DECLARESET(EXIT)
++DECLARESET(CTORS)
++DECLARESET(DTORS)
++DECLARESET(INITLIB)
++DECLARESET(EXPUNGELIB)
++DECLARESET(OPENLIB)
++DECLARESET(CLOSELIB)
++DECLARESET(OPENDEV)
++DECLARESET(CLOSEDEV)
++
++AROS_UFH3 (LIBBASETYPEPTR, GM_UNIQUENAME(InitLib),
++    AROS_UFHA(LIBBASETYPEPTR, lh, D0),
++    AROS_UFHA(BPTR, segList, A0),
++    AROS_UFHA(struct ExecBase *, sysBase, A6)
++)
++{
++    AROS_USERFUNC_INIT
++
++    int ok;
++
++#ifndef __AROS__
++    SysBase = sysBase;
++#endif
++#ifdef GM_SYSBASE_FIELD
++    GM_SYSBASE_FIELD(lh) = sysBase;
++#endif
++    ((struct Library *)lh)-&gt;lib_Revision = REVISION_NUMBER;
++    GM_SEGLIST_FIELD(lh) = segList;
++    if (set_open_libraries() &amp;&amp; set_call_funcs(SETNAME(INIT), 1, 1) )
++    {
++        set_call_funcs(SETNAME(CTORS), -1, 0);
++
++        ok = set_call_libfuncs(SETNAME(INITLIB), 1, 1, lh);
++    }
++    else
++        ok = 0;
++
++    if (!ok)
++    {
++        set_call_libfuncs(SETNAME(EXPUNGELIB), -1, 0, lh);
++        set_call_funcs(SETNAME(DTORS), 1, 0);
++        set_call_funcs(SETNAME(EXIT), -1, 0);
++        set_close_libraries();
++
++        __freebase(lh);
++        return NULL;
++    }
++    else
++    {
++        return  lh;
++    }
++
++    AROS_USERFUNC_EXIT
++}
++
++AROS_LH1 (LIBBASETYPEPTR, GM_UNIQUENAME(OpenLib),
++    AROS_LHA (ULONG, version, D0),
++    LIBBASETYPEPTR, lh, 1, Gtdrag
++)
++{
++    AROS_LIBFUNC_INIT
++
++    if ( set_call_libfuncs(SETNAME(OPENLIB), 1, 1, lh) )
++    {
++        ((struct Library *)lh)-&gt;lib_OpenCnt++;
++        ((struct Library *)lh)-&gt;lib_Flags &amp;= ~LIBF_DELEXP;
++
++        return lh;
++    }
++
++    return NULL;
++
++    AROS_LIBFUNC_EXIT
++}
++
++AROS_LH0 (BPTR, GM_UNIQUENAME(CloseLib),
++    LIBBASETYPEPTR, lh, 2, Gtdrag
++)
++{
++    AROS_LIBFUNC_INIT
++
++    ((struct Library *)lh)-&gt;lib_OpenCnt--;
++    set_call_libfuncs(SETNAME(CLOSELIB), -1, 0, lh);
++    if
++    (
++        (((struct Library *)lh)-&gt;lib_OpenCnt == 0)
++        &amp;&amp; (((struct Library *)lh)-&gt;lib_Flags &amp; LIBF_DELEXP)
++    )
++    {
++        return AROS_LC1(BPTR, GM_UNIQUENAME(ExpungeLib),
++                   AROS_LCA(LIBBASETYPEPTR, lh, D0),
++                   LIBBASETYPEPTR, lh, 3, Gtdrag
++        );
++    }
++
++    return NULL;
++
++    AROS_LIBFUNC_EXIT
++}
++
++AROS_LH1 (BPTR, GM_UNIQUENAME(ExpungeLib),
++    AROS_LHA(LIBBASETYPEPTR, extralh, D0),
++    LIBBASETYPEPTR, lh, 3, Gtdrag
++)
++{
++    AROS_LIBFUNC_INIT
++
++
++    if ( ((struct Library *)lh)-&gt;lib_OpenCnt == 0 )
++    {
++        BPTR seglist = GM_SEGLIST_FIELD(lh);
++
++        if(!set_call_libfuncs(SETNAME(EXPUNGELIB), -1, 1, lh))
++        {
++            ((struct Library *)lh)-&gt;lib_Flags |= LIBF_DELEXP;
++            return NULL;
++        }
++
++        Remove((struct Node *)lh);
++
++        set_call_funcs(SETNAME(DTORS), 1, 0);
++        set_call_funcs(SETNAME(EXIT), -1, 0);
++        set_close_libraries();
++
++        __freebase(lh);
++
++        return seglist;
++    }
++
++    ((struct Library *)lh)-&gt;lib_Flags |= LIBF_DELEXP;
++
++    return NULL;
++
++    AROS_LIBFUNC_EXIT
++}
++
++AROS_LH0 (LIBBASETYPEPTR, GM_UNIQUENAME(ExtFuncLib),
++    LIBBASETYPEPTR, lh, 4, Gtdrag
++)
++{
++    AROS_LIBFUNC_INIT
++    return NULL;
++    AROS_LIBFUNC_EXIT
++}
++
++DEFINESET(INIT)
++DEFINESET(EXIT)
++DEFINESET(CTORS)
++DEFINESET(DTORS)
++DEFINESET(INITLIB)
++DEFINESET(EXPUNGELIB)
++DEFINESET(OPENLIB)
++DEFINESET(CLOSELIB)
++DEFINESET(OPENDEV)
++DEFINESET(CLOSEDEV)
++
++
++const APTR GM_UNIQUENAME(FuncTable)[]=
++{
++    &amp;AROS_SLIB_ENTRY(GM_UNIQUENAME(OpenLib),Gtdrag),
++    &amp;AROS_SLIB_ENTRY(GM_UNIQUENAME(CloseLib),Gtdrag),
++    &amp;AROS_SLIB_ENTRY(GM_UNIQUENAME(ExpungeLib),Gtdrag),
++    &amp;AROS_SLIB_ENTRY(GM_UNIQUENAME(ExtFuncLib),Gtdrag),
++    &amp;AROS_SLIB_ENTRY(GTD_GetIMsg,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(GTD_ReplyIMsg,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(GTD_FilterIMsg,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(GTD_PostFilterIMsg,Gtdrag),
++    NULL,
++    NULL,
++    &amp;AROS_SLIB_ENTRY(GTD_AddAppA,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(GTD_RemoveApp,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(GTD_AddWindowA,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(GTD_RemoveWindow,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(GTD_AddGadgetA,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(GTD_RemoveGadget,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(GTD_RemoveGadgets,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(GTD_SetAttrsA,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(GTD_GetAttr,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(GTD_GetHook,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(GTD_GetString,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(GTD_PrepareDrag,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(GTD_BeginDrag,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(GTD_HandleInput,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(GTD_StopDrag,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(FreeTreeList,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(InitTreeList,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(FreeTreeNodes,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(AddTreeNode,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(CloseTreeNode,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(OpenTreeNode,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(ToggleTreeNode,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(GetTreeContainer,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(GetTreePath,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(FindTreePath,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(FindTreeSpecial,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(FindListSpecial,Gtdrag),
++    &amp;AROS_SLIB_ENTRY(ToggleTree,Gtdrag),
++    (void *)-1
++};
+
+
+Property changes on: trunk/libs/gtdrag/aros/gtdrag_start.c
+___________________________________________________________________
+Name: svn:keywords
+   + Id Date Revision Author
+Name: svn:eol-style
+   + LF
+
+Added: trunk/libs/gtdrag/aros/gtdrag_stubs.c
+===================================================================
+--- trunk/libs/gtdrag/aros/gtdrag_stubs.c	2009-04-17 16:58:59 UTC (rev 49)
++++ trunk/libs/gtdrag/aros/gtdrag_stubs.c	2009-04-21 22:48:16 UTC (rev 50)
+@@ -0,0 +1,264 @@
++/*
++    *** Automatically generated from '/home/mazze/projects/AROS/local/ignition/libs/gtdrag/gtdrag.conf'. Edits will be lost. ***
++    Copyright &#169; 1995-2009, The AROS Development Team. All rights reserved.
++*/
++#define NOLIBDEFINES
++/* Be sure that the libbases are included in the stubs file */
++#undef __NOLIBBASE__
++#undef __GTDRAG_NOLIBBASE__
++#include &lt;proto/gtdrag.h&gt;
++#include &lt;exec/types.h&gt;
++#include &lt;aros/libcall.h&gt;
++
++
++struct IntuiMessage * GTD_GetIMsg(struct MsgPort *mp)
++{
++    return AROS_LC1(struct IntuiMessage *, GTD_GetIMsg,
++                    AROS_LCA(struct MsgPort *,mp,A0),
++                    struct Library *, GTDragBase, 5, Gtdrag);
++}
++
++void GTD_ReplyIMsg(struct IntuiMessage *msg)
++{
++    return AROS_LC1NR(void, GTD_ReplyIMsg,
++                    AROS_LCA(struct IntuiMessage *,msg,A0),
++                    struct Library *, GTDragBase, 6, Gtdrag);
++}
++
++struct IntuiMessage * GTD_FilterIMsg(struct IntuiMessage *msg)
++{
++    return AROS_LC1(struct IntuiMessage *, GTD_FilterIMsg,
++                    AROS_LCA(struct IntuiMessage *,msg,A0),
++                    struct Library *, GTDragBase, 7, Gtdrag);
++}
++
++struct IntuiMessage * GTD_PostFilterIMsg(struct IntuiMessage *msg)
++{
++    return AROS_LC1(struct IntuiMessage *, GTD_PostFilterIMsg,
++                    AROS_LCA(struct IntuiMessage *,msg,A0),
++                    struct Library *, GTDragBase, 8, Gtdrag);
++}
++
++int GTD_AddAppA(STRPTR t, struct TagItem *tag)
++{
++    return AROS_LC2(int, GTD_AddAppA,
++                    AROS_LCA(STRPTR,t,A0),
++                    AROS_LCA(struct TagItem *,tag,A1),
++                    struct Library *, GTDragBase, 11, Gtdrag);
++}
++
++void GTD_RemoveApp()
++{
++    return AROS_LC0NR(void, GTD_RemoveApp,
++                    struct Library *, GTDragBase, 12, Gtdrag);
++}
++
++void GTD_AddWindowA(struct Window *win, struct TagItem *tag)
++{
++    return AROS_LC2NR(void, GTD_AddWindowA,
++                    AROS_LCA(struct Window *,win,A0),
++                    AROS_LCA(struct TagItem *,tag,A1),
++                    struct Library *, GTDragBase, 13, Gtdrag);
++}
++
++void GTD_RemoveWindow(struct Window *win)
++{
++    return AROS_LC1NR(void, GTD_RemoveWindow,
++                    AROS_LCA(struct Window *,win,A0),
++                    struct Library *, GTDragBase, 14, Gtdrag);
++}
++
++void GTD_AddGadgetA(ULONG type, struct Gadget *gad, struct Window *win, struct TagItem *tag)
++{
++    return AROS_LC4NR(void, GTD_AddGadgetA,
++                    AROS_LCA(ULONG,type,D0),
++                    AROS_LCA(struct Gadget *,gad,A0),
++                    AROS_LCA(struct Window *,win,A1),
++                    AROS_LCA(struct TagItem *,tag,A2),
++                    struct Library *, GTDragBase, 15, Gtdrag);
+
+[... truncated: 2151 lines follow ...]
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000075.html">[Ignition-commits] r49 - trunk/config
+</A></li>
+	<LI>Next message: <A HREF="000078.html">[Ignition-commits] r50 - in trunk: . libs/gtdrag libs/gtdrag/aros libs/gtdrag/aros/include libs/gtdrag/aros/include/clib libs/gtdrag/aros/include/defines libs/gtdrag/aros/include/proto libs/scroller libs/scroller/aros libs/scroller/aros/include libs/scroller/aros/include/clib  libs/scroller/aros/include/defines libs/scroller/aros/include/proto libs/textedit libs/textedit/aros libs/textedit/aros/include libs/textedit/aros/include/clib  libs/textedit/aros/include/defines libs/textedit/aros/include/proto locale
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#77">[ date ]</a>
+              <a href="thread.html#77">[ thread ]</a>
+              <a href="subject.html#77">[ subject ]</a>
+              <a href="author.html#77">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

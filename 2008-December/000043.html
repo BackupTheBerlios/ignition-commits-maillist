@@ -1,0 +1,316 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r27 - in trunk: . libs
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2008-December/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r27%20-%20in%20trunk%3A%20.%20libs&In-Reply-To=%3C200812261330.mBQDUPZM015111%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000042.html">
+   <LINK REL="Next"  HREF="000044.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r27 - in trunk: . libs</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r27%20-%20in%20trunk%3A%20.%20libs&In-Reply-To=%3C200812261330.mBQDUPZM015111%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r27 - in trunk: . libs">marust at mail.berlios.de
+       </A><BR>
+    <I>Fri Dec 26 14:30:25 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000042.html">[Ignition-commits] r26 - in trunk: . add-ons
+</A></li>
+        <LI>Next message: <A HREF="000044.html">[Ignition-commits] r28 - in trunk: . add-ons	libs/gtdrag/include/clib libs/include
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#43">[ date ]</a>
+              <a href="thread.html#43">[ thread ]</a>
+              <a href="subject.html#43">[ subject ]</a>
+              <a href="author.html#43">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2008-12-26 14:30:19 +0100 (Fri, 26 Dec 2008)
+New Revision: 27
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=27&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=27&amp;view=rev</A>
+
+Added:
+   trunk/safeclip.c
+   trunk/safeclip.h
+Modified:
+   trunk/graphic.c
+   trunk/graphic.h
+   trunk/libs/compatibility.c
+   trunk/mmakefile.src
+Log:
+* SafeClip rewritten because orignal contained assembler code.
+  Alltough current clipping is implemented very naive it doesn't
+  seem to cause graphics corruption. (Maybe the real reason for
+  the graphics corruption on AROS was unclosed areas.)
+  Now the pseudo 3D diagrams are working on AROS.
+
+
+Modified: trunk/graphic.c
+===================================================================
+--- trunk/graphic.c	2008-12-26 10:56:50 UTC (rev 26)
++++ trunk/graphic.c	2008-12-26 13:30:19 UTC (rev 27)
+@@ -8,12 +8,8 @@
+ #include &quot;types.h&quot;
+ #include &quot;funcs.h&quot;
+ #include &quot;classes.h&quot;
++#include &quot;safeclip.h&quot;
+ 
+-#if defined(HAVE_SAVECLIP)
+-// library exits only on 68k
+-#include &lt;safeclip.h&gt;
+-#endif
+-
+ #define AREABUFFERS 300
+ 
+ struct MinList colors;
+@@ -28,12 +24,7 @@
+ void
+ gInitArea(long xmin, long ymin, long xmax, long ymax)
+ {
+-#if defined(HAVE_SAFECLIP)
+-	CLP_xmin = xmin;
+-	CLP_ymin = ymin;
+-	CLP_xmax = xmax;
+-	CLP_ymax = ymax;
+-#endif
++	SafeSetLimits(xmin, ymin, xmax, ymax);
+ }
+ 
+ 
+
+Modified: trunk/graphic.h
+===================================================================
+--- trunk/graphic.h	2008-12-26 10:56:50 UTC (rev 26)
++++ trunk/graphic.h	2008-12-26 13:30:19 UTC (rev 27)
+@@ -661,15 +661,9 @@
+ extern struct colorPen *AddColor(struct MinList *list, STRPTR name, UBYTE red, UBYTE green, UBYTE blue);
+ 
+ // graphic.c
+-#if defined(HAVE_SAFECLIP)
+-#	define gAreaMove(rp,x,y) SafeAreaDraw(x,y)
+-#	define gAreaDraw(rp,x,y) SafeAreaDraw(x,y)
+-#	define gAreaEnd(rp) SafeAreaEnd(rp)
+-#else
+-#	define gAreaMove(rp,x,y) AreaMove(rp,x,y)
+-#	define gAreaDraw(rp,x,y) AreaDraw(rp,x,y)
+-#	define gAreaEnd(rp) AreaEnd(rp)
+-#endif
++#define gAreaMove(rp,x,y) SafeAreaDraw(x,y)
++#define gAreaDraw(rp,x,y) SafeAreaDraw(x,y)
++#define gAreaEnd(rp) SafeAreaEnd(rp)
+ 
+ extern ULONG SafeInit (ULONG nvertmax);
+ extern void SafeClose (void);
+
+Modified: trunk/libs/compatibility.c
+===================================================================
+--- trunk/libs/compatibility.c	2008-12-26 10:56:50 UTC (rev 26)
++++ trunk/libs/compatibility.c	2008-12-26 13:30:19 UTC (rev 27)
+@@ -70,18 +70,3 @@
+ }
+ 
+ #endif
+-
+-
+-#if !defined(HAVE_SAFECLIP)
+-
+-ULONG SafeInit (ULONG nvertmax)
+-{
+-	return 0;
+-}
+-
+-
+-void SafeClose (void)
+-{
+-}
+-
+-#endif
+
+Modified: trunk/mmakefile.src
+===================================================================
+--- trunk/mmakefile.src	2008-12-26 10:56:50 UTC (rev 26)
++++ trunk/mmakefile.src	2008-12-26 13:30:19 UTC (rev 27)
+@@ -55,6 +55,7 @@
+ 	project \
+ 	reference \
+     rexx \
++	safeclip \
+ 	screen \
+ 	search \
+ 	support \
+
+Added: trunk/safeclip.c
+===================================================================
+--- trunk/safeclip.c	2008-12-26 10:56:50 UTC (rev 26)
++++ trunk/safeclip.c	2008-12-26 13:30:19 UTC (rev 27)
+@@ -0,0 +1,93 @@
++/* Clipping for Area... functions
++ *
++ * Copyright &#169;1996-2008 pinc Software. All Rights Reserved.
++ * Licensed under the terms of the GNU General Public License, version 3.
++ */
++
++#include &quot;safeclip.h&quot;
++
++#include &lt;proto/exec.h&gt;
++#include &lt;proto/graphics.h&gt;
++
++
++static LONG clp_xmin, clp_ymin, clp_xmax, clp_ymax;
++static ULONG clp_nvert, clp_nvertmax;
++
++static struct CLP_Vert {
++	LONG x;
++	LONG y;
++} *clp_vert;
++
++static LONG Clip2d (LONG n);
++
++
++ULONG SafeInit (ULONG nvertmax)
++{
++	clp_nvertmax = nvertmax;
++	clp_vert = AllocVec(nvertmax * sizeof(struct CLP_Vert), MEMF_ANY);
++	if (clp_vert)
++		return 0;
++	else {
++		clp_vert = 0;
++		return 1;
++	}
++}
++
++VOID SafeClose (VOID)
++{
++	FreeVec(clp_vert);
++}
++
++VOID SafeSetLimits (LONG x1, LONG y1, LONG x2, LONG y2)
++{
++	clp_xmin = x1;
++	clp_ymin = y1;
++	clp_xmax = x2;
++	clp_ymax = y2;
++}
++
++VOID SafeAreaDraw (LONG x, LONG y)
++{
++	if (clp_nvert &lt; clp_nvertmax) {
++		clp_vert[clp_nvert].x = x;
++		clp_vert[clp_nvert].y = y;
++		clp_nvert++;
++	}
++}
++
++VOID SafeAreaEnd (struct RastPort *rp)
++{
++	int i;
++
++	if (clp_nvert &gt; 0) {
++		SafeAreaDraw(clp_vert[0].x, clp_vert[0].y); // close area
++		clp_nvert = Clip2d(clp_nvert);
++		AreaMove(rp, clp_vert[0].x, clp_vert[0].y);
++		for (i = 1; i &lt; clp_nvert; i++) {
++			AreaDraw(rp, clp_vert[i].x, clp_vert[i].y);
++		}
++		AreaEnd(rp);
++		clp_nvert = 0;
++	}
++}
++
++static LONG Clip2d (LONG n)
++{
++	int i;
++	
++	if (clp_vert == NULL)
++		return 0;
++	
++	// TODO: improve clipping
++	for (i = 0; i &lt; clp_nvert; i++) {
++		if (clp_vert[i].x &lt; clp_xmin)
++			clp_vert[i].x = clp_xmin;
++		if (clp_vert[i].x &gt; clp_xmax)
++			clp_vert[i].x = clp_xmax;
++		if (clp_vert[i].y &lt; clp_ymin)
++			clp_vert[i].y = clp_ymin;
++		if (clp_vert[i].y &gt; clp_ymax)
++			clp_vert[i].y = clp_ymax;
++	}
++	return n;
++}
+
+
+Property changes on: trunk/safeclip.c
+___________________________________________________________________
+Name: svn:keywords
+   + Id Date Revision Author
+Name: svn:eol-style
+   + native
+
+Added: trunk/safeclip.h
+===================================================================
+--- trunk/safeclip.h	2008-12-26 10:56:50 UTC (rev 26)
++++ trunk/safeclip.h	2008-12-26 13:30:19 UTC (rev 27)
+@@ -0,0 +1,19 @@
++/* Clipping for Area... functions
++ *
++ * Copyright &#169;1996-2008 pinc Software. All Rights Reserved.
++ * Licensed under the terms of the GNU General Public License, version 3.
++ */
++
++#ifndef SAFECLIP_H
++#define SAFECLIP_H
++
++#include &lt;exec/types.h&gt;
++#include &lt;graphics/rastport.h&gt;
++
++ULONG SafeInit (ULONG nvertmax);
++VOID SafeClose (VOID);
++VOID SafeSetLimits (LONG x1, LONG y1, LONG x2, LONG y2);
++VOID SafeAreaDraw (LONG x, LONG y);
++VOID SafeAreaEnd (struct RastPort *rp);
++
++#endif // SAFECLIP_H
+
+
+Property changes on: trunk/safeclip.h
+___________________________________________________________________
+Name: svn:keywords
+   + Id Date Revision Author
+Name: svn:eol-style
+   + native
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000042.html">[Ignition-commits] r26 - in trunk: . add-ons
+</A></li>
+	<LI>Next message: <A HREF="000044.html">[Ignition-commits] r28 - in trunk: . add-ons	libs/gtdrag/include/clib libs/include
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#43">[ date ]</a>
+              <a href="thread.html#43">[ thread ]</a>
+              <a href="subject.html#43">[ subject ]</a>
+              <a href="author.html#43">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

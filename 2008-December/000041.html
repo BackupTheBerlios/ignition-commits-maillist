@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r25 - trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2008-December/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r25%20-%20trunk&In-Reply-To=%3C200812212345.mBLNjOkB014388%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000040.html">
+   <LINK REL="Next"  HREF="000042.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r25 - trunk</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r25%20-%20trunk&In-Reply-To=%3C200812212345.mBLNjOkB014388%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r25 - trunk">marust at mail.berlios.de
+       </A><BR>
+    <I>Mon Dec 22 00:45:24 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000040.html">[Ignition-commits] r24 - in trunk: . add-ons
+</A></li>
+        <LI>Next message: <A HREF="000042.html">[Ignition-commits] r26 - in trunk: . add-ons
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#41">[ date ]</a>
+              <a href="thread.html#41">[ thread ]</a>
+              <a href="subject.html#41">[ subject ]</a>
+              <a href="author.html#41">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2008-12-22 00:45:21 +0100 (Mon, 22 Dec 2008)
+New Revision: 25
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=25&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=25&amp;view=rev</A>
+
+Modified:
+   trunk/funcs.h
+   trunk/handlewindows.c
+Log:
+* HandleFileTypeIDCMP() is a callback hook and must therefor get the argument
+  order Hook*(a0), APTR (a2), Message*(a1)
+
+
+Modified: trunk/funcs.h
+===================================================================
+--- trunk/funcs.h	2008-12-21 20:47:02 UTC (rev 24)
++++ trunk/funcs.h	2008-12-21 23:45:21 UTC (rev 25)
+@@ -36,7 +36,7 @@
+ extern void UpdateGInterface(struct Window *giwin,struct MinList *list,struct gObject *go,UBYTE page);
+ extern void HandleGGadget(struct Page *page,struct gObject *go);
+ extern void UpdateObjectGadgets(struct Window *win);
+-extern void PUBLIC HandleFileTypeIDCMP(REG(a1, struct IntuiMessage *msg),REG(a2, struct FileRequester *fr));
++extern void PUBLIC HandleFileTypeIDCMP(REG(a0, struct Hook *),REG(a2, struct FileRequester *fr),REG(a1, struct IntuiMessage *msg));
+ 
+ // pointer.c
+ extern void SetMousePointer(struct Window *win,ULONG which);
+
+Modified: trunk/handlewindows.c
+===================================================================
+--- trunk/handlewindows.c	2008-12-21 20:47:02 UTC (rev 24)
++++ trunk/handlewindows.c	2008-12-21 23:45:21 UTC (rev 25)
+@@ -1633,7 +1633,7 @@
+ 
+ 
+ void PUBLIC
+-HandleFileTypeIDCMP(REG(a1, struct IntuiMessage *msg), REG(a2, struct FileRequester *fr))
++HandleFileTypeIDCMP(REG(a0, struct Hook *h), REG(a2, struct FileRequester *fr), REG(a1, struct IntuiMessage *msg))
+ {
+     struct winData *wd;
+ 	struct Window *typeWindow = msg-&gt;IDCMPWindow;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000040.html">[Ignition-commits] r24 - in trunk: . add-ons
+</A></li>
+	<LI>Next message: <A HREF="000042.html">[Ignition-commits] r26 - in trunk: . add-ons
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#41">[ date ]</a>
+              <a href="thread.html#41">[ thread ]</a>
+              <a href="subject.html#41">[ subject ]</a>
+              <a href="author.html#41">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

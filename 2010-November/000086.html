@@ -1,0 +1,255 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r56 - trunk/libs/scroller
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2010-November/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r56%20-%20trunk/libs/scroller&In-Reply-To=%3C20101121182000.B6696480C8F%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000085.html">
+   <LINK REL="Next"  HREF="000087.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r56 - trunk/libs/scroller</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r56%20-%20trunk/libs/scroller&In-Reply-To=%3C20101121182000.B6696480C8F%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r56 - trunk/libs/scroller">marust at mail.berlios.de
+       </A><BR>
+    <I>Sun Nov 21 19:20:00 CET 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000085.html">[Ignition-commits] r55 - trunk/include
+</A></li>
+        <LI>Next message: <A HREF="000087.html">[Ignition-commits] r57 - trunk/libs/scroller
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#86">[ date ]</a>
+              <a href="thread.html#86">[ thread ]</a>
+              <a href="subject.html#86">[ subject ]</a>
+              <a href="author.html#86">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2010-11-21 19:20:00 +0100 (Sun, 21 Nov 2010)
+New Revision: 56
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=56&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=56&amp;view=rev</A>
+
+Removed:
+   trunk/libs/scroller/SMakefile
+   trunk/libs/scroller/Scroller_lib_aros.c
+   trunk/libs/scroller/Scroller_rev.i
+   trunk/libs/scroller/Scroller_romtag.asm
+   trunk/libs/scroller/mmakefile.src
+   trunk/libs/scroller/pScroller.conf
+Modified:
+   trunk/libs/scroller/Scroller_includes.h
+   trunk/libs/scroller/Scroller_lib.c
+Log:
+Attempt to build pScroller.gadget with a normal Makefile.
+
+
+Modified: trunk/libs/scroller/Scroller_includes.h
+===================================================================
+--- trunk/libs/scroller/Scroller_includes.h	2010-11-20 14:45:16 UTC (rev 55)
++++ trunk/libs/scroller/Scroller_includes.h	2010-11-21 18:20:00 UTC (rev 56)
+@@ -18,6 +18,7 @@
+ #endif
+ 
+ #include &quot;SDI_compiler.h&quot;
++#include &quot;compatibility.h&quot;
+ 
+ #include &lt;exec/execbase.h&gt;
+ #include &lt;exec/libraries.h&gt;
+@@ -25,6 +26,7 @@
+ #include &lt;exec/lists.h&gt;
+ #include &lt;exec/ports.h&gt;
+ #include &lt;exec/memory.h&gt;
++#include &lt;exec/resident.h&gt;
+ #include &lt;devices/input.h&gt;
+ #include &lt;intuition/intuition.h&gt;
+ #include &lt;intuition/gadgetclass.h&gt;
+
+Modified: trunk/libs/scroller/Scroller_lib.c
+===================================================================
+--- trunk/libs/scroller/Scroller_lib.c	2010-11-20 14:45:16 UTC (rev 55)
++++ trunk/libs/scroller/Scroller_lib.c	2010-11-21 18:20:00 UTC (rev 56)
+@@ -8,14 +8,65 @@
+ 
+ #include &quot;Scroller_includes.h&quot;
+ 
++#define VERSION (0)
++#define REVISION (1)
++#define LIBNAME &quot;pScroller.gadget&quot;
++#define VSTRING &quot;pScroller.gadget 0.2 (23.9.2000)&quot;
++#define VERSTAG &quot;$VER: pScroller.gadget 0.2 (23.9.2000)&quot;
+ 
+-struct Library * PUBLIC LibInit(REG(a0, BPTR Segment),REG(d0, struct ClassBase *cb),REG(a6, struct ExecBase *ExecBase);
++
++struct Library * PUBLIC LibInit(REG(a0, BPTR Segment),REG(d0, struct ClassBase *cb),REG(a6, struct ExecBase *ExecBase));
+ struct Library * PUBLIC LibOpen(REG(a6, struct ClassBase *cb));
+ BPTR PUBLIC LibExpunge(REG(a6, struct ClassBase *cb));
+ BPTR PUBLIC LibClose(REG(a6, struct ClassBase *cb));
+ LONG PUBLIC LibNull(REG(a6, struct ClassBase *cb));
+ 
+ 
++static APTR LibVectors[] =
++{
++	LibOpen,
++	LibClose,
++	LibExpunge,
++	LibNull,
++
++	GetClass,
++
++	(APTR)-1
++};
++
++
++static struct
++{
++	ULONG DataSize;
++	APTR Table;
++	APTR Data;
++	struct Library * (*Init)();
++} LibInitTab =
++{
++	sizeof(struct ClassBase),
++	LibVectors,
++	NULL,
++	LibInit
++};
++
++
++static const USED_VAR struct Resident ROMTag =
++{
++	RTC_MATCHWORD,
++	(struct Resident *)&amp;ROMTag,
++	(struct Resident *)(&amp;ROMTag + 1),
++	RTF_AUTOINIT|RTF_EXTENDED,
++	VERSION,
++	NT_LIBRARY,
++	0,
++	(char *)LIBNAME,
++	(char *)VSTRING,
++	&amp;LibInitTab,
++	REVISION,
++	0
++};
++
++
+ void PRIVATE SC_Exit(struct ClassBase *cb)
+ {
+   if (FreeClass(cb-&gt;cb_ScrollerClass))
+@@ -31,15 +82,15 @@
+ 
+ int PRIVATE SC_Init(struct ClassBase *cb)
+ {
+-  if (cb-&gt;cb_IntuitionBase = OpenLibrary(&quot;intuition.library&quot;,37))
++  if ((cb-&gt;cb_IntuitionBase = OpenLibrary(&quot;intuition.library&quot;,37)) != NULL)
+   {
+-    if (cb-&gt;cb_GfxBase = (APTR)OpenLibrary(&quot;graphics.library&quot;,37))
++    if ((cb-&gt;cb_GfxBase = (APTR)OpenLibrary(&quot;graphics.library&quot;,37)) != NULL)
+     {
+-      if (cb-&gt;cb_UtilityBase = OpenLibrary(&quot;utility.library&quot;,37))
++      if ((cb-&gt;cb_UtilityBase = OpenLibrary(&quot;utility.library&quot;,37)) != NULL)
+       {
+         Class *cl;
+ 
+-        if (cl = MakeClass(&quot;pinc-scrollergadget&quot;,&quot;propgclass&quot;,NULL,sizeof(struct ScrollerGData),0))
++        if ((cl = MakeClass(&quot;pinc-scrollergadget&quot;,&quot;propgclass&quot;,NULL,sizeof(struct ScrollerGData),0)) != NULL)
+         {
+           cl-&gt;cl_Dispatcher.h_Entry = (APTR)DispatchScrollerGadget;
+           cl-&gt;cl_Dispatcher.h_Data = cb;
+@@ -48,7 +99,7 @@
+ 
+           cb-&gt;cb_ScrollerClass = cl;
+ 
+-          if (cl = MakeClass(&quot;pinc-arrowimage&quot;,&quot;imageclass&quot;,NULL,sizeof(struct ArrowIData),0))
++          if ((cl = MakeClass(&quot;pinc-arrowimage&quot;,&quot;imageclass&quot;,NULL,sizeof(struct ArrowIData),0)) != NULL)
+           {
+             cl-&gt;cl_Dispatcher.h_Entry = (APTR)DispatchArrowImage;
+             cl-&gt;cl_Dispatcher.h_Data = cb;
+@@ -76,41 +127,17 @@
+ }
+ 
+ 
+-STATIC APTR LibVectors[] =
+-{
+-  LibOpen,
+-  LibClose,
+-  LibExpunge,
+-  LibNull,
+-
+-  GetClass,
+-
+-  (APTR)-1
+-};
+-
+-extern UBYTE __far LibName[], LibID[];
+-extern LONG __far LibVersion, LibRevision;
+-
+-struct { ULONG DataSize; APTR Table; APTR Data; struct Library * (*Init)(); } __aligned LibInitTab =
+-{
+-  sizeof(struct ClassBase),
+-  LibVectors,
+-  NULL,
+-  LibInit
+-};
+-
+-
+ struct Library * PUBLIC LibInit(REG(a0, BPTR segment),REG(d0, struct ClassBase *cb),REG(a6, struct ExecBase *ExecBase))
+ {
+   if(ExecBase-&gt;LibNode.lib_Version &lt; 37)
+     return(NULL);
+ 
+   cb-&gt;cb_LibNode.lib_Node.ln_Type = NT_LIBRARY;
+-  cb-&gt;cb_LibNode.lib_Node.ln_Name = LibName;
++  cb-&gt;cb_LibNode.lib_Node.ln_Name = LIBNAME;
+   cb-&gt;cb_LibNode.lib_Flags        = LIBF_CHANGED | LIBF_SUMUSED;
+-  cb-&gt;cb_LibNode.lib_Version      = LibVersion;
+-  cb-&gt;cb_LibNode.lib_Revision     = LibRevision;
+-  cb-&gt;cb_LibNode.lib_IdString     = (APTR)LibID;
++  cb-&gt;cb_LibNode.lib_Version      = VERSION;
++  cb-&gt;cb_LibNode.lib_Revision     = REVISION;
++  cb-&gt;cb_LibNode.lib_IdString     = VSTRING;
+   cb-&gt;cb_LibSegment = segment;
+   cb-&gt;cb_SysBase = ExecBase;
+ 
+@@ -181,5 +208,5 @@
+ 
+ LONG PUBLIC LibNull(REG(a6, struct ClassBase *cb))
+ {
+-  return(NULL);
++	return 0;
+ }
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000085.html">[Ignition-commits] r55 - trunk/include
+</A></li>
+	<LI>Next message: <A HREF="000087.html">[Ignition-commits] r57 - trunk/libs/scroller
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#86">[ date ]</a>
+              <a href="thread.html#86">[ thread ]</a>
+              <a href="subject.html#86">[ subject ]</a>
+              <a href="author.html#86">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

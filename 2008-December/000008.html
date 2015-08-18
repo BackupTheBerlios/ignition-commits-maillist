@@ -1,0 +1,179 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r13 - trunk/locale
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2008-December/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r13%20-%20trunk/locale&In-Reply-To=%3C200812130940.mBD9eVZA006915%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000018.html">
+   <LINK REL="Next"  HREF="000013.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r13 - trunk/locale</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r13%20-%20trunk/locale&In-Reply-To=%3C200812130940.mBD9eVZA006915%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r13 - trunk/locale">marust at mail.berlios.de
+       </A><BR>
+    <I>Sat Dec 13 10:40:31 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000018.html">[Ignition-commits] r12 - trunk/add-ons
+</A></li>
+        <LI>Next message: <A HREF="000013.html">[Ignition-commits] r13 - trunk/locale
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8">[ date ]</a>
+              <a href="thread.html#8">[ thread ]</a>
+              <a href="subject.html#8">[ subject ]</a>
+              <a href="author.html#8">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2008-12-13 10:40:27 +0100 (Sat, 13 Dec 2008)
+New Revision: 13
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=13&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=13&amp;view=rev</A>
+
+Added:
+   trunk/locale/mmakefile.src
+Modified:
+   trunk/locale/
+   trunk/locale/ignition_english.ct
+Log:
+(Something went wrong with commit r12)
+
+* AROS mmakefile.src added
+* Added some space characters to english.ct to get rid of FlexCat warnings
+
+
+
+
+Property changes on: trunk/locale
+___________________________________________________________________
+Name: svn:ignore
+   + mmakefile
+
+
+Modified: trunk/locale/ignition_english.ct
+===================================================================
+--- trunk/locale/ignition_english.ct	2008-12-13 09:30:41 UTC (rev 12)
++++ trunk/locale/ignition_english.ct	2008-12-13 09:40:27 UTC (rev 13)
+@@ -267,7 +267,7 @@
+ Could not load project \&quot;%s\&quot;.
+ ;
+ MSG_COLOR_CHANGE_UNDO
+-Color changed
++Color changed 
+ ;
+ MSG_SET_PATTERN_UNDO
+ pattern set
+@@ -651,7 +651,7 @@
+ Page color 
+ ;
+ MSG_ATTACH_NOTE_UNDO
+-Attach note
++Attach note 
+ ;
+ MSG_DELETE_NOTE_UNDO
+ Delete note
+@@ -2361,7 +2361,7 @@
+ Save|Back
+ ;
+ MSG_INTERACTIVE_MODE_HELP
+-interactive
++interactive 
+ ;
+ MSG_EDIT_MODE_HELP
+ edit
+
+
+Property changes on: trunk/locale/ignition_english.ct
+___________________________________________________________________
+Name: svn:eol-style
+   + native
+
+Added: trunk/locale/mmakefile.src
+===================================================================
+--- trunk/locale/mmakefile.src	2008-12-13 09:30:41 UTC (rev 12)
++++ trunk/locale/mmakefile.src	2008-12-13 09:40:27 UTC (rev 13)
+@@ -0,0 +1,41 @@
++#
++# meta-makefile for Ignition Catalogs for AROS
++#
++
++include $(TOP)/config/make.cfg
++
++
++CATDIR := $(AROS_CONTRIB)/Office/Ignition/Catalogs
++
++SRCS := ignition_english.ct
++OBJS := $(CATDIR)/english/Ignition.catalog
++DIRS := $(CATDIR)/english/
++
++
++#MM
++contrib-ignition-catalogs : create_dirs $(OBJS) ../ignition_strings.h
++
++$(CATDIR)/english/Ignition.catalog : ignition_english.ct ignition.cd
++	@$(ECHO) &quot;Creating Ignition catalog for language english&quot;
++	@$(FLEXCAT) ignition.cd ignition_english.ct CATALOG=$(CATDIR)/english/Ignition.catalog
++
++../ignition_strings.h : ignition.cd
++	@$(ECHO) &quot;Creating Ignition catalog source file ../ignition_strings.h&quot;
++	@$(FLEXCAT) ignition.cd ../ignition_strings.h=$(TOOLDIR)/C_h_orig.sd
++
++create_dirs:
++	$(IF) $(TEST) ! -d $(CATDIR) ; then $(MKDIR) $(CATDIR) ; else $(NOP) ; fi
++	@$(FOR) dir in $(DIRS) ; do \
++	    $(IF) $(TEST) ! -d $$dir ; then $(MKDIR) $$dir ; else $(NOP) ; fi ; \
++	done
++
++
++contrib-ignition-catalogs-clean : FILES := $(BD_OJS) ../ignition_strings.h
++
++#MM
++contrib-ignition-catalogs-clean ::
++	$(RM) $(FILES)
++
++.PHONY: contrib-ignition-catalogs contrib-ignition-catalogs-clean
++
++%common
+
+
+Property changes on: trunk/locale/mmakefile.src
+___________________________________________________________________
+Name: svn:keywords
+   + Id Date Revision Author
+Name: svn:eol-style
+   + native
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000018.html">[Ignition-commits] r12 - trunk/add-ons
+</A></li>
+	<LI>Next message: <A HREF="000013.html">[Ignition-commits] r13 - trunk/locale
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8">[ date ]</a>
+              <a href="thread.html#8">[ thread ]</a>
+              <a href="subject.html#8">[ subject ]</a>
+              <a href="author.html#8">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

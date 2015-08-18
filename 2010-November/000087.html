@@ -1,0 +1,113 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r57 - trunk/libs/scroller
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2010-November/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r57%20-%20trunk/libs/scroller&In-Reply-To=%3C20101121182737.1CB2F480EC6%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000086.html">
+   <LINK REL="Next"  HREF="000088.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r57 - trunk/libs/scroller</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r57%20-%20trunk/libs/scroller&In-Reply-To=%3C20101121182737.1CB2F480EC6%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r57 - trunk/libs/scroller">marust at mail.berlios.de
+       </A><BR>
+    <I>Sun Nov 21 19:27:36 CET 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000086.html">[Ignition-commits] r56 - trunk/libs/scroller
+</A></li>
+        <LI>Next message: <A HREF="000088.html">[Ignition-commits] r58 - trunk/libs/scroller
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#87">[ date ]</a>
+              <a href="thread.html#87">[ thread ]</a>
+              <a href="subject.html#87">[ subject ]</a>
+              <a href="author.html#87">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2010-11-21 19:27:36 +0100 (Sun, 21 Nov 2010)
+New Revision: 57
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=57&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=57&amp;view=rev</A>
+
+Added:
+   trunk/libs/scroller/Makefile
+Log:
+Forgot to commit the Makefile
+
+
+Added: trunk/libs/scroller/Makefile
+===================================================================
+--- trunk/libs/scroller/Makefile	                        (rev 0)
++++ trunk/libs/scroller/Makefile	2010-11-21 18:27:36 UTC (rev 57)
+@@ -0,0 +1,27 @@
++CC=i386-aros-gcc
++CFLAGS=-Wall -Wno-pointer-sign -I../../include -Iinclude
++LDFLAGS=-lgraphics -lintuition -lutility -lrom -nostartfiles -auto
++
++EXE = ../pScroller.gadget
++
++OBJS = Scroller_lib.o Scroller.o
++
++.PHONY: all
++all : $(EXE)
++
++$(EXE) : $(OBJS)
++	$(CC) -o $@ $(OBJS) $(LDFLAGS)
++
++.PHONY: clean
++clean :
++	rm -f $(OBJS) $(EXE)
++
++.PHONY: distclean
++distclean : clean
++
++
++Scroller_lib.o: Scroller_lib.c Scroller_includes.h \
++  ../../include/SDI_compiler.h ../../include/compatibility.h \
++  include/gadgets/Scroller.h
++Scroller.o: Scroller.c Scroller_includes.h ../../include/SDI_compiler.h \
++  ../../include/compatibility.h include/gadgets/Scroller.h
+
+
+Property changes on: trunk/libs/scroller/Makefile
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + LF
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000086.html">[Ignition-commits] r56 - trunk/libs/scroller
+</A></li>
+	<LI>Next message: <A HREF="000088.html">[Ignition-commits] r58 - trunk/libs/scroller
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#87">[ date ]</a>
+              <a href="thread.html#87">[ thread ]</a>
+              <a href="subject.html#87">[ subject ]</a>
+              <a href="author.html#87">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

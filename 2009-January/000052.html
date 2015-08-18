@@ -1,0 +1,94 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r36 - trunk/libs/textedit
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2009-January/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r36%20-%20trunk/libs/textedit&In-Reply-To=%3C200901211415.n0LEFHeu007919%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000051.html">
+   <LINK REL="Next"  HREF="000053.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r36 - trunk/libs/textedit</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r36%20-%20trunk/libs/textedit&In-Reply-To=%3C200901211415.n0LEFHeu007919%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r36 - trunk/libs/textedit">marust at mail.berlios.de
+       </A><BR>
+    <I>Wed Jan 21 15:15:17 CET 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000051.html">[Ignition-commits] r35 - trunk/libs/include
+</A></li>
+        <LI>Next message: <A HREF="000053.html">[Ignition-commits] r36 - trunk/libs/textedit
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#52">[ date ]</a>
+              <a href="thread.html#52">[ thread ]</a>
+              <a href="subject.html#52">[ subject ]</a>
+              <a href="author.html#52">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2009-01-21 15:14:28 +0100 (Wed, 21 Jan 2009)
+New Revision: 36
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=36&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=36&amp;view=rev</A>
+
+Modified:
+   trunk/libs/textedit/TextEdit.c
+Log:
+* Bugfix for:
+  <A HREF="http://developer.berlios.de/bugs/?func=detailbug&amp;bug_id=14893&amp;group_id=8642">http://developer.berlios.de/bugs/?func=detailbug&amp;bug_id=14893&amp;group_id=8642</A>
+  (Variable &quot;el&quot; was changed and used within one sequence point)
+
+
+Modified: trunk/libs/textedit/TextEdit.c
+===================================================================
+--- trunk/libs/textedit/TextEdit.c	2009-01-21 13:26:57 UTC (rev 35)
++++ trunk/libs/textedit/TextEdit.c	2009-01-21 14:14:28 UTC (rev 36)
+@@ -255,10 +255,10 @@
+       break;
+     i += el-&gt;el_Width;
+   }
+-  if (!el-&gt;el_Word)  /* last character */
+-    return((--el)-&gt;el_Length-1+el-&gt;el_Word-ed-&gt;ed_Text);
+-  else               /* character in word */
+-  {
++  if (!el-&gt;el_Word) { /* last character */
++    --el;
++    return --el-&gt;el_Length - 1 + el-&gt;el_Word-ed-&gt;ed_Text;
++  } else {             /* character in word */
+     struct TextExtent extent;
+     ULONG  fit;
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000051.html">[Ignition-commits] r35 - trunk/libs/include
+</A></li>
+	<LI>Next message: <A HREF="000053.html">[Ignition-commits] r36 - trunk/libs/textedit
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#52">[ date ]</a>
+              <a href="thread.html#52">[ thread ]</a>
+              <a href="subject.html#52">[ subject ]</a>
+              <a href="author.html#52">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

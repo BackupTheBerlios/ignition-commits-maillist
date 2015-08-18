@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r60 - in trunk/libs/textedit: . test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2010-December/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r60%20-%20in%20trunk/libs/textedit%3A%20.%20test&In-Reply-To=%3C20101226111258.35052480580%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000092.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r60 - in trunk/libs/textedit: . test</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r60%20-%20in%20trunk/libs/textedit%3A%20.%20test&In-Reply-To=%3C20101226111258.35052480580%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r60 - in trunk/libs/textedit: . test">marust at mail.berlios.de
+       </A><BR>
+    <I>Sun Dec 26 12:12:58 CET 2010</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000092.html">[Ignition-commits] r61 - in trunk/libs/textedit: . include	include/clib include/defines include/pragmas include/proto sfd
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#91">[ date ]</a>
+              <a href="thread.html#91">[ thread ]</a>
+              <a href="subject.html#91">[ subject ]</a>
+              <a href="author.html#91">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2010-12-26 12:12:57 +0100 (Sun, 26 Dec 2010)
+New Revision: 60
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=60&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=60&amp;view=rev</A>
+
+Removed:
+   trunk/libs/textedit/SMakefile
+   trunk/libs/textedit/TextEdit_lib_aros.c
+   trunk/libs/textedit/TextEdit_rev.i
+   trunk/libs/textedit/TextEdit_romtag.asm
+   trunk/libs/textedit/mmakefile.src
+   trunk/libs/textedit/pTextEdit.conf
+   trunk/libs/textedit/test/mmakefile.src
+Modified:
+   trunk/libs/textedit/TextEdit_lib.c
+Log:
+Some AROS/SASC specialities removed as preparation
+for building with a Makefile.
+
+
+Modified: trunk/libs/textedit/TextEdit_lib.c
+===================================================================
+--- trunk/libs/textedit/TextEdit_lib.c	2010-11-21 22:07:06 UTC (rev 59)
++++ trunk/libs/textedit/TextEdit_lib.c	2010-12-26 11:12:57 UTC (rev 60)
+@@ -46,6 +46,7 @@
+     {
+       if (cb-&gt;cb_UtilityBase = OpenLibrary(&quot;utility.library&quot;,37))
+       {
++        cb-&gt;cb_Console.io_Message.mn_Length = sizeof(struct IOStdReq);
+         if (!OpenDevice(&quot;console.device&quot;,-1,(struct IORequest *)&amp;cb-&gt;cb_Console,0))
+         {
+           Class *cl;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000092.html">[Ignition-commits] r61 - in trunk/libs/textedit: . include	include/clib include/defines include/pragmas include/proto sfd
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#91">[ date ]</a>
+              <a href="thread.html#91">[ thread ]</a>
+              <a href="subject.html#91">[ subject ]</a>
+              <a href="author.html#91">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

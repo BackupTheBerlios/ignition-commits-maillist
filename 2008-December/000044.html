@@ -1,0 +1,307 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r28 - in trunk: . add-ons	libs/gtdrag/include/clib libs/include
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2008-December/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r28%20-%20in%20trunk%3A%20.%20add-ons%0A%09libs/gtdrag/include/clib%20libs/include&In-Reply-To=%3C200812261521.mBQFLi6W026385%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000043.html">
+   <LINK REL="Next"  HREF="000045.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r28 - in trunk: . add-ons	libs/gtdrag/include/clib libs/include</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r28%20-%20in%20trunk%3A%20.%20add-ons%0A%09libs/gtdrag/include/clib%20libs/include&In-Reply-To=%3C200812261521.mBQFLi6W026385%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r28 - in trunk: . add-ons	libs/gtdrag/include/clib libs/include">marust at mail.berlios.de
+       </A><BR>
+    <I>Fri Dec 26 16:21:44 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000043.html">[Ignition-commits] r27 - in trunk: . libs
+</A></li>
+        <LI>Next message: <A HREF="000045.html">[Ignition-commits] r29 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#44">[ date ]</a>
+              <a href="thread.html#44">[ thread ]</a>
+              <a href="subject.html#44">[ subject ]</a>
+              <a href="author.html#44">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2008-12-26 16:21:39 +0100 (Fri, 26 Dec 2008)
+New Revision: 28
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=28&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=28&amp;view=rev</A>
+
+Modified:
+   trunk/add-ons/gclass_protos.h
+   trunk/add-ons/iotype.h
+   trunk/font.h
+   trunk/funcs.h
+   trunk/graphic.h
+   trunk/libs/gtdrag/include/clib/gtdrag_protos.h
+   trunk/libs/include/SDI_compiler.h
+   trunk/windows.h
+Log:
+* Added SDI_compiler macro VARARG68K to all variadic functions.
+  This should ensure that parameters are passed on the stack.
+
+
+Modified: trunk/add-ons/gclass_protos.h
+===================================================================
+--- trunk/add-ons/gclass_protos.h	2008-12-26 13:30:19 UTC (rev 27)
++++ trunk/add-ons/gclass_protos.h	2008-12-26 15:21:39 UTC (rev 28)
+@@ -70,8 +70,8 @@
+ void (*SetOutlineColor)(struct RastPort *rp,ULONG color);
+ 
+ /* variadic functions must be real functions */
+-ULONG gDoMethod(APTR go,LONG data,...);
+-ULONG gDoSuperMethod(struct gClass *gc,APTR go,LONG data,...);
+-struct FontInfo *SetFontInfo(struct FontInfo *fi,ULONG dpi,ULONG tag1,...);
++ULONG gDoMethod(APTR go,LONG data,...) VARARG68K;
++ULONG gDoSuperMethod(struct gClass *gc,APTR go,LONG data,...) VARARG68K;
++struct FontInfo *SetFontInfo(struct FontInfo *fi,ULONG dpi,ULONG tag1,...) VARARG68K;
+ 
+ #endif  /* CLIB_GCLASS_PROTOS_H */
+
+Modified: trunk/add-ons/iotype.h
+===================================================================
+--- trunk/add-ons/iotype.h	2008-12-26 13:30:19 UTC (rev 27)
++++ trunk/add-ons/iotype.h	2008-12-26 15:21:39 UTC (rev 28)
+@@ -443,7 +443,7 @@
+ STRPTR (*ita)(double d,long komma ,UBYTE flags);
+ 
+ // variadic functions must be real functions
+-void   ReportError(STRPTR fmt, ...);
++void   ReportError(STRPTR fmt, ...) VARARG68K;
+ 
+ #if defined(__SASC)
+ #	pragma tagcall ioBase ReportError 5a 9802
+
+Modified: trunk/font.h
+===================================================================
+--- trunk/font.h	2008-12-26 13:30:19 UTC (rev 27)
++++ trunk/font.h	2008-12-26 15:21:39 UTC (rev 28)
+@@ -99,9 +99,9 @@
+ extern ULONG PUBLIC OutlineHeight(REG(a0, struct FontInfo *fi),REG(a1, STRPTR text),REG(d0, long len));
+ extern void PUBLIC FreeFontInfo(REG(a0, struct FontInfo *fi));
+ extern struct FontInfo * PUBLIC NewFontInfoA(REG(a0, struct FontInfo *fi),REG(d0, ULONG dpi),REG(a1, struct TagItem *ti));
+-extern struct FontInfo *NewFontInfo(struct FontInfo *fi,ULONG dpi,ULONG tag,...);
++extern struct FontInfo *NewFontInfo(struct FontInfo *fi,ULONG dpi,ULONG tag,...) VARARG68K;
+ extern struct FontInfo * PUBLIC SetFontInfoA(REG(a0, struct FontInfo *fi),REG(d0, ULONG dpi),REG(a1, struct TagItem *ti));
+-extern struct FontInfo *SetFontInfo(struct FontInfo *fi,ULONG dpi,ULONG tag,...);
++extern struct FontInfo *SetFontInfo(struct FontInfo *fi,ULONG dpi,ULONG tag,...) VARARG68K;
+ extern struct FontInfo * PUBLIC CopyFontInfo(REG(a0, struct FontInfo *fi));
+ 
+ #endif   /* IGN_FONT_H */
+
+Modified: trunk/funcs.h
+===================================================================
+--- trunk/funcs.h	2008-12-26 13:30:19 UTC (rev 27)
++++ trunk/funcs.h	2008-12-26 15:21:39 UTC (rev 28)
+@@ -102,10 +102,10 @@
+ extern void InitPrinter(void);
+ 
+ // lock.c
+-extern struct LockNode *FindLockNode(struct MinList *list,ULONG length,...);
++extern struct LockNode *FindLockNode(struct MinList *list,ULONG length,...) VARARG68K;
+ extern void RemLockNode(struct LockNode *ln);
+-extern void RemLockNodeData(struct MinList *list,ULONG length,...);
+-extern struct LockNode *AddLockNode(struct MinList *list,BYTE pri,APTR func,ULONG length,...);
++extern void RemLockNodeData(struct MinList *list,ULONG length,...) VARARG68K;
++extern struct LockNode *AddLockNode(struct MinList *list,BYTE pri,APTR func,ULONG length,...) VARARG68K;
+ extern struct LockNode *AddFreeLock(APTR list,struct Window *win);
+ extern struct LockNode *AddListViewLock(struct MinList *list,struct Window *win,struct Gadget *gad);
+ extern struct LockNode *AddTreeLock(struct MinList *list,struct Window *win,struct Gadget *gad);
+@@ -154,7 +154,7 @@
+ extern void RemoveRexxPort(struct RexxPort *rxp);
+ extern void FreeRexxScript(struct RexxScript *rxs);
+ extern ULONG RunRexxScript(UBYTE type,STRPTR name);
+-extern ULONG RexxCall(ULONG (*func)(long *opts),...);
++extern ULONG RexxCall(ULONG (*func)(long *opts),...) VARARG68K;
+ extern void CloseRexx(void);
+ extern void initRexx(void);
+ 
+@@ -212,11 +212,11 @@
+ extern int32 ConvertTime(STRPTR s);
+ extern double ConvertNumber(STRPTR s,UBYTE targettype);
+ extern void WriteChunkString(APTR iff,STRPTR t);
+-extern void MakeLocaleStrings(struct MinList *list, LONG id, ...);
+-extern struct List *MakeLocaleStringList(LONG id, ...);
++extern void MakeLocaleStrings(struct MinList *list, LONG id, ...) VARARG68K;
++extern struct List *MakeLocaleStringList(LONG id, ...) VARARG68K;
+ extern void FreeStringList(struct List *list);
+-extern void MakeStrings(struct MinList *list, const STRPTR string, ...);
+-extern struct List *MakeStringList(const STRPTR string, ...);
++extern void MakeStrings(struct MinList *list, const STRPTR string, ...) VARARG68K;
++extern struct List *MakeStringList(const STRPTR string, ...) VARARG68K;
+ extern ULONG DoClassMethodA(Class *cl,Msg msg);
+ extern BOOL IsDoubleClick(WORD entry);
+ extern struct Node *HandleLVRawKeys(struct Gadget *lvgad,struct Window *win,struct MinList *list,long itemheight);
+@@ -259,7 +259,7 @@
+ extern void UpdateMapTitle(struct Mappe *mp);
+ extern STRPTR GetPageTitle(struct Page *page);
+ extern void SetProjectMouseReport(struct Page *page,BOOL set);
+-extern void UpdatePageFont(struct Page *page,ULONG tag,...);
++extern void UpdatePageFont(struct Page *page,ULONG tag,...) VARARG68K;
+ extern void UpdateProjPage(struct Window *win,struct Page *page);
+ extern void ProjectToGObjects(struct Page *page,struct winData *wd);
+ extern void ASM handleProjIDCMP(REG(a0, struct TagItem *tags));
+@@ -274,7 +274,7 @@
+ 
+ // ignition.c
+ extern void NormalizeWindowBox(struct IBox *box);
+-extern struct Window *OpenProjWindow(struct Page *,ULONG,...);
++extern struct Window *OpenProjWindow(struct Page *,ULONG,...) VARARG68K;
+ extern struct Gadget *MakeProjectGadgets(struct winData *,long w,long h);
+ extern void MakeMarkText(struct Page *page,STRPTR t);
+ extern void DisplayTablePos(struct Page *page);
+
+Modified: trunk/graphic.h
+===================================================================
+--- trunk/graphic.h	2008-12-26 13:30:19 UTC (rev 27)
++++ trunk/graphic.h	2008-12-26 15:21:39 UTC (rev 28)
+@@ -710,9 +710,9 @@
+ extern struct gObject *gMakeRefObject(struct Page *page, struct gClass *gc, struct gObject *go, const STRPTR undoText);
+ extern ULONG GetGObjectAttr(struct gObject *go,ULONG tag,ULONG *data);
+ extern void gSetObjectAttrsA(struct Page *page,struct gObject *go,struct TagItem *tags);
+-extern void gSetObjectAttrs(struct Page *page,struct gObject *go,ULONG tag1,...);
++extern void gSetObjectAttrs(struct Page *page,struct gObject *go,ULONG tag1,...) VARARG68K;
+ extern void SetGObjectAttrsA(struct Page *page,struct gObject *go,struct TagItem *tag);
+-extern void SetGObjectAttrs(struct Page *page,struct gObject *go,ULONG tag1,...);
++extern void SetGObjectAttrs(struct Page *page,struct gObject *go,ULONG tag1,...) VARARG68K;
+ extern void RefreshGObjectBounds(struct Page *page,struct gObject *go);
+ extern void RemoveGObject(struct Page *page,struct gObject *go,BYTE draw);
+ extern void AddGObject(struct Page *page,struct gGroup *gg,struct gObject *go,BYTE draw);
+@@ -728,9 +728,9 @@
+ extern BOOL HandleGObjects(struct Page *page);
+ extern void PrepareCreateObject(struct Page *page,struct gClass *gc,BOOL more);
+ extern ULONG gDoClassMethodA(struct gClass *gc,APTR go,Msg msg);
+-extern ULONG gDoClassMethod(struct gClass *gc,APTR go,ULONG id,...);
++extern ULONG gDoClassMethod(struct gClass *gc,APTR go,ULONG id,...) VARARG68K;
+ extern ULONG PUBLIC gDoMethodA(REG(a0, APTR go),REG(a1, Msg msg));
+-extern ULONG gDoMethod(APTR go,ULONG id,...);
++extern ULONG gDoMethod(APTR go,ULONG id,...) VARARG68K;
+ extern ULONG PUBLIC gDoSuperMethodA(REG(a0, struct gClass *gc),REG(a1, APTR go),REG(a2, Msg msg));
+ extern BOOL PUBLIC gIsSubclassFrom(REG(a0, struct gClass *gc),REG(a1, struct gClass *supergc));
+ extern void PUBLIC gSuperDraw(REG(d0, struct Page *page),REG(d1, ULONG dpi),REG(a0, struct RastPort *rp),REG(a1, struct gClass *gc),REG(a2, struct gObject *go),REG(a3, struct gBounds *gb));
+
+Modified: trunk/libs/gtdrag/include/clib/gtdrag_protos.h
+===================================================================
+--- trunk/libs/gtdrag/include/clib/gtdrag_protos.h	2008-12-26 13:30:19 UTC (rev 27)
++++ trunk/libs/gtdrag/include/clib/gtdrag_protos.h	2008-12-26 15:21:39 UTC (rev 28)
+@@ -29,17 +29,17 @@
+ /* Handling functions */
+ /**/
+ int GTD_AddAppA(STRPTR t,struct TagItem *tag);
+-int GTD_AddApp(STRPTR t,ULONG tag1,...);
++int GTD_AddApp(STRPTR t,ULONG tag1,...) VARARG68K;
+ void GTD_RemoveApp(void);
+ void GTD_AddWindowA(struct Window *win,struct TagItem *tag);
+-void GTD_AddWindow(struct Window *win,ULONG tag1,...);
++void GTD_AddWindow(struct Window *win,ULONG tag1,...) VARARG68K;
+ void GTD_RemoveWindow(struct Window *);
+ void GTD_AddGadgetA(ULONG type,struct Gadget *gad,struct Window *win,struct TagItem *tag);
+-void GTD_AddGadget(ULONG type,struct Gadget *gad,struct Window *win,ULONG tag1,...);
++void GTD_AddGadget(ULONG type,struct Gadget *gad,struct Window *win,ULONG tag1,...) VARARG68K;
+ void GTD_RemoveGadget(struct Gadget *);
+ void GTD_RemoveGadgets(struct Window *);
+ void GTD_SetAttrsA(APTR gad,struct TagItem *tags);
+-void GTD_SetAttrs(APTR gad,ULONG tag1,...);
++void GTD_SetAttrs(APTR gad,ULONG tag1,...) VARARG68K;
+ BOOL GTD_GetAttr(APTR gad,ULONG tag,ULONG *storage);
+ struct Hook *GTD_GetHook(ULONG type);
+ STRPTR GTD_GetString(struct ObjectDescription *od,STRPTR buf,LONG len);
+
+Modified: trunk/libs/include/SDI_compiler.h
+===================================================================
+--- trunk/libs/include/SDI_compiler.h	2008-12-26 13:30:19 UTC (rev 27)
++++ trunk/libs/include/SDI_compiler.h	2008-12-26 15:21:39 UTC (rev 28)
+@@ -227,6 +227,8 @@
+   #undef REGARGS
+   #define REGARGS
+ 
++  #undef VARARG68K
++  #define VARARG68K __stackparm
+ #endif /* __AROS__ */
+ 
+ /*************************************************************************/
+
+Modified: trunk/windows.h
+===================================================================
+--- trunk/windows.h	2008-12-26 13:30:19 UTC (rev 27)
++++ trunk/windows.h	2008-12-26 15:21:39 UTC (rev 28)
+@@ -231,8 +231,8 @@
+ extern void PUBLIC PatternPopper(REG(a0, struct RastPort *rp),REG(d0, UWORD x),REG(d1, UWORD y),REG(d2, UWORD cols),REG(d3, UWORD rows));
+ extern void PUBLIC ColorPopper(REG(a0, struct RastPort *rp),REG(d0, UWORD x),REG(d1, UWORD y),REG(d2, UWORD cols),REG(d3, UWORD rows));
+ extern long PopColors(struct Window *win,struct Gadget *gad);
+-extern long PopUpTable(struct Window *win,struct Gadget *refgad,UWORD cols,UWORD rows,APTR func,ULONG tag1,...);
+-extern long PopUpList(struct Window *,struct Gadget *,struct MinList *,ULONG tag1,...);
++extern long PopUpTable(struct Window *win,struct Gadget *refgad,UWORD cols,UWORD rows,APTR func,ULONG tag1,...) VARARG68K;
++extern long PopUpList(struct Window *,struct Gadget *,struct MinList *,ULONG tag1,...) VARARG68K;
+ extern void ClosePopUpText(void);
+ extern void ShowPopUpText(STRPTR t,long wx,long wy);
+ 
+@@ -244,12 +244,12 @@
+ extern void CloseAppScreen(struct Screen *scr);
+  
+ // windows.c
+-extern long DoRequest(CONST_STRPTR t,CONST_STRPTR gads,...);
+-extern void ErrorRequest(CONST_STRPTR t,...);
++extern long DoRequest(CONST_STRPTR t,CONST_STRPTR gads,...) VARARG68K;
++extern void ErrorRequest(CONST_STRPTR t,...) VARARG68K;
+ extern void PUBLIC ErrorRequestA(REG(a0, CONST_STRPTR t),REG(a1, APTR args));
+ extern void ErrorOpenLibrary(STRPTR lib,STRPTR paket);
+-extern void MakeLocaleLabels(const char *labels[], ULONG id, ...);
+-extern void MakeShortCutString(STRPTR shortCuts, ULONG ids, ...);
++extern void MakeLocaleLabels(const char *labels[], ULONG id, ...) VARARG68K;
++extern void MakeShortCutString(STRPTR shortCuts, ULONG ids, ...) VARARG68K;
+ extern void SetBusy(BOOL set,BYTE type);
+ extern void DisposeProgressBar(struct ProgressBar *pb);
+ extern struct ProgressBar *NewProgressBar(struct Window *win,long x,long y,long w,long h);
+@@ -258,11 +258,11 @@
+ extern void StandardNewSize(void (*create)(struct winData *,long,long));
+ extern BOOL WindowIsProjectDependent(long type);
+ extern void RefreshAppWindow(struct Window *win,struct winData *wd);
+-extern struct Window *OpenAppWindow(long type,ULONG tag1,...);
++extern struct Window *OpenAppWindow(long type,ULONG tag1,...) VARARG68K;
+ extern void CloseAppWindow(struct Window *win,BOOL);
+ extern void DisableGadget(struct Gadget *gad,struct Window *win,BOOL disable);
+ extern long CountGadToolGads(struct Window *win);
+-extern APTR NewObj(struct winData *,short type,APTR,STRPTR,ULONG tag1,...);
++extern APTR NewObj(struct winData *,short type,APTR,STRPTR,ULONG tag1,...) VARARG68K;
+ extern void DrawDithRect(struct RastPort *rp,long x1,long y1,long x2,long y2);
+ extern void DrawGroupBorder(struct RastPort *rp, CONST_STRPTR t,long x, long y, long w, long h);
+ extern void PUBLIC DrawRect(REG(a0, struct RastPort *rp),REG(d0, long x),REG(d1, long y),REG(d2, long w),REG(d3, long h));
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000043.html">[Ignition-commits] r27 - in trunk: . libs
+</A></li>
+	<LI>Next message: <A HREF="000045.html">[Ignition-commits] r29 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#44">[ date ]</a>
+              <a href="thread.html#44">[ thread ]</a>
+              <a href="subject.html#44">[ subject ]</a>
+              <a href="author.html#44">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

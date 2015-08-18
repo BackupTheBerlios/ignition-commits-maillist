@@ -1,0 +1,1115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r7 - in trunk/libs/gtdrag: . docs examples fd	include/clib include/libraries include/lvo include/pragmas	include/proto
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2008-December/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r7%20-%20in%20trunk/libs/gtdrag%3A%20.%20docs%20examples%20fd%0A%09include/clib%20include/libraries%20include/lvo%20include/pragmas%0A%09include/proto&In-Reply-To=%3C200812130649.mBD6nfo1028501%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000012.html">
+   <LINK REL="Next"  HREF="000003.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r7 - in trunk/libs/gtdrag: . docs examples fd	include/clib include/libraries include/lvo include/pragmas	include/proto</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r7%20-%20in%20trunk/libs/gtdrag%3A%20.%20docs%20examples%20fd%0A%09include/clib%20include/libraries%20include/lvo%20include/pragmas%0A%09include/proto&In-Reply-To=%3C200812130649.mBD6nfo1028501%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r7 - in trunk/libs/gtdrag: . docs examples fd	include/clib include/libraries include/lvo include/pragmas	include/proto">marust at mail.berlios.de
+       </A><BR>
+    <I>Sat Dec 13 07:49:41 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000012.html">[Ignition-commits] r6 - in trunk/libs/textedit: . fd include/clib include/gadgets include/pragmas include/proto test
+</A></li>
+        <LI>Next message: <A HREF="000003.html">[Ignition-commits] r8 - in trunk/libs/gtdrag: docs examples
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2">[ date ]</a>
+              <a href="thread.html#2">[ thread ]</a>
+              <a href="subject.html#2">[ subject ]</a>
+              <a href="author.html#2">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2008-12-13 07:49:17 +0100 (Sat, 13 Dec 2008)
+New Revision: 7
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/haiku?rev=7&amp;view=rev">http://svn.berlios.de/viewcvs/haiku?rev=7&amp;view=rev</A>
+
+Added:
+   trunk/libs/gtdrag/examples/mmakefile.src
+   trunk/libs/gtdrag/gtdrag.conf
+   trunk/libs/gtdrag/gtdrag_lib_aros.c
+   trunk/libs/gtdrag/mmakefile.src
+Modified:
+   trunk/libs/gtdrag/
+   trunk/libs/gtdrag/GTD_Apps.c
+   trunk/libs/gtdrag/GTD_Boopsi.c
+   trunk/libs/gtdrag/GTD_Drag.c
+   trunk/libs/gtdrag/GTD_DragObj.c
+   trunk/libs/gtdrag/GTD_DropMsgs.c
+   trunk/libs/gtdrag/GTD_Gadgets.c
+   trunk/libs/gtdrag/GTD_Highlight.c
+   trunk/libs/gtdrag/GTD_Hook.c
+   trunk/libs/gtdrag/GTD_IFFHook.c
+   trunk/libs/gtdrag/GTD_IMsgs.c
+   trunk/libs/gtdrag/GTD_ImageHook.c
+   trunk/libs/gtdrag/GTD_Tree.c
+   trunk/libs/gtdrag/GTD_TreeHook.c
+   trunk/libs/gtdrag/GTD_Windows.c
+   trunk/libs/gtdrag/SMakefile
+   trunk/libs/gtdrag/docs/gtdrag.doc
+   trunk/libs/gtdrag/docs/gtdrag.guide
+   trunk/libs/gtdrag/docs/gtdrag.guide.info
+   trunk/libs/gtdrag/docs/gtdrag.readme
+   trunk/libs/gtdrag/examples/
+   trunk/libs/gtdrag/examples/boopsi.c
+   trunk/libs/gtdrag/examples/dragtest.c
+   trunk/libs/gtdrag/examples/dragtest.info
+   trunk/libs/gtdrag/examples/treetest.c
+   trunk/libs/gtdrag/fd/gtdrag_lib.fd
+   trunk/libs/gtdrag/gtdrag.c
+   trunk/libs/gtdrag/gtdrag_includes.h
+   trunk/libs/gtdrag/gtdrag_lib.c
+   trunk/libs/gtdrag/gtdrag_rev.i
+   trunk/libs/gtdrag/gtdrag_romtag.asm
+   trunk/libs/gtdrag/include/clib/gtdrag_protos.h
+   trunk/libs/gtdrag/include/libraries/gtdrag.h
+   trunk/libs/gtdrag/include/libraries/gtdrag.i
+   trunk/libs/gtdrag/include/lvo/gtdrag_lib.i
+   trunk/libs/gtdrag/include/pragmas/gtdrag_pragmas.h
+   trunk/libs/gtdrag/include/proto/gtdrag.h
+   trunk/libs/gtdrag/makelib.with
+Log:
+* AROS/GCC port
+
+
+Property changes on: trunk/libs/gtdrag
+___________________________________________________________________
+Name: svn:ignore
+   + mmakefile
+
+
+Modified: trunk/libs/gtdrag/GTD_Apps.c
+===================================================================
+--- trunk/libs/gtdrag/GTD_Apps.c	2008-12-13 06:36:25 UTC (rev 6)
++++ trunk/libs/gtdrag/GTD_Apps.c	2008-12-13 06:49:17 UTC (rev 7)
+@@ -34,13 +34,16 @@
+ }
+ 
+ 
+-void PUBLIC GTD_RemoveApp(void)
++LIB_LH0(void, GTD_RemoveApp, 
++  struct Library *, library, 12, Gtdrag)
+ {
++  LIBFUNC_INIT
++
+   struct DragApp *da;
+   struct MinNode *n,*s;
+ 
+   ObtainSemaphore(&amp;ListSemaphore);
+-  if (da = GetDragApp(NULL))
++  if ((da = GetDragApp(NULL)) != 0)
+   {
+     for(n = winlist.mlh_Head;n-&gt;mln_Succ;n = n-&gt;mln_Succ)
+     {
+@@ -67,11 +70,18 @@
+     FreeMem(da, sizeof(struct DragApp));
+   }
+   ReleaseSemaphore(&amp;ListSemaphore);
++
++  LIBFUNC_EXIT
+ }
+ 
+ 
+-int PUBLIC GTD_AddAppA(reg (a0) STRPTR t,reg (a1) struct TagItem *tag1)
++LIB_LH2(int, GTD_AddAppA, 
++  LIB_LHA(STRPTR, t, A0),
++  LIB_LHA(struct TagItem *, tag1, A1),
++  struct Library *, library, 11, Gtdrag)
+ {
++  LIBFUNC_INIT
++
+   struct DragApp *da;
+ 
+   if (!FindTagItem(GTDA_NewStyle,tag1))
+@@ -80,7 +90,7 @@
+ 
+   if (t &amp;&amp; !GetDragApp(NULL))
+   {
+-    if (da = AllocMem(sizeof(struct DragApp),MEMF_PUBLIC | MEMF_CLEAR))
++    if ((da = AllocMem(sizeof(struct DragApp),MEMF_PUBLIC | MEMF_CLEAR)) != 0)
+     {
+       da-&gt;da_Name = t;
+       da-&gt;da_Task = FindTask(NULL);
+@@ -94,6 +104,6 @@
+   }
+   ReleaseSemaphore(&amp;ListSemaphore);
+   return(FALSE);
++
++  LIBFUNC_EXIT
+ }
+-
+-
+
+
+Property changes on: trunk/libs/gtdrag/GTD_Apps.c
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Modified: trunk/libs/gtdrag/GTD_Boopsi.c
+===================================================================
+--- trunk/libs/gtdrag/GTD_Boopsi.c	2008-12-13 06:36:25 UTC (rev 6)
++++ trunk/libs/gtdrag/GTD_Boopsi.c	2008-12-13 06:49:17 UTC (rev 7)
+@@ -33,7 +33,7 @@
+   gi.gi_Domain.Height = rdg-&gt;dg_Gadget-&gt;Height;
+   gi.gi_DrInfo = GetScreenDrawInfo(gi.gi_Screen);
+ 
+-  if (rp = ObtainGIRPort(&amp;gi))
++  if ((rp = ObtainGIRPort(&amp;gi)) != 0)
+   {
+     if (mode != GRENDER_DELETE)
+     {
+@@ -49,8 +49,13 @@
+ }
+ 
+ 
+-ULONG PUBLIC GTD_HandleInput(reg (a0) struct Gadget *gad,reg (a1) struct gpInput *gpi)
++LIB_LH2(ULONG, GTD_HandleInput, 
++  LIB_LHA(struct Gadget *, gad, A0),
++  LIB_LHA(struct gpInput *, gpi, A1),
++  struct Library *, library, 24, Gtdrag)
+ {
++  LIBFUNC_INIT
++
+   struct InputEvent *ie;
+   long   x,y;
+ 
+@@ -81,11 +86,18 @@
+       IntuiTick(x,y);
+   }
+   return(GMR_MEACTIVE);  // catches all input events
++
++  LIBFUNC_EXIT
+ }
+ 
+ 
+-BOOL PUBLIC GTD_PrepareDrag(reg (a0) struct Gadget *gad,reg (a1) struct gpInput *gpi)
++LIB_LH2(BOOL, GTD_PrepareDrag, 
++  LIB_LHA(struct Gadget *, gad, A0),
++  LIB_LHA(struct gpInput *, gpi, A1),
++  struct Library *, library, 22, Gtdrag)
+ {
++  LIBFUNC_INIT
++
+   struct DragGadget *dg;
+   struct Window *win;
+ 
+@@ -104,7 +116,7 @@
+     GTD_AddAppA(&quot;intuition&quot;,(struct TagItem *)tags);
+   }
+ 
+-  if (dg = AddDragGadget(gad,win,BOOPSI_KIND))
++  if ((dg = AddDragGadget(gad,win,BOOPSI_KIND)) != 0)
+   {
+     struct DragWindow *dw;
+ 
+@@ -130,12 +142,19 @@
+     return(TRUE);
+   }
+   return(FALSE);
++
++  LIBFUNC_EXIT
+ }
+ 
+ 
+-BOOL PUBLIC GTD_BeginDrag(reg (a0) struct Gadget *gad,reg (a1) struct gpInput *gpi)
++LIB_LH2(BOOL, GTD_BeginDrag, 
++  LIB_LHA(struct Gadget *, gad, A0),
++  LIB_LHA(struct gpInput *, gpi, A1),
++  struct Library *, library, 23, Gtdrag)
+ {
+-  if (dg = FindDragGadget(gad))
++  AROS_LIBFUNC_INIT
++
++  if ((dg = FindDragGadget(gad)) != 0)
+   {
+     PrepareDrag(TRUE);
+     boopsigad = gad;
+@@ -144,14 +163,22 @@
+     return(TRUE);
+   }
+   return(FALSE);
++
++  LIBFUNC_EXIT
+ }
+ 
+ 
+-void PUBLIC GTD_StopDrag(reg (a0) struct Gadget *gad)
++LIB_LH1(void, GTD_StopDrag, 
++  LIB_LHA(struct Gadget *, gad, A0),
++  struct Library *, library, 25, Gtdrag)
+ {
++  LIBFUNC_INIT
++
+   if (gad != boopsigad || !gdo)
+     return;
+ 
+   FreeDragObj(gdo);
+   EndDrag();
++  
++  AROS_LIBFUNC_EXIT
+ }
+
+
+Property changes on: trunk/libs/gtdrag/GTD_Boopsi.c
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Modified: trunk/libs/gtdrag/GTD_Drag.c
+===================================================================
+--- trunk/libs/gtdrag/GTD_Drag.c	2008-12-13 06:36:25 UTC (rev 6)
++++ trunk/libs/gtdrag/GTD_Drag.c	2008-12-13 06:49:17 UTC (rev 7)
+@@ -27,7 +27,7 @@
+   adg = dg = NULL;  gdo = NULL;  boopsigad = NULL;
+   mx = ~0L;
+ 
+-  for(sdg = (APTR)gadlist.mlh_Head;ndg = (APTR)sdg-&gt;dg_Node.mln_Succ;sdg = ndg)
++  for(sdg = (APTR)gadlist.mlh_Head;(ndg = (APTR)sdg-&gt;dg_Node.mln_Succ) != 0;sdg = ndg)
+   {
+     if (sdg-&gt;dg_Flags &amp; DGF_ONTHEFLY)     // remove temporary BOOPSI-gadgets
+     {
+@@ -67,7 +67,7 @@
+     x = mousex+dg-&gt;dg_Window-&gt;LeftEdge;
+     y = mousey+dg-&gt;dg_Window-&gt;TopEdge;
+ 
+-    if (adg = GetAcceptorDragGadget(x,y))
++    if ((adg = GetAcceptorDragGadget(x,y)) != 0)
+     {
+       adg-&gt;dg_Flags |= DGF_LIKECURRENT;
+ 
+@@ -87,5 +87,3 @@
+   if (adg &amp;&amp; UpdateHighlighting(IDCMP_INTUITICKS,mousex,mousey,adg))
+     UpdateDragObj(gdo,mousex,mousey);
+ }
+-
+-
+
+
+Property changes on: trunk/libs/gtdrag/GTD_Drag.c
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Modified: trunk/libs/gtdrag/GTD_DragObj.c
+===================================================================
+--- trunk/libs/gtdrag/GTD_DragObj.c	2008-12-13 06:36:25 UTC (rev 6)
++++ trunk/libs/gtdrag/GTD_DragObj.c	2008-12-13 06:49:17 UTC (rev 7)
+@@ -8,10 +8,12 @@
+ 
+ #include &quot;gtdrag_includes.h&quot;
+ 
+-#include &lt;cybergraphics/cybergraphics.h&gt;
+-#include &lt;clib/cybergraphics_protos.h&gt;
+-#include &lt;pragmas/cybergraphics_pragmas.h&gt;
++#include &lt;cybergraphx/cybergraphics.h&gt;
++#include &lt;proto/cybergraphics.h&gt;
+ 
++#if defined(__SASC)
++#	include &lt;pragmas/cybergraphics_pragmas.h&gt;
++#endif
+ 
+ #define LOCKLAYERS
+ 
+@@ -27,7 +29,7 @@
+     UpdateDragObj(gdo,0,-9999);
+ 
+ #ifdef LOCKLAYERS
+-  LockLayer(NULL,gdo-&gt;do_DragGadget-&gt;dg_Window-&gt;RPort-&gt;Layer);
++  LockLayer(0,gdo-&gt;do_DragGadget-&gt;dg_Window-&gt;RPort-&gt;Layer);
+   UnlockLayers(&amp;gdo-&gt;do_Screen-&gt;LayerInfo);
+ #endif
+ 
+@@ -325,4 +327,3 @@
+   gdo-&gt;do_X = x;
+   gdo-&gt;do_Y = y;
+ }
+-
+
+
+Property changes on: trunk/libs/gtdrag/GTD_DragObj.c
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Modified: trunk/libs/gtdrag/GTD_DropMsgs.c
+===================================================================
+--- trunk/libs/gtdrag/GTD_DropMsgs.c	2008-12-13 06:36:25 UTC (rev 6)
++++ trunk/libs/gtdrag/GTD_DropMsgs.c	2008-12-13 06:49:17 UTC (rev 7)
+@@ -9,8 +9,14 @@
+ #include &quot;gtdrag_includes.h&quot;
+ 
+ 
+-STRPTR PUBLIC GTD_GetString(reg (a0) struct ObjectDescription *od,reg (a1) STRPTR t,reg (d0) LONG len)
++LIB_LH3(STRPTR, GTD_GetString, 
++  LIB_LHA(struct ObjectDescription *, od, A0),
++  LIB_LHA(STRPTR, t, D1),
++  LIB_LHA(LONG, len, D0),
++  struct Library *, library, 21, Gtdrag)
+ {
++  LIBFUNC_INIT
++
+   if (!od || !od-&gt;od_Object || !t || !len)
+     return(NULL);
+ 
+@@ -33,6 +39,8 @@
+       return(NULL);
+   }
+   return(t);
++
++  LIBFUNC_EXIT
+ }
+ 
+ 
+@@ -43,7 +51,7 @@
+   if (!msg || msg-&gt;Class != IDCMP_OBJECTDROP)
+     return;
+ 
+-  if (dm = msg-&gt;IAddress)
++  if ((dm = msg-&gt;IAddress) != 0)
+     FreeMem(dm,sizeof(struct DropMessage));
+ 
+   FreeMem(msg,sizeof(struct ExtIntuiMessage));
+@@ -103,7 +111,7 @@
+   if (adg &amp;&amp; adg-&gt;dg_Type == BOOPSI_KIND &amp;&amp; DoCustomMethod(adg-&gt;dg_Gadget,GM_OBJECTDROP,&amp;dm,qual))  // send to boopsi-gadget
+     return;
+ 
+-  if (imsg = AllocMem(sizeof(struct ExtIntuiMessage),MEMF_CLEAR | MEMF_PUBLIC))
++  if ((imsg = AllocMem(sizeof(struct ExtIntuiMessage),MEMF_CLEAR | MEMF_PUBLIC)) != 0)
+   {
+     struct DropMessage *gdm;
+ 
+@@ -116,13 +124,12 @@
+     CurrentTime(&amp;imsg-&gt;Seconds,&amp;imsg-&gt;Micros);
+     imsg-&gt;IDCMPWindow = win;
+ 
+-    if (imsg-&gt;IAddress = gdm = AllocMem(sizeof(struct DropMessage),MEMF_PUBLIC))
++    if ((imsg-&gt;IAddress = gdm = AllocMem(sizeof(struct DropMessage),MEMF_PUBLIC)) != 0)
+     {
+       CopyMem(&amp;dm,gdm,sizeof(struct DropMessage));
+-      PutMsg(win-&gt;UserPort,imsg);
++      PutMsg(win-&gt;UserPort,(struct Message *)imsg);
+       return;
+     }
+     FreeMem(imsg,sizeof(struct ExtIntuiMessage));
+   }
+ }
+-
+
+
+Property changes on: trunk/libs/gtdrag/GTD_DropMsgs.c
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Modified: trunk/libs/gtdrag/GTD_Gadgets.c
+===================================================================
+--- trunk/libs/gtdrag/GTD_Gadgets.c	2008-12-13 06:36:25 UTC (rev 6)
++++ trunk/libs/gtdrag/GTD_Gadgets.c	2008-12-13 06:49:17 UTC (rev 7)
+@@ -101,7 +101,7 @@
+   struct DragGadget *sdg;
+   APTR   layer = WhichLayer(&amp;gdo-&gt;do_Screen-&gt;LayerInfo,mx,my);
+ 
+-  if (sdg = WhichDragGadget(layer,mx,my))
++  if ((sdg = WhichDragGadget(layer,mx,my)) != 0)
+     return(DragGadgetAcceptsObject(sdg,mx-sdg-&gt;dg_Window-&gt;LeftEdge,my-sdg-&gt;dg_Window-&gt;TopEdge) ? sdg : NULL);
+ 
+   /*** BOOPSI gadgets ***/
+@@ -124,9 +124,9 @@
+           {
+             long rc;
+ 
+-            if (rc = DoCustomMethod(gad,GM_OBJECTDRAG,&amp;dg-&gt;dg_Object,dg-&gt;dg_Gadget,words(x-gad-&gt;LeftEdge,y-gad-&gt;TopEdge)))
++            if ((rc = DoCustomMethod(gad,GM_OBJECTDRAG,&amp;dg-&gt;dg_Object,dg-&gt;dg_Gadget,words(x-gad-&gt;LeftEdge,y-gad-&gt;TopEdge))) != 0)
+             {
+-              if (sdg = AddDragGadget(gad,win,BOOPSI_KIND))
++              if ((sdg = AddDragGadget(gad,win,BOOPSI_KIND)) != 0)
+               {
+                 if (rc &amp; GMR_FINAL)
+                   sdg-&gt;dg_CurrentObject = dg-&gt;dg_Object.od_Object;
+@@ -168,8 +168,12 @@
+ }
+ 
+ 
+-void PUBLIC GTD_RemoveGadgets(reg (a0) struct Window *win)
++LIB_LH1(void, GTD_RemoveGadgets, 
++  LIB_LHA(struct Window *, win, A0),
++  struct Library *, library, 17, Gtdrag)
+ {
++  LIBFUNC_INIT
++
+   struct DragGadget *dg,*ndg;
+ 
+   ObtainSemaphore(&amp;ListSemaphore);
+@@ -185,6 +189,8 @@
+     }
+   }
+   ReleaseSemaphore(&amp;ListSemaphore);
++
++  LIBFUNC_EXIT
+ }
+ 
+ 
+@@ -201,23 +207,35 @@
+ }
+ 
+ 
+-void PUBLIC GTD_RemoveGadget(reg (a0) struct Gadget *gad)
++LIB_LH1(void, GTD_RemoveGadget, 
++  LIB_LHA(struct Gadget *, gad, A0),
++  struct Library *, library, 16, Gtdrag)
+ {
++  LIBFUNC_INIT
++
+   struct DragGadget *dg;
+ 
+   ObtainSemaphore(&amp;ListSemaphore);
+ 
+-  if (dg = FindDragGadget(gad))
++  if ((dg = FindDragGadget(gad)) != 0)
+   {
+     Remove((struct Node *)dg);
+     FreeMem(dg,sizeof(struct DragGadget));
+   }
+   ReleaseSemaphore(&amp;ListSemaphore);
++
++  LIBFUNC_EXIT
+ }
+ 
+ 
+-BOOL PUBLIC GTD_GetAttr(reg (a0) APTR gad,reg (d0) ULONG tag,reg (a1) ULONG *storage)
++LIB_LH3(BOOL, GTD_GetAttr, 
++  LIB_LHA(APTR, gad, A0),
++  LIB_LHA(ULONG, tag, D0),
++  LIB_LHA(ULONG *, storage, A1),
++  struct Library *, library, 19, Gtdrag)
+ {
++  LIBFUNC_INIT
++
+   struct DragGadget *dg;
+ 
+   if (!storage || !(dg = FindDragGadget(gad)))
+@@ -254,11 +272,18 @@
+       return(TRUE);
+   }
+   return(FALSE);
++
++  LIBFUNC_EXIT
+ }
+ 
+ 
+-void PUBLIC GTD_SetAttrsA(reg (a0) APTR gad,reg (a1) struct TagItem *tags)
++LIB_LH2(void, GTD_SetAttrsA, 
++  LIB_LHA(APTR, gad, A0),
++  LIB_LHA(struct TagItem *, tags, A1),
++  struct Library *, library, 18, Gtdrag)
+ {
++  LIBFUNC_INIT
++
+   struct TagItem *tstate,*ti;
+   struct DragGadget *dg;
+ 
+@@ -269,7 +294,7 @@
+   }
+ 
+   tstate = (struct TagItem *)tags;
+-  while(ti = NextTagItem(&amp;tstate))
++  while((ti = NextTagItem(&amp;tstate)) != 0)
+   {
+     switch(ti-&gt;ti_Tag)
+     {
+@@ -359,6 +384,8 @@
+   }
+   if (dg-&gt;dg_Flags &amp; DGF_TREEVIEW &amp;&amp; dg-&gt;dg_Object.od_Type == ODT_UNKNOWN)
+     dg-&gt;dg_Object.od_Type = ODT_TREENODE;
++
++  LIBFUNC_EXIT
+ }
+ 
+ 
+@@ -385,15 +412,24 @@
+ }
+ 
+ 
+-void PUBLIC GTD_AddGadgetA(reg (d0) ULONG type,reg (a0) struct Gadget *gad,reg (a1) struct Window *win,reg (a2) struct TagItem *tags)
++LIB_LH4(void, GTD_AddGadgetA, 
++  LIB_LHA(ULONG, type, D0),
++  LIB_LHA(struct Gadget *, gad, A0),
++  LIB_LHA(struct Window *, win, A1),
++  LIB_LHA(struct TagItem *, tags, A2),
++  struct Library *, library, 15, Gtdrag)
+ {
++  LIBFUNC_INIT
++
+   struct DragGadget *dg;
+ 
+-  if (dg = AddDragGadget(gad,win,type))
++  if ((dg = AddDragGadget(gad,win,type)) != 0)
+   {
+     GTD_SetAttrsA(gad,tags);
+ 
+     if (!dg-&gt;dg_ItemHeight)
+       dg-&gt;dg_ItemHeight = win-&gt;WScreen-&gt;Font-&gt;ta_YSize;
+   }
++  
++  LIBFUNC_EXIT
+ }
+
+
+Property changes on: trunk/libs/gtdrag/GTD_Gadgets.c
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Modified: trunk/libs/gtdrag/GTD_Highlight.c
+===================================================================
+--- trunk/libs/gtdrag/GTD_Highlight.c	2008-12-13 06:36:25 UTC (rev 6)
++++ trunk/libs/gtdrag/GTD_Highlight.c	2008-12-13 06:49:17 UTC (rev 7)
+@@ -180,7 +180,7 @@
+       hw -= 16;
+       GT_GetGadgetAttrs(hdg-&gt;dg_Gadget,hdg-&gt;dg_Window,NULL,GTLV_Labels,&amp;hdg-&gt;dg_List,TAG_END);
+     }
+-    if (hbm = AllocBitMap(hw,hh,hsrp.BitMap-&gt;Depth,BMF_CLEAR | BMF_MINPLANES,hsrp.BitMap))
++    if ((hbm = AllocBitMap(hw,hh,hsrp.BitMap-&gt;Depth,BMF_CLEAR | BMF_MINPLANES,hsrp.BitMap)) != 0)
+     {
+       InitRastPort(&amp;hrp);
+       hrp.BitMap = hbm;
+@@ -213,5 +213,3 @@
+     }
+   }
+ }
+-
+-
+
+
+Property changes on: trunk/libs/gtdrag/GTD_Highlight.c
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Modified: trunk/libs/gtdrag/GTD_Hook.c
+===================================================================
+--- trunk/libs/gtdrag/GTD_Hook.c	2008-12-13 06:36:25 UTC (rev 6)
++++ trunk/libs/gtdrag/GTD_Hook.c	2008-12-13 06:49:17 UTC (rev 7)
+@@ -12,8 +12,12 @@
+ ULONG  ghostPtrn = 0x44441111;
+ 
+ 
+-struct Hook * PUBLIC GTD_GetHook(reg (d0) ULONG type)
++LIB_LH1(struct Hook *, GTD_GetHook, 
++  LIB_LHA(ULONG, type, D0),
++  struct Library *, library, 20, Gtdrag)
+ {
++  LIBFUNC_INIT
++
+   switch(type)
+   {
+     case GTDH_IMAGE: return(&amp;renderHook);
+@@ -21,6 +25,8 @@
+     case GTDH_IFFSTREAM: return(&amp;iffstreamHook);
+   }
+   return(NULL);
++
++  LIBFUNC_EXIT
+ }
+ 
+ 
+@@ -77,5 +83,3 @@
+   FillOldExtent(rp,bounds,&amp;extent.te_Extent);
+   return(extent.te_Width);
+ }
+-
+-
+
+
+Property changes on: trunk/libs/gtdrag/GTD_Hook.c
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Modified: trunk/libs/gtdrag/GTD_IFFHook.c
+===================================================================
+--- trunk/libs/gtdrag/GTD_IFFHook.c	2008-12-13 06:36:25 UTC (rev 6)
++++ trunk/libs/gtdrag/GTD_IFFHook.c	2008-12-13 06:49:17 UTC (rev 7)
+@@ -12,7 +12,7 @@
+ #define BUFFERSIZE 2048
+ 
+ 
+-ULONG PUBLIC IFFStreamHook(reg (a0) struct Hook *h,reg (a1) struct IFFStreamCmd *sc,reg (a2) struct IFFHandle *iff)
++ULONG PUBLIC IFFStreamHook(REG(a0, struct Hook *h), REG(a2, struct IFFHandle *iff), REG(a1, struct IFFStreamCmd *sc))
+ {
+   struct IFFStreamHookData *is = h-&gt;h_Data;
+ 
+@@ -72,6 +72,3 @@
+ 
+   return(0L);
+ }
+-
+-
+-
+
+
+Property changes on: trunk/libs/gtdrag/GTD_IFFHook.c
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Modified: trunk/libs/gtdrag/GTD_IMsgs.c
+===================================================================
+--- trunk/libs/gtdrag/GTD_IMsgs.c	2008-12-13 06:36:25 UTC (rev 6)
++++ trunk/libs/gtdrag/GTD_IMsgs.c	2008-12-13 06:49:17 UTC (rev 7)
+@@ -76,14 +76,14 @@
+   else if (class == IDCMP_MOUSEBUTTONS &amp;&amp; dg)
+     EndDrag();
+ 
+-  if (gmsg = GT_FilterIMsg(msg))
++  if ((gmsg = GT_FilterIMsg(msg)) != 0)
+   {
+     da-&gt;da_GTMsg = TRUE;
+     msg = gmsg;
+     if (fakemsg &amp;&amp; (class == IDCMP_GADGETUP || class == IDCMP_MOUSEBUTTONS))
+     {
+       msg = GT_PostFilterIMsg(msg);
+-      ReplyMsg(msg);
++      ReplyMsg((struct Message*)msg);
+       fakemsg = FALSE;
+       msg = NULL;
+     }
+@@ -92,18 +92,22 @@
+ }
+ 
+ 
+-struct IntuiMessage * PUBLIC GTD_GetIMsg(reg (a0) struct MsgPort *mp)
++LIB_LH1(struct IntuiMessage *, GTD_GetIMsg, 
++  LIB_LHA(struct MsgPort *, mp, A0),
++  struct Library *, library, 5, Gtdrag)
+ {
++  LIBFUNC_INIT
++
+   struct IntuiMessage *msg;
+   struct DragApp *da;
+ 
+-  if (da = GetDragApp(NULL))
++  if ((da = GetDragApp(NULL)) != 0)
+   {
+-    while(msg = (struct IntuiMessage *)GetMsg(mp))
++    while((msg = (struct IntuiMessage *)GetMsg(mp)) != 0)
+     {
+       msg = HandleIMsg(da,msg);
+       if (!da-&gt;da_GTMsg)
+-        ReplyMsg(msg);
++        ReplyMsg((struct Message *)msg);
+       else
+         return(msg);
+     }
+@@ -112,46 +116,65 @@
+     return(GT_GetIMsg(mp));
+ 
+   return(NULL);
++
++  LIBFUNC_EXIT
+ }
+ 
+ 
+-struct IntuiMessage * PUBLIC GTD_FilterIMsg(reg (a0) struct IntuiMessage *msg)
++LIB_LH1(struct IntuiMessage *, GTD_FilterIMsg, 
++  LIB_LHA(struct IntuiMessage *, msg, A0),
++  struct Library *, library, 7, Gtdrag)
+ {
++  LIBFUNC_INIT
++
+   struct DragApp *da;
+ 
+-  if (da = GetDragApp(NULL))
++  if ((da = GetDragApp(NULL)) != 0)
+     return(HandleIMsg(da,msg));
+ 
+   return(GT_FilterIMsg(msg));
++
++  LIBFUNC_EXIT
+ }
+ 
+ 
+-void PUBLIC GTD_ReplyIMsg(reg (a0) struct IntuiMessage *msg)
++LIB_LH1(void, GTD_ReplyIMsg, 
++  LIB_LHA(struct IntuiMessage *, msg, A0),
++  struct Library *, library, 6, Gtdrag)
+ {
++  LIBFUNC_INIT
++
+   struct DragApp *da;
+ 
+-  if (da = GetDragApp(NULL))
++  if ((da = GetDragApp(NULL)) != 0)
+   {
+     if (da-&gt;da_GTMsg)
+       msg = GT_PostFilterIMsg(msg);
+ 
+-    ReplyMsg(msg);
++    ReplyMsg((struct Message *)msg);
+   }
+   else
+     GT_ReplyIMsg(msg);
+ 
+-  if (msg = (APTR)GetMsg(dmport))
++  if ((msg = (APTR)GetMsg(dmport)) != 0)
+     FreeDropMessage(msg);
++
++  LIBFUNC_EXIT
+ }
+ 
+ 
+-struct IntuiMessage * PUBLIC GTD_PostFilterIMsg(reg (a0) struct IntuiMessage *msg)
++LIB_LH1(struct IntuiMessage *, GTD_PostFilterIMsg, 
++  LIB_LHA(struct IntuiMessage *, msg, A0),
++  struct Library *, library, 8, Gtdrag)
+ {
++  LIBFUNC_INIT
++
+   struct DragApp *da;
+ 
+   if (!(da = GetDragApp(NULL)) || da-&gt;da_GTMsg)
+     return(GT_PostFilterIMsg(msg));
+ 
+   return(msg);
++
++  LIBFUNC_EXIT
+ }
+-
+
+
+Property changes on: trunk/libs/gtdrag/GTD_IMsgs.c
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Modified: trunk/libs/gtdrag/GTD_ImageHook.c
+===================================================================
+--- trunk/libs/gtdrag/GTD_ImageHook.c	2008-12-13 06:36:25 UTC (rev 6)
++++ trunk/libs/gtdrag/GTD_ImageHook.c	2008-12-13 06:49:17 UTC (rev 7)
+@@ -9,7 +9,7 @@
+ #include &quot;gtdrag_includes.h&quot;
+ 
+ 
+-ULONG PUBLIC RenderHook(reg (a1) struct LVDrawMsg *msg,reg (a2) struct ImageNode *in)
++ULONG RenderHook(REG(a0, struct Hook * h), REG(a2, struct ImageNode *in), REG(a1, struct LVDrawMsg *msg))
+ {
+   struct RastPort *rp;
+   struct Rectangle bounds;
+@@ -88,6 +88,3 @@
+     GhostRect(rp,pens[BLOCKPEN],msg-&gt;lvdm_Bounds.MinX, msg-&gt;lvdm_Bounds.MinY,msg-&gt;lvdm_Bounds.MaxX, msg-&gt;lvdm_Bounds.MaxY);
+   return(LVCB_OK);
+ }
+-
+-
+-
+
+
+Property changes on: trunk/libs/gtdrag/GTD_ImageHook.c
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Modified: trunk/libs/gtdrag/GTD_Tree.c
+===================================================================
+--- trunk/libs/gtdrag/GTD_Tree.c	2008-12-13 06:36:25 UTC (rev 6)
++++ trunk/libs/gtdrag/GTD_Tree.c	2008-12-13 06:49:17 UTC (rev 7)
+@@ -7,13 +7,14 @@
+ 
+ 
+ #include &quot;gtdrag_includes.h&quot;
++#include &quot;compatibility.h&quot;
+ 
+ 
+-#define NewList(l) NewList((struct List *)(l))
+-#define RemHead(l) RemHead((struct List *)(l))
+-#define AddTail(l,n) AddTail((struct List *)(l),(struct Node *)(n))
+-#define AddHead(l,n) AddHead((struct List *)(l),(struct Node *)(n))
+-#define FindName(l,s) (APTR)FindName((struct List *)(l),(s))
++#define MyNewList(l) NewList((struct List *)(l))
++#define MyRemHead(l) RemHead((struct List *)(l))
++#define MyAddTail(l,n) AddTail((struct List *)(l),(struct Node *)(n))
++#define MyAddHead(l,n) AddHead((struct List *)(l),(struct Node *)(n))
++#define MyFindName(l,s) (APTR)FindName((struct List *)(l),(s))
+ 
+ 
+ /** @short adds a TreeNode to a list
+@@ -43,13 +44,21 @@
+  *  @see FreeTreeNodes()
+  */
+ 
+-struct TreeNode * PUBLIC AddTreeNode(reg (a0) APTR pool,reg (a1) struct MinList *tree,reg (a2) STRPTR name,reg (a3) struct Image *im,reg (d0) UWORD flags)
++LIB_LH5(struct TreeNode *, AddTreeNode, 
++  LIB_LHA(APTR, pool, A0),
++  LIB_LHA(struct MinList *, tree, A1),
++  LIB_LHA(STRPTR, name, A2),
++  LIB_LHA(struct Image *, im, A3),
++  LIB_LHA(UWORD, flags, D0),
++  struct Library *, library, 29, Gtdrag)
+ {
++  LIBFUNC_INIT
++
+   struct TreeNode *tn;
+ 
+-  if (tn = AllocPooled(pool,sizeof(struct TreeNode)))
++  if ((tn = AllocPooled(pool,sizeof(struct TreeNode))) != 0)
+   {
+-    NewList(&amp;tn-&gt;tn_Nodes);
++    MyNewList(&amp;tn-&gt;tn_Nodes);
+     tn-&gt;tn_Node.in_Name = name;
+     tn-&gt;tn_Node.in_Image = im;
+     tn-&gt;tn_Flags = flags;
+@@ -63,9 +72,11 @@
+       Insert((struct List *)tree,(struct Node *)tn,(struct Node *)stn-&gt;tn_Node.in_Pred);
+     }
+     else
+-      AddTail(tree,tn);
++      MyAddTail(tree,tn);
+   }
+   return(tn);
++
++  LIBFUNC_EXIT
+ }
+ 
+ /** @short frees the tree nodes
+@@ -80,17 +91,24 @@
+  *  @see AddTreeNode()
+  */
+ 
+-void PUBLIC FreeTreeNodes(reg (a0) APTR pool,reg (a1) struct MinList *list)
++LIB_LH2(void, FreeTreeNodes, 
++  LIB_LHA(APTR, pool, A0),
++  LIB_LHA(struct MinList *, list, A1),
++  struct Library *, library, 28, Gtdrag)
+ {
++  LIBFUNC_INIT
++
+   struct TreeNode *tn;
+ 
+-  while(tn = (APTR)RemHead(list))
++  while((tn = (APTR)MyRemHead(list)) != 0)
+   {
+     if (tn-&gt;tn_Flags &amp; TNF_CONTAINER)
+       FreeTreeNodes(pool,&amp;tn-&gt;tn_Nodes);
+ 
+     FreePooled(pool,tn,sizeof(struct TreeNode));
+   }
++
++  LIBFUNC_EXIT
+ }
+ 
+ /** @short frees the TreeList contents
+@@ -104,10 +122,17 @@
+  *  @see FreeTreeNodes()
+  */
+ 
+-void PUBLIC FreeTreeList(reg (a0) APTR pool,reg (a1) struct TreeList *tl)
++LIB_LH2(void, FreeTreeList, 
++  LIB_LHA(APTR, pool, A0),
++  LIB_LHA(struct TreeList *, tl, A1),
++  struct Library *, library, 26, Gtdrag)
+ {
+-  NewList(&amp;tl-&gt;tl_View);
++  LIBFUNC_INIT
++
++  MyNewList(&amp;tl-&gt;tl_View);
+   FreeTreeNodes(pool,&amp;tl-&gt;tl_Tree);
++
++  LIBFUNC_EXIT
+ }
+ 
+ /** @short closes an open TreeNode
+@@ -124,8 +149,13 @@
+  *  @see ToggleTreeNode()
+  */
+ 
+-void PUBLIC CloseTreeNode(reg (a0) struct MinList *main,reg (a1) struct TreeNode *tn)
++LIB_LH2(void, CloseTreeNode, 
++  LIB_LHA(struct MinList *, main, A0),
++  LIB_LHA(struct TreeNode *, tn, A1),
++  struct Library *, library, 30, Gtdrag)
+ {
++  LIBFUNC_INIT
++
+   struct TreeNode *itn;
+ 
+   if (!main || !tn)
+@@ -141,6 +171,8 @@
+     if ((itn-&gt;tn_Flags &amp; (TNF_CONTAINER | TNF_OPEN)) == (TNF_CONTAINER | TNF_OPEN))
+       CloseTreeNode(main,itn);
+   }
++
++  LIBFUNC_EXIT
+ }
+ 
+ /** @short opens a closed TreeNode
+@@ -158,8 +190,13 @@
+  *  @see ToggleTreeNode()
+  */
+ 
+-LONG PUBLIC OpenTreeNode(reg (a0) struct MinList *main,reg (a1) struct TreeNode *tn)
++LIB_LH2(LONG, OpenTreeNode, 
++  LIB_LHA(struct MinList *, main, A0),
++  LIB_LHA(struct TreeNode *, tn, A1),
++  struct Library *, library, 31, Gtdrag)
+ {
++  LIBFUNC_INIT
++
+   struct MinNode *insertln;
+   struct TreeNode *itn;
+   long   count = 0;
+@@ -180,6 +217,8 @@
+     insertln = insertln-&gt;mln_Pred;
+   }
+   return count;
++
++  LIBFUNC_EXIT
+ }
+ 
+ /** @short toggles a TreeNode between closes/open
+@@ -197,8 +236,13 @@
+  *  @see OpenTreeNode()
+  */
+ 
+-LONG PUBLIC ToggleTreeNode(reg (a0) struct MinList *main,reg (a1) struct TreeNode *tn)
++LIB_LH2(LONG, ToggleTreeNode, 
++  LIB_LHA(struct MinList *, main, A0),
++  LIB_LHA(struct TreeNode *, tn, A1),
++  struct Library *, library, 32, Gtdrag)
+ {
++  LIBFUNC_INIT
++
+   if (!main || !tn)
+     return(0);
+ 
+@@ -219,6 +263,8 @@
+     tn-&gt;tn_Flags = (tn-&gt;tn_Flags &amp; ~TNF_REPLACE) | TNF_ADD;
+ 
+   return(0);
++
++  LIBFUNC_EXIT
+ }
+ 
+ 
+@@ -229,7 +275,7 @@
+   foreach(list,tn)
+   {
+     if (flags &amp; TNF_OPEN)
+-      AddTail(main,&amp;tn-&gt;tn_ViewNode);
++      MyAddTail(main,&amp;tn-&gt;tn_ViewNode);
+     else
+       tn-&gt;tn_ViewNode.mln_Succ = NULL;
+ 
+@@ -260,10 +306,16 @@
+  *  @param tl a pointer to the TreeList
+  */
+ 
+-void PUBLIC InitTreeList(reg (a0) struct TreeList *tl)
++LIB_LH1(void, InitTreeList, 
++  LIB_LHA(struct TreeList *, tl, A0),
++  struct Library *, library, 27, Gtdrag)
+ {
+-  NewList(&amp;tl-&gt;tl_View);
++  LIBFUNC_INIT
++
++  MyNewList(&amp;tl-&gt;tl_View);
+   FillTreeList(&amp;tl-&gt;tl_View,&amp;tl-&gt;tl_Tree,0,TNF_OPEN,0);
++
++  LIBFUNC_EXIT
+ }
+ 
+ /** @short gets the container of a TreeNode
+@@ -275,13 +327,19 @@
+  *  @return container the container TreeNode or NULL
+  */
+ 
+-struct TreeNode * PUBLIC GetTreeContainer(reg (a0) struct TreeNode *tn)
++LIB_LH1(struct TreeNode *, GetTreeContainer, 
++  LIB_LHA(struct TreeNode *, tn, A0),
++  struct Library *, library, 33, Gtdrag)
+ {
++  LIBFUNC_INIT
++
+   if (!tn || !tn-&gt;tn_Depth)
+     return(NULL);
+ 
+   for(;tn-&gt;tn_Node.in_Pred;tn = (APTR)tn-&gt;tn_Node.in_Pred);
+   return((struct TreeNode *)((UBYTE *)tn - sizeof(struct MinNode) - sizeof(struct ImageNode)));
++
++  LIBFUNC_EXIT
+ }
+ 
+ /** @short finds the path of a TreeNode
+@@ -296,15 +354,21 @@
+  *  @return path returns the buffer or NULL for failure
+  */
+ 
+-STRPTR PUBLIC GetTreePath(reg (a0) struct TreeNode *tn,reg (a1) STRPTR buffer,reg (d0) LONG len)
++LIB_LH3(STRPTR, GetTreePath, 
++  LIB_LHA(struct TreeNode *, tn, A0),
++  LIB_LHA(STRPTR, buffer, A1),
++  LIB_LHA(LONG, len, D0),
+
+[... truncated: 1694 lines follow ...]
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000012.html">[Ignition-commits] r6 - in trunk/libs/textedit: . fd include/clib include/gadgets include/pragmas include/proto test
+</A></li>
+	<LI>Next message: <A HREF="000003.html">[Ignition-commits] r8 - in trunk/libs/gtdrag: docs examples
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2">[ date ]</a>
+              <a href="thread.html#2">[ thread ]</a>
+              <a href="subject.html#2">[ subject ]</a>
+              <a href="author.html#2">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

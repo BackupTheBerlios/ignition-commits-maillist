@@ -1,0 +1,388 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r61 - in trunk/libs/textedit: . include	include/clib include/defines include/pragmas include/proto sfd
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2010-December/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r61%20-%20in%20trunk/libs/textedit%3A%20.%20include%0A%09include/clib%20include/defines%20include/pragmas%20include/proto%20sfd&In-Reply-To=%3C20101226171029.6EC64480580%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000091.html">
+   <LINK REL="Next"  HREF="000093.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r61 - in trunk/libs/textedit: . include	include/clib include/defines include/pragmas include/proto sfd</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r61%20-%20in%20trunk/libs/textedit%3A%20.%20include%0A%09include/clib%20include/defines%20include/pragmas%20include/proto%20sfd&In-Reply-To=%3C20101226171029.6EC64480580%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r61 - in trunk/libs/textedit: . include	include/clib include/defines include/pragmas include/proto sfd">marust at mail.berlios.de
+       </A><BR>
+    <I>Sun Dec 26 18:10:29 CET 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000091.html">[Ignition-commits] r60 - in trunk/libs/textedit: . test
+</A></li>
+        <LI>Next message: <A HREF="000093.html">[Ignition-commits] r62 - in trunk/libs/textedit: . include/proto
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#92">[ date ]</a>
+              <a href="thread.html#92">[ thread ]</a>
+              <a href="subject.html#92">[ subject ]</a>
+              <a href="author.html#92">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2010-12-26 18:10:29 +0100 (Sun, 26 Dec 2010)
+New Revision: 61
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=61&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=61&amp;view=rev</A>
+
+Added:
+   trunk/libs/textedit/include/defines/
+   trunk/libs/textedit/include/defines/TextEdit.h
+   trunk/libs/textedit/sfd/
+   trunk/libs/textedit/sfd/TextEdit_lib.sfd
+Removed:
+   trunk/libs/textedit/fd/
+Modified:
+   trunk/libs/textedit/TextEdit_includes.h
+   trunk/libs/textedit/include/clib/TextEdit_protos.h
+   trunk/libs/textedit/include/pragmas/TextEdit_pragmas.h
+   trunk/libs/textedit/include/proto/TextEdit.h
+Log:
+Replaced fd by sfd for using with sfdc (it has support for AROS).
+Created proto, defines and pragmas includes with sfdc tool.
+
+
+Modified: trunk/libs/textedit/TextEdit_includes.h
+===================================================================
+--- trunk/libs/textedit/TextEdit_includes.h	2010-12-26 11:12:57 UTC (rev 60)
++++ trunk/libs/textedit/TextEdit_includes.h	2010-12-26 17:10:29 UTC (rev 61)
+@@ -7,22 +7,12 @@
+ 
+ #define INTUI_V36_NAMES_ONLY
+ 
+-#if !defined(__AROS__)
+-#	define __USE_SYSBASE
+-
+-#	define SysBase cb-&gt;cb_SysBase
+-#	define IntuitionBase cb-&gt;cb_IntuitionBase
+-#	define GfxBase cb-&gt;cb_GfxBase
+-#	define DOSBase cb-&gt;cb_DOSBase
+-#	define UtilityBase cb-&gt;cb_UtilityBase
+-#	define IFFParseBase cb-&gt;cb_IFFParseBase
+-#endif
+-
+ #define ConsoleDevice ((struct Library *)cb-&gt;cb_Console.io_Device)
+ 
+ #include &quot;TextEdit_private.h&quot;
+ 
+ #include &quot;SDI_compiler.h&quot;
++#include &quot;compatibility.h&quot;
+ 
+ #include &lt;exec/execbase.h&gt;
+ #include &lt;exec/libraries.h&gt;
+@@ -49,16 +39,17 @@
+ #include &lt;proto/utility.h&gt;
+ #include &lt;proto/dos.h&gt;
+ 
+-#if defined(__SASC)
+-#	include &lt;pragmas/exec_pragmas.h&gt;
+-#	include &lt;pragmas/iffparse_pragmas.h&gt;
+-#	include &lt;pragmas/console_pragmas.h&gt;
+-#	include &lt;pragmas/intuition_pragmas.h&gt;
+-#	include &lt;pragmas/graphics_pragmas.h&gt;
+-#	include &lt;pragmas/utility_pragmas.h&gt;
+-#	include &lt;pragmas/dos_pragmas.h&gt;
++#if !defined(__AROS__)
++// AROS gets SysBase from linker
++#define SysBase cb-&gt;cb_SysBase
+ #endif
+ 
++#define IntuitionBase cb-&gt;cb_IntuitionBase
++#define GfxBase cb-&gt;cb_GfxBase
++#define DOSBase cb-&gt;cb_DOSBase
++#define UtilityBase cb-&gt;cb_UtilityBase
++#define IFFParseBase cb-&gt;cb_IFFParseBase
++
+ #include &lt;stdlib.h&gt;
+ #include &lt;ctype.h&gt;
+ #include &lt;string.h&gt;
+@@ -140,10 +131,6 @@
+ 
+ /** public functions **/
+ 
+-
+-#if defined(__AROS__)
+-#	include &lt;proto/pTextEdit.h&gt;
+-#else
+ /* Mazze: ClassBase moved to end of argument list */
+ extern Class * PUBLIC GetClass(REG(a6, APTR cb));
+ extern void PUBLIC Text2Clipboard(REG(d0, UBYTE clipunit),REG(a0, STRPTR t),REG(d1, long len),REG(a6, struct ClassBase *cb));
+@@ -151,6 +138,5 @@
+ extern IPTR PUBLIC DispatchEditGadget(REG(a0, Class *cl),REG(a2, Object *o),REG(a1, Msg msg));
+ extern void PUBLIC FreeEditList(REG(a0, struct EditGData *ed),REG(a6, struct ClassBase *cb));
+ extern BOOL PUBLIC PrepareEditText(REG(a0, struct EditGData *ed),REG(a1, struct RastPort *rp),REG(a2, STRPTR t),REG(a6, struct ClassBase *cb));
+-#endif
+ 
+ #endif    // TEXTEDIT_H
+
+Modified: trunk/libs/textedit/include/clib/TextEdit_protos.h
+===================================================================
+--- trunk/libs/textedit/include/clib/TextEdit_protos.h	2010-12-26 11:12:57 UTC (rev 60)
++++ trunk/libs/textedit/include/clib/TextEdit_protos.h	2010-12-26 17:10:29 UTC (rev 61)
+@@ -21,9 +21,10 @@
+ /*--- functions in V1 or higher ---*/
+ 
+ /* Public entries */
+-Class *GetClass(APTR classbase);
++Class *GetClass(void);
+ void Text2Clipboard(UBYTE clipunit,STRPTR t,LONG len);
+ STRPTR TextFromClipboard(UBYTE clipunit,APTR pool);
++void FreeEditList(struct EditGData *ed);
+ void PrepareEditText(struct EditGData *ed,struct RastPort *rp,STRPTR t);
+ 
+ #endif   /* CLIB_TEXTEDIT_PROTOS_H */
+
+Added: trunk/libs/textedit/include/defines/TextEdit.h
+===================================================================
+--- trunk/libs/textedit/include/defines/TextEdit.h	                        (rev 0)
++++ trunk/libs/textedit/include/defines/TextEdit.h	2010-12-26 17:10:29 UTC (rev 61)
+@@ -0,0 +1,48 @@
++/* Automatically generated header! Do not edit! */
++
++#ifndef _INLINE_TEXTEDIT_H
++#define _INLINE_TEXTEDIT_H
++
++#ifndef AROS_LIBCALL_H
++#include &lt;aros/libcall.h&gt;
++#endif /* !AROS_LIBCALL_H */
++
++#ifndef TEXTEDIT_BASE_NAME
++#define TEXTEDIT_BASE_NAME TextEditBase
++#endif /* !TEXTEDIT_BASE_NAME */
++
++#define GetClass() __GetClass_WB(TEXTEDIT_BASE_NAME)
++#define __GetClass_WB(___base) \
++	AROS_LC0(Class *, GetClass, \
++	struct Library *, (___base), 5, Textedit)
++
++#define Text2Clipboard(___unit, ___string, ___len) __Text2Clipboard_WB(TEXTEDIT_BASE_NAME, ___unit, ___string, ___len)
++#define __Text2Clipboard_WB(___base, ___unit, ___string, ___len) \
++	AROS_LC3NR(void, Text2Clipboard, \
++	AROS_LCA(UBYTE, (___unit), D0), \
++	AROS_LCA(STRPTR, (___string), A0), \
++	AROS_LCA(LONG, (___len), D1), \
++	struct Library *, (___base), 6, Textedit)
++
++#define TextFromClipboard(___unit, ___pool) __TextFromClipboard_WB(TEXTEDIT_BASE_NAME, ___unit, ___pool)
++#define __TextFromClipboard_WB(___base, ___unit, ___pool) \
++	AROS_LC2(STRPTR, TextFromClipboard, \
++	AROS_LCA(UBYTE, (___unit), D0), \
++	AROS_LCA(APTR, (___pool), A0), \
++	struct Library *, (___base), 7, Textedit)
++
++#define FreeEditList(___ed) __FreeEditList_WB(TEXTEDIT_BASE_NAME, ___ed)
++#define __FreeEditList_WB(___base, ___ed) \
++	AROS_LC1NR(void, FreeEditList, \
++	AROS_LCA(struct EditGData *, (___ed), A0), \
++	struct Library *, (___base), 8, Textedit)
++
++#define PrepareEditText(___ed, ___rp, ___string) __PrepareEditText_WB(TEXTEDIT_BASE_NAME, ___ed, ___rp, ___string)
++#define __PrepareEditText_WB(___base, ___ed, ___rp, ___string) \
++	AROS_LC3NR(void, PrepareEditText, \
++	AROS_LCA(struct EditGData *, (___ed), A0), \
++	AROS_LCA(struct RastPort *, (___rp), A1), \
++	AROS_LCA(STRPTR, (___string), A2), \
++	struct Library *, (___base), 9, Textedit)
++
++#endif /* !_INLINE_TEXTEDIT_H */
+
+
+Property changes on: trunk/libs/textedit/include/defines/TextEdit.h
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + LF
+
+Modified: trunk/libs/textedit/include/pragmas/TextEdit_pragmas.h
+===================================================================
+--- trunk/libs/textedit/include/pragmas/TextEdit_pragmas.h	2010-12-26 11:12:57 UTC (rev 60)
++++ trunk/libs/textedit/include/pragmas/TextEdit_pragmas.h	2010-12-26 17:10:29 UTC (rev 61)
+@@ -1,13 +1,61 @@
+-/*--- functions in V1 or higher ---*/
+-/**/
+-/* Public functions */
+-/**/
+-#pragma libcall TextEditBase GetClass 1e E01
+-#pragma libcall TextEditBase Text2Clipboard 24 18003
+-#pragma libcall TextEditBase TextFromClipboard 2a 8002
+-/**/
+-/* &quot;private&quot; functions */
+-/**/
+-#pragma libcall TextEditBase FreeEditList 30 801
+-#pragma libcall TextEditBase PrepareEditText 36 A9803
++/* Automatically generated header! Do not edit! */
++#ifndef PRAGMAS_TEXTEDIT_PRAGMAS_H
++#define PRAGMAS_TEXTEDIT_PRAGMAS_H
+ 
++/*
++**	$VER: textedit_pragmas.h  
++**
++**	Direct ROM interface (pragma) definitions.
++**
++**	Copyright &#169; 2010 pinc Software
++**	    All Rights Reserved
++*/
++
++#if defined(LATTICE) || defined(__SASC) || defined(_DCC)
++#ifndef __CLIB_PRAGMA_LIBCALL
++#define __CLIB_PRAGMA_LIBCALL
++#endif /* __CLIB_PRAGMA_LIBCALL */
++#else /* __MAXON__, __STORM__ or AZTEC_C */
++#ifndef __CLIB_PRAGMA_AMICALL
++#define __CLIB_PRAGMA_AMICALL
++#endif /* __CLIB_PRAGMA_AMICALL */
++#endif /* */
++
++#if defined(__SASC_60) || defined(__STORM__)
++#ifndef __CLIB_PRAGMA_TAGCALL
++#define __CLIB_PRAGMA_TAGCALL
++#endif /* __CLIB_PRAGMA_TAGCALL */
++#endif /* __MAXON__, __STORM__ or AZTEC_C */
++
++#ifdef __CLIB_PRAGMA_LIBCALL
++ #pragma libcall TextEditBase GetClass 1e 00
++#endif /* __CLIB_PRAGMA_LIBCALL */
++#ifdef __CLIB_PRAGMA_AMICALL
++ #pragma amicall(TextEditBase, 0x1e, GetClass())
++#endif /* __CLIB_PRAGMA_AMICALL */
++#ifdef __CLIB_PRAGMA_LIBCALL
++ #pragma libcall TextEditBase Text2Clipboard 24 18003
++#endif /* __CLIB_PRAGMA_LIBCALL */
++#ifdef __CLIB_PRAGMA_AMICALL
++ #pragma amicall(TextEditBase, 0x24, Text2Clipboard(d0,a0,d1))
++#endif /* __CLIB_PRAGMA_AMICALL */
++#ifdef __CLIB_PRAGMA_LIBCALL
++ #pragma libcall TextEditBase TextFromClipboard 2a 8002
++#endif /* __CLIB_PRAGMA_LIBCALL */
++#ifdef __CLIB_PRAGMA_AMICALL
++ #pragma amicall(TextEditBase, 0x2a, TextFromClipboard(d0,a0))
++#endif /* __CLIB_PRAGMA_AMICALL */
++#ifdef __CLIB_PRAGMA_LIBCALL
++ #pragma libcall TextEditBase FreeEditList 30 801
++#endif /* __CLIB_PRAGMA_LIBCALL */
++#ifdef __CLIB_PRAGMA_AMICALL
++ #pragma amicall(TextEditBase, 0x30, FreeEditList(a0))
++#endif /* __CLIB_PRAGMA_AMICALL */
++#ifdef __CLIB_PRAGMA_LIBCALL
++ #pragma libcall TextEditBase PrepareEditText 36 a9803
++#endif /* __CLIB_PRAGMA_LIBCALL */
++#ifdef __CLIB_PRAGMA_AMICALL
++ #pragma amicall(TextEditBase, 0x36, PrepareEditText(a0,a1,a2))
++#endif /* __CLIB_PRAGMA_AMICALL */
++
++#endif /* PRAGMAS_TEXTEDIT_PRAGMAS_H */
+
+Modified: trunk/libs/textedit/include/proto/TextEdit.h
+===================================================================
+--- trunk/libs/textedit/include/proto/TextEdit.h	2010-12-26 11:12:57 UTC (rev 60)
++++ trunk/libs/textedit/include/proto/TextEdit.h	2010-12-26 17:10:29 UTC (rev 61)
+@@ -1,7 +1,35 @@
++/* Automatically generated header! Do not edit! */
++
+ #ifndef PROTO_TEXTEDIT_H
+ #define PROTO_TEXTEDIT_H
+-#include &lt;exec/types.h&gt;
+-extern struct Library *TextEditBase;
+-#include &lt;clib/TextEdit_protos.h&gt;
+-#include &lt;pragmas/TextEdit_pragmas.h&gt;
+-#endif
++
++#include &lt;clib/textedit_protos.h&gt;
++
++#ifndef _NO_INLINE
++# if defined(__GNUC__)
++#  ifdef __AROS__
++#   include &lt;defines/TextEdit.h&gt;
++#  else
++#   include &lt;inline/TextEdit.h&gt;
++#  endif
++# else
++#  include &lt;pragmas/TextEdit_pragmas.h&gt;
++# endif
++#endif /* _NO_INLINE */
++
++#ifdef __amigaos4__
++# include &lt;interfaces/TextEdit.h&gt;
++# ifndef __NOGLOBALIFACE__
++   extern struct TextEditIFace *ITextEdit;
++# endif /* __NOGLOBALIFACE__*/
++#else /* !__amigaos4__ */
++# ifndef __NOLIBBASE__
++   extern struct Library *
++#  ifdef __CONSTLIBBASEDECL__
++    __CONSTLIBBASEDECL__
++#  endif /* __CONSTLIBBASEDECL__ */
++   TextEditBase;
++# endif /* !__NOLIBBASE__ */
++#endif /* !__amigaos4__ */
++
++#endif /* !PROTO_TEXTEDIT_H */
+
+Added: trunk/libs/textedit/sfd/TextEdit_lib.sfd
+===================================================================
+--- trunk/libs/textedit/sfd/TextEdit_lib.sfd	                        (rev 0)
++++ trunk/libs/textedit/sfd/TextEdit_lib.sfd	2010-12-26 17:10:29 UTC (rev 61)
+@@ -0,0 +1,14 @@
++==base _TextEditBase
++==basetype struct Library *
++==libname pTextEdit.gadget
++==copyright Copyright &#169; 2010 pinc Software
++==bias 30
++==public
++==include &lt;exec/types.h&gt;
++==include &lt;gadgets/TextEdit.h&gt;
++Class * GetClass() ()
++void Text2Clipboard(UBYTE unit, STRPTR string, LONG len) (d0,a0,d1)
++STRPTR TextFromClipboard(UBYTE unit, APTR pool) (d0,a0)
++void FreeEditList(struct EditGData * ed) (a0)
++void PrepareEditText(struct EditGData * ed, struct RastPort * rp, STRPTR string) (a0,a1,a2)
++==end
+
+
+Property changes on: trunk/libs/textedit/sfd/TextEdit_lib.sfd
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + LF
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000091.html">[Ignition-commits] r60 - in trunk/libs/textedit: . test
+</A></li>
+	<LI>Next message: <A HREF="000093.html">[Ignition-commits] r62 - in trunk/libs/textedit: . include/proto
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#92">[ date ]</a>
+              <a href="thread.html#92">[ thread ]</a>
+              <a href="subject.html#92">[ subject ]</a>
+              <a href="author.html#92">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

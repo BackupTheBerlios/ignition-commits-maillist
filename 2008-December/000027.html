@@ -1,0 +1,333 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r16 - in trunk: . docs
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2008-December/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r16%20-%20in%20trunk%3A%20.%20docs&In-Reply-To=%3C200812151919.mBFJJgXd021545%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000026.html">
+   <LINK REL="Next"  HREF="000028.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r16 - in trunk: . docs</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r16%20-%20in%20trunk%3A%20.%20docs&In-Reply-To=%3C200812151919.mBFJJgXd021545%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r16 - in trunk: . docs">marust at mail.berlios.de
+       </A><BR>
+    <I>Mon Dec 15 20:19:42 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000026.html">[Ignition-commits] r15 - in trunk: .	distribution	distribution/full/misc help/deutsch help/english libs
+</A></li>
+        <LI>Next message: <A HREF="000028.html">[Ignition-commits] r16 - in trunk: . docs
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27">[ date ]</a>
+              <a href="thread.html#27">[ thread ]</a>
+              <a href="subject.html#27">[ subject ]</a>
+              <a href="author.html#27">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2008-12-15 20:19:35 +0100 (Mon, 15 Dec 2008)
+New Revision: 16
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=16&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=16&amp;view=rev</A>
+
+Added:
+   trunk/docs/ReadMe.html
+   trunk/docs/ReadMe.html.info
+Removed:
+   trunk/docs/Read Me.html
+   trunk/docs/Read Me.html.info
+Modified:
+   trunk/database.c
+   trunk/gadgets.h
+   trunk/handleprefs.c
+   trunk/handlewindows.c
+   trunk/hooks.c
+   trunk/mmakefile.src
+   trunk/popper.c
+   trunk/prefs.c
+   trunk/types.h
+Log:
+Some fixes which were sent by AROS core developer Georg Steger to me:
+
+* Added &quot;if ((WORD)imsg.Code &lt; 0) break;&quot;
+  When clicked into an empty Listview AROS Gadtools emits a GADGETUP message with CODE == -1.
+  This fails where Ignition counts nodes until it reaches imsg.Code. There are probably more places
+  where this has to be fixed.
+ 
+* Changed
+  ULONG  ASM (*l_HookFunction)(REG(a1, struct LVDrawMsg *), REG(a2, APTR));
+  to
+  ULONG  ASM (*l_HookFunction)(REG(a0, APTR), REG(a2, APTR), REG(a1, struct LVDrawMsg *));
+
+  Because AROS x86-32 moves all parameters on the stack it fails if parameters are omitted or have
+  wrong order.
+
+* &quot;if (pattern != 0xff)&quot; --&gt; &quot;if (pattern != -1)&quot;:
+  Because pattern is signed it can never be 0xff.
+
+* &quot;helvetica&quot; -&gt; &quot;arial&quot;
+  Helvetice font doesn't exist on AROS. The result is wrong layout calculation in some places.
+
+Additionally:
+* Renamed Read Me.html to ReadMe.html because copy macro doesn't like spaces in names.
+* Copy docs help rexx etc. to target dir
+
+Modified: trunk/database.c
+===================================================================
+--- trunk/database.c	2008-12-14 22:41:08 UTC (rev 15)
++++ trunk/database.c	2008-12-15 19:19:35 UTC (rev 16)
+@@ -1466,6 +1466,8 @@
+ 			switch(i = (gad = imsg.IAddress)-&gt;GadgetID)
+ 			{
+ 				case 1:  // Database-Liste
++					if ((WORD)imsg.Code &lt; 0)
++						break;
+ 					for(i = 0,db = (APTR)((struct List *)wd-&gt;wd_ExtData[2])-&gt;lh_Head;i &lt; imsg.Code;db = (APTR)db-&gt;db_Node.ln_Succ,i++);
+ 					UpdateDatabaseGadgets(mp,db,NULL);
+ 					break;
+@@ -1566,6 +1568,8 @@
+ 					}
+ 					break;
+ 				case 11:  // Felder-Liste
++					if ((WORD)imsg.Code &lt; 0)
++						break;
+ 					if (db)
+ 					{
+ 						for(i = 0,fi = (APTR)db-&gt;db_Fields.mlh_Head;i &lt; imsg.Code;fi = (APTR)fi-&gt;fi_Node.ln_Succ,i++);
+@@ -1773,6 +1777,8 @@
+ 					}
+ 					break;
+ 				case 7:    // field list
++					if ((WORD)imsg.Code &lt; 0)
++						break;
+ 					if (ma) {
+ 						for(mf = (APTR)ma-&gt;ma_Fields.mlh_Head,i = imsg.Code;i &amp;&amp; mf-&gt;mf_Node.ln_Succ;mf = (APTR)mf-&gt;mf_Node.ln_Succ,i--);
+ 						UpdateMaskGadgets(ma,mf);
+
+Deleted: trunk/docs/Read Me.html
+
+Deleted: trunk/docs/Read Me.html.info
+
+Copied: trunk/docs/ReadMe.html (from rev 14, trunk/docs/Read Me.html)
+
+Copied: trunk/docs/ReadMe.html.info (from rev 14, trunk/docs/Read Me.html.info)
+
+Modified: trunk/gadgets.h
+===================================================================
+--- trunk/gadgets.h	2008-12-14 22:41:08 UTC (rev 15)
++++ trunk/gadgets.h	2008-12-15 19:19:35 UTC (rev 16)
+@@ -163,7 +163,7 @@
+ struct Link {
+ 	struct MinNode l_Node;
+ 	APTR   l_Link;
+-	ULONG  ASM (*l_HookFunction)(REG(a1, struct LVDrawMsg *), REG(a2, APTR));
++	ULONG  ASM (*l_HookFunction)(REG(a0, APTR), REG(a2, APTR), REG(a1, struct LVDrawMsg *));
+ };
+ 
+ 
+
+Modified: trunk/handleprefs.c
+===================================================================
+--- trunk/handleprefs.c	2008-12-14 22:41:08 UTC (rev 15)
++++ trunk/handleprefs.c	2008-12-15 19:19:35 UTC (rev 16)
+@@ -47,6 +47,8 @@
+                 DisenablePrefsGadgets(FALSE);
+             break;
+         case IDCMP_GADGETUP:
++			if ((WORD)imsg.Code &lt; 0)
++				break;
+             if ((gad = imsg.IAddress)-&gt;GadgetID == 1)
+             {
+                 for(tn = (APTR)prefstree.tl_View.mlh_Head,i = 0;i &lt; imsg.Code;tn = (APTR)tn-&gt;tn_Node.in_Succ,i++);
+@@ -2048,6 +2050,8 @@
+ 				switch (id)
+                 {
+                     case 1:  // Namen-Liste
++						if ((WORD)imsg.Code &lt; 0)
++							break;
+                         for(i = 0,nm = (APTR)((struct List *)wd-&gt;wd_ExtData[2])-&gt;lh_Head;i &lt; imsg.Code;nm = (APTR)nm-&gt;nm_Node.ln_Succ,i++);
+                         UpdateNamesGadgets(nm,TRUE);
+                         break;
+
+Modified: trunk/handlewindows.c
+===================================================================
+--- trunk/handlewindows.c	2008-12-14 22:41:08 UTC (rev 15)
++++ trunk/handlewindows.c	2008-12-15 19:19:35 UTC (rev 16)
+@@ -2138,7 +2138,7 @@
+                     if (pages &amp; 2) /* Farbe &amp; Ausrichtung */
+                     {
+                         SetPageColor(rxpage,apen,bpen);
+-                        if (pattern != 0xff)
++						if (pattern != -1)
+                             SetCellPattern(rxpage,patcol,pattern);
+                         if (alignH || alignV)
+                         {
+
+Modified: trunk/hooks.c
+===================================================================
+--- trunk/hooks.c	2008-12-14 22:41:08 UTC (rev 15)
++++ trunk/hooks.c	2008-12-15 19:19:35 UTC (rev 16)
+@@ -605,8 +605,7 @@
+ ULONG PUBLIC LinkHook(REG(a0, struct Hook *h), REG(a2, struct Link *l), REG(a1, struct LVDrawMsg *msg))
+ {
+ 	if (l-&gt;l_HookFunction)
+-		return(l-&gt;l_HookFunction(msg,l-&gt;l_Link));
+-
++		return(l-&gt;l_HookFunction(0, l-&gt;l_Link, msg));
+ 	return(LVCB_OK);
+ }
+ 
+
+Modified: trunk/mmakefile.src
+===================================================================
+--- trunk/mmakefile.src	2008-12-14 22:41:08 UTC (rev 15)
++++ trunk/mmakefile.src	2008-12-15 19:19:35 UTC (rev 16)
+@@ -4,10 +4,13 @@
+ 
+ include $(TOP)/config/make.cfg
+ 
+-#MM- contrib-ignition : contrib-ignition-bin contrib-ignition-icons contrib-ignition-config
++#MM- contrib-ignition : contrib-ignition-bin contrib-ignition-icons contrib-ignition-config \
++#MM  contrib-ignition-help contrib-ignition-rexx contrib-ignition-sheets \
++#MM  contrib-ignition-docs contrib-ignition-files
+ 
+ #MM contrib-ignition-bin : linklibs includes contrib-ignition-textedit \
+-#MM contrib-ignition-scroller contrib-ignition-gtdrag contrib-ignition-catalogs
++#MM contrib-ignition-scroller contrib-ignition-gtdrag contrib-ignition-catalogs \
++#MM contrib-ignition-gcdescr
+ 
+ EXE := Ignition
+ 
+@@ -65,5 +68,19 @@
+ 
+ %copy_dir_recursive mmake=contrib-ignition-icons src=icons dst=$(TARGETDIR)/icons
+ %copy_dir_recursive mmake=contrib-ignition-config src=config dst=$(TARGETDIR)/config
++%copy_dir_recursive mmake=contrib-ignition-docs src=docs dst=$(TARGETDIR)/docs
++%copy_dir_recursive mmake=contrib-ignition-help src=help dst=$(TARGETDIR)/help
++%copy_dir_recursive mmake=contrib-ignition-rexx src=rexx dst=$(TARGETDIR)/rexx
++%copy_dir_recursive mmake=contrib-ignition-sheets src=sheets dst=$(TARGETDIR)/sheets
+ 
++#MM
++contrib-ignition-gcdescr :
++FILES := $(wildcard add-ons/*.gcdescr)
++%copy_files_q files=$(FILES) src=. dst=$(TARGETDIR) maketarget=contrib-ignition-gcdescr
++
++#MM
++contrib-ignition-files :
++FILES := ignition.info LICENSE README
++%copy_files_q files=$(FILES) src=. dst=$(TARGETDIR) maketarget=contrib-ignition-files
++
+ %common
+
+Modified: trunk/popper.c
+===================================================================
+--- trunk/popper.c	2008-12-14 22:41:08 UTC (rev 15)
++++ trunk/popper.c	2008-12-15 19:19:35 UTC (rev 16)
+@@ -309,8 +309,10 @@
+ 		px = 0;
+ 
+ 	if ((bm = AllocBitMap(pw, ph, GetBitMapAttr(rp-&gt;BitMap, BMA_DEPTH), BMF_MINPLANES, rp-&gt;BitMap)) != 0) {
++#ifndef __AROS__ /* quick fix to avoid deadlock */
+ 		LockLayers(&amp;scr-&gt;LayerInfo);
+ 		UnlockLayer(win-&gt;RPort-&gt;Layer);
++#endif
+ 		BltBitMap(rp-&gt;BitMap,px,py,bm,0,0,pw,ph,0xc0,0xff,NULL);
+ 		EraseRect(rp,px,py,px+pw-1,py+ph-1);
+ 
+@@ -370,8 +372,10 @@
+ 		}
+ 		BltBitMapRastPort(bm,0,0,rp,px,py,pw,ph,0xc0);
+ 		FreeBitMap(bm);
++#ifndef __AROS__ /* quick fix to avoid deadlock */
+ 		LockLayer(0, win-&gt;RPort-&gt;Layer);
+ 		UnlockLayers(&amp;scr-&gt;LayerInfo);
++#endif
+ 	}
+ 
+ 	if (noreport)
+
+Modified: trunk/prefs.c
+===================================================================
+--- trunk/prefs.c	2008-12-14 22:41:08 UTC (rev 15)
++++ trunk/prefs.c	2008-12-15 19:19:35 UTC (rev 16)
+@@ -281,7 +281,11 @@
+ 				pd-&gt;pd_ToolBar = TRUE;
+ 				pd-&gt;pd_HelpBar = TRUE;
+ 				pd-&gt;pd_ShowAntis = TRUE;
++#ifdef __AROS__
++				pd-&gt;pd_AntiAttr.ta_Name = AllocString(&quot;arial.font&quot;);
++#else
+ 				pd-&gt;pd_AntiAttr.ta_Name = AllocString(&quot;helvetica.font&quot;);
++#endif	
+ 				pd-&gt;pd_AntiAttr.ta_YSize = 11;
+ 				UpdateAntiFont(pr);
+ 			}
+@@ -307,7 +311,11 @@
+ 				strcpy(ps-&gt;ps_PubName,&quot;Workbench&quot;);
+ 				ps-&gt;ps_BackFill = TRUE;
+ 				ps-&gt;ps_BFColor = 1;
++#ifdef __AROS__
++				ps-&gt;ps_TextAttr.ta_Name = AllocString(&quot;arial.font&quot;);
++#else
+ 				ps-&gt;ps_TextAttr.ta_Name = AllocString(&quot;helvetica.font&quot;);
++#endif
+ 				ps-&gt;ps_TextAttr.ta_YSize = 11;
+ 				ps-&gt;ps_mmWidth = 340 &lt;&lt; 10;
+ 				ps-&gt;ps_mmHeight = 280 &lt;&lt; 10;
+
+Modified: trunk/types.h
+===================================================================
+--- trunk/types.h	2008-12-14 22:41:08 UTC (rev 15)
++++ trunk/types.h	2008-12-15 19:19:35 UTC (rev 16)
+@@ -528,9 +528,16 @@
+ struct Command {
+     struct Command *cmd_Succ;
+     struct Command *cmd_Pred;
++#if defined(__AROS__)
++  #warning FIXME when V1 ABI is out
++    char   *cmd_Name;
+     UBYTE  cmd_Type;
+     BYTE   cmd_Pri;
++#else
++    UBYTE  cmd_Type;
++    BYTE   cmd_Pri;
+     char   *cmd_Name;
++#endif
+ };
+ 
+ #define CMDT_INTERN 0
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000026.html">[Ignition-commits] r15 - in trunk: .	distribution	distribution/full/misc help/deutsch help/english libs
+</A></li>
+	<LI>Next message: <A HREF="000028.html">[Ignition-commits] r16 - in trunk: . docs
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27">[ date ]</a>
+              <a href="thread.html#27">[ thread ]</a>
+              <a href="subject.html#27">[ subject ]</a>
+              <a href="author.html#27">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

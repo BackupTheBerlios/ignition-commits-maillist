@@ -1,0 +1,655 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r5 - in trunk/libs/scroller: . include/gadgets
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2008-December/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r5%20-%20in%20trunk/libs/scroller%3A%20.%20include/gadgets&In-Reply-To=%3C200812130622.mBD6M2rG003259%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000001.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r5 - in trunk/libs/scroller: . include/gadgets</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r5%20-%20in%20trunk/libs/scroller%3A%20.%20include/gadgets&In-Reply-To=%3C200812130622.mBD6M2rG003259%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r5 - in trunk/libs/scroller: . include/gadgets">marust at mail.berlios.de
+       </A><BR>
+    <I>Sat Dec 13 07:22:02 CET 2008</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000001.html">[Ignition-commits] r6 - in trunk/libs/textedit: . fd include/clib	include/gadgets include/pragmas include/proto test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#0">[ date ]</a>
+              <a href="thread.html#0">[ thread ]</a>
+              <a href="subject.html#0">[ subject ]</a>
+              <a href="author.html#0">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2008-12-13 07:21:37 +0100 (Sat, 13 Dec 2008)
+New Revision: 5
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/haiku?rev=5&amp;view=rev">http://svn.berlios.de/viewcvs/haiku?rev=5&amp;view=rev</A>
+
+Added:
+   trunk/libs/scroller/Scroller_lib_aros.c
+   trunk/libs/scroller/mmakefile.src
+   trunk/libs/scroller/pScroller.conf
+Modified:
+   trunk/libs/scroller/
+   trunk/libs/scroller/SMakefile
+   trunk/libs/scroller/Scroller.c
+   trunk/libs/scroller/Scroller_includes.h
+   trunk/libs/scroller/Scroller_lib.c
+   trunk/libs/scroller/Scroller_rev.i
+   trunk/libs/scroller/Scroller_romtag.asm
+   trunk/libs/scroller/include/gadgets/Scroller.h
+Log:
+* AROS/GCC port
+
+
+Property changes on: trunk/libs/scroller
+___________________________________________________________________
+Name: svn:ignore
+   + mmakefile
+
+
+
+Property changes on: trunk/libs/scroller/SMakefile
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Modified: trunk/libs/scroller/Scroller.c
+===================================================================
+--- trunk/libs/scroller/Scroller.c	2008-12-11 22:38:32 UTC (rev 4)
++++ trunk/libs/scroller/Scroller.c	2008-12-13 06:21:37 UTC (rev 5)
+@@ -3,80 +3,21 @@
+  * Licensed under the terms of the MIT License.
+  */
+ 
+-//!	init &amp; support functions.
++//!	dispatcher functions.
+ 
+ 
+ #include &quot;Scroller_includes.h&quot;
+ 
+ 
+-Class * PUBLIC GetClass(reg (a6) APTR cb)
+-{
+-  return(((struct ClassBase *)cb)-&gt;cb_ScrollerClass);
+-}
+-
+-
+-void PRIVATE SC_Exit(struct ClassBase *cb)
+-{
+-  if (FreeClass(cb-&gt;cb_ScrollerClass))
+-    cb-&gt;cb_ScrollerClass = NULL;
+-  if (FreeClass(cb-&gt;cb_ArrowClass))
+-    cb-&gt;cb_ArrowClass = NULL;
+-
+-  CloseLibrary(cb-&gt;cb_IntuitionBase);
+-  CloseLibrary((struct Library *)cb-&gt;cb_GfxBase);
+-  CloseLibrary(cb-&gt;cb_UtilityBase);
+-}
+-
+-
+-int PRIVATE SC_Init(struct ClassBase *cb)
+-{
+-  if (cb-&gt;cb_IntuitionBase = OpenLibrary(&quot;intuition.library&quot;,37))
+-  {
+-    if (cb-&gt;cb_GfxBase = (APTR)OpenLibrary(&quot;graphics.library&quot;,37))
+-    {
+-      if (cb-&gt;cb_UtilityBase = OpenLibrary(&quot;utility.library&quot;,37))
+-      {
+-        Class *cl;
+-
+-        if (cl = MakeClass(&quot;pinc-scrollergadget&quot;,&quot;propgclass&quot;,NULL,sizeof(struct ScrollerGData),0))
+-        {
+-          cl-&gt;cl_Dispatcher.h_Entry = (APTR)DispatchScrollerGadget;
+-          cl-&gt;cl_Dispatcher.h_Data = cb;
+-          cl-&gt;cl_UserData = (ULONG)cb;
+-          AddClass(cl);
+-
+-          cb-&gt;cb_ScrollerClass = cl;
+-
+-          if (cl = MakeClass(&quot;pinc-arrowimage&quot;,&quot;imageclass&quot;,NULL,sizeof(struct ArrowIData),0))
+-          {
+-            cl-&gt;cl_Dispatcher.h_Entry = (APTR)DispatchArrowImage;
+-            cl-&gt;cl_Dispatcher.h_Data = cb;
+-            cl-&gt;cl_UserData = (ULONG)cb;
+-            //AddClass(cl);
+-
+-            cb-&gt;cb_ArrowClass = cl;
+-            return(TRUE);
+-          }
+-          FreeClass(cl);
+-        }
+-        CloseLibrary(cb-&gt;cb_UtilityBase);
+-      }
+-      CloseLibrary(cb-&gt;cb_GfxBase);
+-    }
+-    CloseLibrary(cb-&gt;cb_IntuitionBase);
+-  }
+-  return(FALSE);
+-}
+-
+ /********************************** Arrow-Images **********************************/
+ 
+ #define IM(o) ((struct Image *)o)
+ 
+-ULONG PUBLIC DispatchArrowImage(reg (a0) Class *cl,reg (a2) Object *o,reg (a1) Msg msg)
++IPTR PUBLIC DispatchArrowImage(REG(a0, Class *cl), REG(a2, Object *o), REG(a1, Msg msg))
+ {
+   struct ArrowIData *ad;
+   struct ClassBase *cb;
+-  ULONG  retval = 0;
++  IPTR   retval = 0;
+ 
+   ad = INST_DATA(cl,o);
+   cb = (APTR)cl-&gt;cl_UserData;
+@@ -84,7 +25,7 @@
+   switch(msg-&gt;MethodID)
+   {
+     case OM_NEW:
+-      if (retval = DoSuperMethodA(cl,o,msg))
++      if ((retval = DoSuperMethodA(cl,o,msg)) != 0)
+       {
+         IM(retval)-&gt;Width = GetTagData(IA_Width,16,((struct opSet *)msg)-&gt;ops_AttrList);
+         IM(retval)-&gt;Height = GetTagData(IA_Height,13,((struct opSet *)msg)-&gt;ops_AttrList);
+@@ -156,12 +97,12 @@
+ 
+ BOOL PRIVATE DispatchScrollerNew(struct ClassBase *cb,struct ScrollerGData *sd,struct Gadget *gad,struct opSet *ops)
+ {
+-  static ULONG upmap[] = {GA_ID,SGA_Up,TAG_END};
+-  static ULONG downmap[] = {GA_ID,SGA_Down,TAG_END};
++  static struct TagItem upmap[] = {{GA_ID,SGA_Up},{TAG_END}};
++  static struct TagItem downmap[] = {{GA_ID,SGA_Down},{TAG_END}};
+   struct Gadget *previous;
+   long   x,y,w,h;
+ 
+-  if (!(previous = (struct Gadget *)GetTagData(GA_Previous,NULL,ops-&gt;ops_AttrList)))
++  if (!(previous = (struct Gadget *)GetTagData(GA_Previous,0,ops-&gt;ops_AttrList)))
+     return(FALSE);
+   sd-&gt;sd_ItemHeight = GetTagData(SGA_ItemHeight,13,ops-&gt;ops_AttrList);
+ 
+@@ -209,11 +150,11 @@
+ }
+ 
+ 
+-ULONG PUBLIC DispatchScrollerGadget(reg (a0) Class *cl,reg (a2) Object *o,reg (a1) Msg msg)
++IPTR PUBLIC DispatchScrollerGadget(REG(a0, Class *cl), REG(a2, Object *o), REG(a1, Msg msg))
+ {
+   struct ScrollerGData *sd;
+   struct ClassBase *cb;
+-  ULONG  retval = 0;
++  IPTR   retval = 0;
+ 
+   sd = INST_DATA(cl,o);
+   cb = (APTR)cl-&gt;cl_UserData;
+@@ -221,7 +162,7 @@
+   switch(msg-&gt;MethodID)
+   {
+     case OM_NEW:
+-      if (retval = DoSuperMethodA(cl,o,msg))
++      if ((retval = DoSuperMethodA(cl,o,msg)) != 0)
+       {
+         struct Gadget *gad = (struct Gadget *)retval;
+ 
+@@ -241,7 +182,7 @@
+         else
+         {
+           DoMethod(o,OM_DISPOSE);
+-          retval = NULL;
++          retval = 0;
+         }
+       }
+       break;
+@@ -252,7 +193,7 @@
+ 
+       retval = DoSuperMethodA(cl,o,msg);
+ 
+-      if (move = -GetTagData(SGA_Up,0,opu-&gt;opu_AttrList))
++      if ((move = -GetTagData(SGA_Up,0,opu-&gt;opu_AttrList)) != 0)
+         if (!(sd-&gt;sd_Up-&gt;Flags &amp; GFLG_SELECTED))
+           move = 0;
+       if (!move &amp;&amp; (move = GetTagData(SGA_Down,0,opu-&gt;opu_AttrList)))
+@@ -262,16 +203,16 @@
+       {
+         long top;
+ 
+-        if (GetAttr(PGA_Top,o,(ULONG *)&amp;top))
++        if (GetAttr(PGA_Top,o,(IPTR *)&amp;top))
+         {
+           top += move;
+           if (top &gt;= 0)
+           {
+             struct RastPort *rp = ObtainGIRPort(opu-&gt;opu_GInfo);
+-            ULONG  tags[] = {PGA_Top,0,TAG_END};
++            struct TagItem  tags[] = {{PGA_Top,0},{TAG_END}};
+ 
+             SetAttrs(o,PGA_Top,top,TAG_END);
+-            GetAttr(PGA_Top,o,&amp;tags[1]);
++            GetAttr(PGA_Top,o,&amp;tags[0].ti_Data);
+             DoSuperMethod(cl,o,OM_NOTIFY,tags,opu-&gt;opu_GInfo,0);
+             DoSuperMethod(cl,o,GM_RENDER,opu-&gt;opu_GInfo,rp,GREDRAW_UPDATE);
+             ReleaseGIRPort(rp);
+@@ -301,4 +242,3 @@
+   }
+   return(retval);
+ }
+-
+
+
+Property changes on: trunk/libs/scroller/Scroller.c
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Modified: trunk/libs/scroller/Scroller_includes.h
+===================================================================
+--- trunk/libs/scroller/Scroller_includes.h	2008-12-11 22:38:32 UTC (rev 4)
++++ trunk/libs/scroller/Scroller_includes.h	2008-12-13 06:21:37 UTC (rev 5)
+@@ -5,14 +5,20 @@
+ #ifndef SCROLLER_INCLUDES_H
+ #define SCROLLER_INCLUDES_H
+ 
++
+ #define INTUI_V36_NAMES_ONLY
+-#define __USE_SYSBASE
+ 
+-#define SysBase cb-&gt;cb_SysBase
+-#define IntuitionBase cb-&gt;cb_IntuitionBase
+-#define GfxBase cb-&gt;cb_GfxBase
+-#define UtilityBase cb-&gt;cb_UtilityBase
++#if defined(__SASC)
++#	define __USE_SYSBASE
+ 
++#	define SysBase cb-&gt;cb_SysBase
++#	define IntuitionBase cb-&gt;cb_IntuitionBase
++#	define GfxBase cb-&gt;cb_GfxBase
++#	define UtilityBase cb-&gt;cb_UtilityBase
++#endif
++
++#include &quot;SDI_compiler.h&quot;
++
+ #include &lt;exec/execbase.h&gt;
+ #include &lt;exec/libraries.h&gt;
+ #include &lt;exec/nodes.h&gt;
+@@ -29,28 +35,23 @@
+ #include &lt;gadgets/Scroller.h&gt;
+ #include &lt;dos/dos.h&gt;
+ 
+-#include &lt;clib/exec_protos.h&gt;
+-#include &lt;clib/intuition_protos.h&gt;
+-#include &lt;clib/graphics_protos.h&gt;
+-#include &lt;clib/utility_protos.h&gt;
++#include &lt;proto/exec.h&gt;
++#include &lt;proto/intuition.h&gt;
++#include &lt;proto/graphics.h&gt;
++#include &lt;proto/utility.h&gt;
+ 
+-#include &lt;pragmas/exec_pragmas.h&gt;
+-#include &lt;pragmas/intuition_pragmas.h&gt;
+-#include &lt;pragmas/graphics_pragmas.h&gt;
+-#include &lt;pragmas/utility_pragmas.h&gt;
++#if defined(__SASC)
++#	include &lt;pragmas/exec_pragmas.h&gt;
++#	include &lt;pragmas/intuition_pragmas.h&gt;
++#	include &lt;pragmas/graphics_pragmas.h&gt;
++#	include &lt;pragmas/utility_pragmas.h&gt;
++#endif
+ 
+ #include &lt;stdlib.h&gt;
+ #include &lt;ctype.h&gt;
+ #include &lt;string.h&gt;
+ #include &lt;math.h&gt;
+ 
+-#define PUBLIC __asm __saveds
+-#define PRIVATE __regargs
+-#define reg(x) register __ ## x
+-
+-extern void kprintf(STRPTR,...);
+-#define bug kprintf
+-
+ #define ID_FTXT  MAKE_ID('F','T','X','T')
+ #define ID_CHRS  MAKE_ID('C','H','R','S')
+ 
+@@ -101,9 +102,8 @@
+ extern void PRIVATE SC_Exit(struct ClassBase *cb);
+ 
+ /** public functions **/
++extern Class * PUBLIC GetClass(REG(a6, APTR classbase));
++extern IPTR PUBLIC DispatchScrollerGadget(REG(a0, Class *cl),REG(a2, Object *o),REG(a1, Msg msg));
++extern IPTR PUBLIC DispatchArrowImage(REG(a0, Class *cl),REG(a2,Object *o),REG(a1, Msg msg));
+ 
+-extern Class * PUBLIC GetClass(reg (a6) APTR classbase);
+-extern ULONG PUBLIC DispatchScrollerGadget(reg (a0) Class *cl,reg (a2) Object *o,reg (a1) Msg msg);
+-extern ULONG PUBLIC DispatchArrowImage(reg (a0) Class *cl,reg (a2) Object *o,reg (a1) Msg msg);
+-
+ #endif    // SCROLLER_INCLUDES_H
+
+
+Property changes on: trunk/libs/scroller/Scroller_includes.h
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Modified: trunk/libs/scroller/Scroller_lib.c
+===================================================================
+--- trunk/libs/scroller/Scroller_lib.c	2008-12-11 22:38:32 UTC (rev 4)
++++ trunk/libs/scroller/Scroller_lib.c	2008-12-13 06:21:37 UTC (rev 5)
+@@ -9,12 +9,73 @@
+ #include &quot;Scroller_includes.h&quot;
+ 
+ 
+-struct Library * PUBLIC LibInit(reg (a0) BPTR Segment,reg (d0) struct ClassBase *cb,reg (a6) struct ExecBase *ExecBase);
+-struct Library * PUBLIC LibOpen(reg (a6) struct ClassBase *cb);
+-BPTR PUBLIC LibExpunge(reg (a6) struct ClassBase *cb);
+-BPTR PUBLIC LibClose(reg (a6) struct ClassBase *cb);
+-LONG PUBLIC LibNull(reg (a6) struct ClassBase *cb);
++struct Library * PUBLIC LibInit(REG(a0, BPTR Segment),REG(d0, struct ClassBase *cb),REG(a6, struct ExecBase *ExecBase);
++struct Library * PUBLIC LibOpen(REG(a6, struct ClassBase *cb));
++BPTR PUBLIC LibExpunge(REG(a6, struct ClassBase *cb));
++BPTR PUBLIC LibClose(REG(a6, struct ClassBase *cb));
++LONG PUBLIC LibNull(REG(a6, struct ClassBase *cb));
+ 
++
++void PRIVATE SC_Exit(struct ClassBase *cb)
++{
++  if (FreeClass(cb-&gt;cb_ScrollerClass))
++    cb-&gt;cb_ScrollerClass = NULL;
++  if (FreeClass(cb-&gt;cb_ArrowClass))
++    cb-&gt;cb_ArrowClass = NULL;
++
++  CloseLibrary(cb-&gt;cb_IntuitionBase);
++  CloseLibrary((struct Library *)cb-&gt;cb_GfxBase);
++  CloseLibrary(cb-&gt;cb_UtilityBase);
++}
++
++
++int PRIVATE SC_Init(struct ClassBase *cb)
++{
++  if (cb-&gt;cb_IntuitionBase = OpenLibrary(&quot;intuition.library&quot;,37))
++  {
++    if (cb-&gt;cb_GfxBase = (APTR)OpenLibrary(&quot;graphics.library&quot;,37))
++    {
++      if (cb-&gt;cb_UtilityBase = OpenLibrary(&quot;utility.library&quot;,37))
++      {
++        Class *cl;
++
++        if (cl = MakeClass(&quot;pinc-scrollergadget&quot;,&quot;propgclass&quot;,NULL,sizeof(struct ScrollerGData),0))
++        {
++          cl-&gt;cl_Dispatcher.h_Entry = (APTR)DispatchScrollerGadget;
++          cl-&gt;cl_Dispatcher.h_Data = cb;
++          cl-&gt;cl_UserData = (ULONG)cb;
++          AddClass(cl);
++
++          cb-&gt;cb_ScrollerClass = cl;
++
++          if (cl = MakeClass(&quot;pinc-arrowimage&quot;,&quot;imageclass&quot;,NULL,sizeof(struct ArrowIData),0))
++          {
++            cl-&gt;cl_Dispatcher.h_Entry = (APTR)DispatchArrowImage;
++            cl-&gt;cl_Dispatcher.h_Data = cb;
++            cl-&gt;cl_UserData = (ULONG)cb;
++            //AddClass(cl);
++
++            cb-&gt;cb_ArrowClass = cl;
++            return(TRUE);
++          }
++          FreeClass(cl);
++        }
++        CloseLibrary(cb-&gt;cb_UtilityBase);
++      }
++      CloseLibrary(cb-&gt;cb_GfxBase);
++    }
++    CloseLibrary(cb-&gt;cb_IntuitionBase);
++  }
++  return(FALSE);
++}
++
++
++Class * PUBLIC GetClass(REG(a6, APTR cb))
++{
++  return(((struct ClassBase *)cb)-&gt;cb_ScrollerClass);
++}
++
++
+ STATIC APTR LibVectors[] =
+ {
+   LibOpen,
+@@ -39,7 +100,7 @@
+ };
+ 
+ 
+-struct Library * PUBLIC LibInit(reg (a0) BPTR segment,reg (d0) struct ClassBase *cb,reg (a6) struct ExecBase *ExecBase)
++struct Library * PUBLIC LibInit(REG(a0, BPTR segment),REG(d0, struct ClassBase *cb),REG(a6, struct ExecBase *ExecBase))
+ {
+   if(ExecBase-&gt;LibNode.lib_Version &lt; 37)
+     return(NULL);
+@@ -59,7 +120,7 @@
+ }
+ 
+ 
+-struct Library * PUBLIC LibOpen(reg (a6) struct ClassBase *cb)
++struct Library * PUBLIC LibOpen(REG(a6, struct ClassBase *cb))
+ {
+   cb-&gt;cb_LibNode.lib_Flags &amp;= ~LIBF_DELEXP;
+   cb-&gt;cb_LibNode.lib_OpenCnt++;
+@@ -82,7 +143,7 @@
+ }
+ 
+ 
+-BPTR PUBLIC LibExpunge(reg (a6) struct ClassBase *cb)
++BPTR PUBLIC LibExpunge(REG(a6, struct ClassBase *cb))
+ {
+   if (!cb-&gt;cb_LibNode.lib_OpenCnt &amp;&amp; cb-&gt;cb_LibSegment)
+   {
+@@ -100,7 +161,7 @@
+ }
+ 
+ 
+-BPTR PUBLIC LibClose(reg (a6) struct ClassBase *cb)
++BPTR PUBLIC LibClose(REG(a6, struct ClassBase *cb))
+ {
+   if (cb-&gt;cb_LibNode.lib_OpenCnt)
+     cb-&gt;cb_LibNode.lib_OpenCnt--;
+@@ -118,9 +179,7 @@
+ }
+ 
+ 
+-LONG PUBLIC LibNull(reg (a6) struct ClassBase *cb)
++LONG PUBLIC LibNull(REG(a6, struct ClassBase *cb))
+ {
+   return(NULL);
+ }
+-
+-
+
+
+Property changes on: trunk/libs/scroller/Scroller_lib.c
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Added: trunk/libs/scroller/Scroller_lib_aros.c
+===================================================================
+--- trunk/libs/scroller/Scroller_lib_aros.c	2008-12-11 22:38:32 UTC (rev 4)
++++ trunk/libs/scroller/Scroller_lib_aros.c	2008-12-13 06:21:37 UTC (rev 5)
+@@ -0,0 +1,23 @@
++/*
++ * Copyright &#169;1999-2008 pinc Software. All Rights Reserved.
++ * Licensed under the terms of the MIT License.
++ */
++
++//!	AROS init functions.
++
++
++#include &quot;Scroller_includes.h&quot;
++
++#include &lt;aros/symbolsets.h&gt;
++
++struct IClass *pscrollervar;
++struct IClass *parrowvar;
++
++int SC_Init(struct ClassBase *cb)
++{
++  cb-&gt;cb_ScrollerClass = pscrollervar;
++  cb-&gt;cb_ArrowClass = parrowvar;
++  return TRUE;
++}
++
++ADD2OPENLIB(SC_Init, 0);
+
+
+Property changes on: trunk/libs/scroller/Scroller_lib_aros.c
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/libs/scroller/Scroller_rev.i
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/libs/scroller/Scroller_romtag.asm
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/libs/scroller/include/gadgets/Scroller.h
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Added: trunk/libs/scroller/mmakefile.src
+===================================================================
+--- trunk/libs/scroller/mmakefile.src	2008-12-11 22:38:32 UTC (rev 4)
++++ trunk/libs/scroller/mmakefile.src	2008-12-13 06:21:37 UTC (rev 5)
+@@ -0,0 +1,19 @@
++# $Id$
++
++include $(TOP)/config/make.cfg
++
++#MM contrib-ignition-scroller : includes linklibs
++
++FILES := Scroller Scroller_lib_aros
++USER_INCLUDES := -I../include
++
++%build_module mmake=contrib-ignition-scroller \
++  modname=pScroller modtype=gadget \
++  files=$(FILES) uselibs=&quot;amiga rom&quot;
++
++#MM includes-copy
++
++INCLUDE_FILES := include/gadgets/Scroller.h
++%copy_includes path=gadgets dir=include/gadgets
++
++%common
+
+
+Property changes on: trunk/libs/scroller/mmakefile.src
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Added: trunk/libs/scroller/pScroller.conf
+===================================================================
+--- trunk/libs/scroller/pScroller.conf	2008-12-11 22:38:32 UTC (rev 4)
++++ trunk/libs/scroller/pScroller.conf	2008-12-13 06:21:37 UTC (rev 5)
+@@ -0,0 +1,34 @@
++##begin config
++basename pScroller
++libbasetype struct ClassBase
++version 0.2
++date 23.9.2000
++copyright Copyright (C) 1999-2008 pinc Software
++superclass PROPGCLASS
++classdatatype struct ScrollerGData
++dispatcher DispatchScrollerGadget
++classid &quot;pinc-scrollergadget&quot;
++classptr_var pscrollervar
++##end config
++
++##begin cdef
++#include &lt;gadgets/Scroller.h&gt;
++##end cdef
++
++##begin cdefprivate
++#include &quot;Scroller_includes.h&quot;
++extern struct IClass *pscrollervar;
++extern struct IClass *parrowvar;
++##end cdefprivate
++
++##begin class
++##begin config
++basename pArrow
++type image
++superclass IMAGECLASS
++classdatatype struct ArrowIData
++dispatcher DispatchArrowImage
++classid &quot;pinc-arrowimage&quot;
++classptr_var parrowvar
++##end config
++##end class
+
+
+Property changes on: trunk/libs/scroller/pScroller.conf
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000001.html">[Ignition-commits] r6 - in trunk/libs/textedit: . fd include/clib	include/gadgets include/pragmas include/proto test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#0">[ date ]</a>
+              <a href="thread.html#0">[ thread ]</a>
+              <a href="subject.html#0">[ subject ]</a>
+              <a href="author.html#0">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

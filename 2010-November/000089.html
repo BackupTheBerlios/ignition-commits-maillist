@@ -1,0 +1,183 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r59 - trunk/libs/scroller
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2010-November/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r59%20-%20trunk/libs/scroller&In-Reply-To=%3C20101121220706.8D788480F2F%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000088.html">
+   <LINK REL="Next"  HREF="000090.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r59 - trunk/libs/scroller</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r59%20-%20trunk/libs/scroller&In-Reply-To=%3C20101121220706.8D788480F2F%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r59 - trunk/libs/scroller">marust at mail.berlios.de
+       </A><BR>
+    <I>Sun Nov 21 23:07:06 CET 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000088.html">[Ignition-commits] r58 - trunk/libs/scroller
+</A></li>
+        <LI>Next message: <A HREF="000090.html">[Ignition-commits] r59 - trunk/libs/scroller
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#89">[ date ]</a>
+              <a href="thread.html#89">[ thread ]</a>
+              <a href="subject.html#89">[ subject ]</a>
+              <a href="author.html#89">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2010-11-21 23:07:06 +0100 (Sun, 21 Nov 2010)
+New Revision: 59
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=59&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=59&amp;view=rev</A>
+
+Modified:
+   trunk/libs/scroller/Makefile
+   trunk/libs/scroller/Scroller.c
+   trunk/libs/scroller/Scroller_includes.h
+   trunk/libs/scroller/Scroller_lib.c
+Log:
+Finally made it linking.
+
+
+Modified: trunk/libs/scroller/Makefile
+===================================================================
+--- trunk/libs/scroller/Makefile	2010-11-21 18:34:25 UTC (rev 58)
++++ trunk/libs/scroller/Makefile	2010-11-21 22:07:06 UTC (rev 59)
+@@ -1,7 +1,11 @@
+-CC=i386-aros-gcc
+-CFLAGS=-Wall -Wno-pointer-sign -I../../include -Iinclude
+-LDFLAGS=-lgraphics -lintuition -lutility -lrom -nostartfiles
++# Copyright &#169;1999-2010 pinc Software. All Rights Reserved.
++# Licensed under the terms of the MIT License.
+ 
++CC = i386-aros-gcc
++CFLAGS = -Wall -Wno-pointer-sign -I../../include -Iinclude \
++	-D__GRAPHICS_NOLIBBASE__ -D__INTUITION_NOLIBBASE__ -D__UTILITY_NOLIBBASE__
++LDFLAGS = -lrom -nostartfiles
++
+ EXE = ../pScroller.gadget
+ 
+ OBJS = Scroller_lib.o Scroller.o
+
+Modified: trunk/libs/scroller/Scroller.c
+===================================================================
+--- trunk/libs/scroller/Scroller.c	2010-11-21 18:34:25 UTC (rev 58)
++++ trunk/libs/scroller/Scroller.c	2010-11-21 22:07:06 UTC (rev 59)
+@@ -1,5 +1,5 @@
+ /*
+- * Copyright &#169;1999-2008 pinc Software. All Rights Reserved.
++ * Copyright &#169;1999-2010 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the MIT License.
+  */
+ 
+
+Modified: trunk/libs/scroller/Scroller_includes.h
+===================================================================
+--- trunk/libs/scroller/Scroller_includes.h	2010-11-21 18:34:25 UTC (rev 58)
++++ trunk/libs/scroller/Scroller_includes.h	2010-11-21 22:07:06 UTC (rev 59)
+@@ -1,5 +1,5 @@
+ /*
+- * Copyright &#169;1999-2008 pinc Software. All Rights Reserved.
++ * Copyright &#169;1999-2010 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the MIT License.
+  */
+ #ifndef SCROLLER_INCLUDES_H
+@@ -8,15 +8,6 @@
+ 
+ #define INTUI_V36_NAMES_ONLY
+ 
+-#if defined(__SASC)
+-#	define __USE_SYSBASE
+-
+-#	define SysBase cb-&gt;cb_SysBase
+-#	define IntuitionBase cb-&gt;cb_IntuitionBase
+-#	define GfxBase cb-&gt;cb_GfxBase
+-#	define UtilityBase cb-&gt;cb_UtilityBase
+-#endif
+-
+ #include &quot;SDI_compiler.h&quot;
+ #include &quot;compatibility.h&quot;
+ 
+@@ -42,18 +33,19 @@
+ #include &lt;proto/graphics.h&gt;
+ #include &lt;proto/utility.h&gt;
+ 
+-#if defined(__SASC)
+-#	include &lt;pragmas/exec_pragmas.h&gt;
+-#	include &lt;pragmas/intuition_pragmas.h&gt;
+-#	include &lt;pragmas/graphics_pragmas.h&gt;
+-#	include &lt;pragmas/utility_pragmas.h&gt;
+-#endif
+-
+ #include &lt;stdlib.h&gt;
+ #include &lt;ctype.h&gt;
+ #include &lt;string.h&gt;
+ #include &lt;math.h&gt;
+ 
++#if !defined(__AROS__)
++// AROS gets SysBase from the linker.
++#define SysBase cb-&gt;cb_SysBase
++#endif
++#define IntuitionBase cb-&gt;cb_IntuitionBase
++#define GfxBase cb-&gt;cb_GfxBase
++#define UtilityBase cb-&gt;cb_UtilityBase
++
+ #define ID_FTXT  MAKE_ID('F','T','X','T')
+ #define ID_CHRS  MAKE_ID('C','H','R','S')
+ 
+
+Modified: trunk/libs/scroller/Scroller_lib.c
+===================================================================
+--- trunk/libs/scroller/Scroller_lib.c	2010-11-21 18:34:25 UTC (rev 58)
++++ trunk/libs/scroller/Scroller_lib.c	2010-11-21 22:07:06 UTC (rev 59)
+@@ -1,5 +1,5 @@
+ /*
+- * Copyright &#169;1999-2008 pinc Software. All Rights Reserved.
++ * Copyright &#169;1999-2010 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the MIT License.
+  */
+ 
+@@ -9,7 +9,7 @@
+ #include &quot;Scroller_includes.h&quot;
+ 
+ #define VERSION (0)
+-#define REVISION (1)
++#define REVISION (2)
+ #define LIBNAME &quot;pScroller.gadget&quot;
+ #define VSTRING &quot;pScroller.gadget 0.2 (23.9.2000)&quot;
+ #define VERSTAG &quot;$VER: pScroller.gadget 0.2 (23.9.2000)&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000088.html">[Ignition-commits] r58 - trunk/libs/scroller
+</A></li>
+	<LI>Next message: <A HREF="000090.html">[Ignition-commits] r59 - trunk/libs/scroller
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#89">[ date ]</a>
+              <a href="thread.html#89">[ thread ]</a>
+              <a href="subject.html#89">[ subject ]</a>
+              <a href="author.html#89">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

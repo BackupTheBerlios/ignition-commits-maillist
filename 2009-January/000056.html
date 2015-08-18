@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r37 - in trunk: . lib/safeclip libs/textedit	libs/textedit/include/gadgets
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2009-January/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r37%20-%20in%20trunk%3A%20.%20lib/safeclip%20libs/textedit%0A%09libs/textedit/include/gadgets&In-Reply-To=%3C200901211650.n0LGoGN1030429%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000053.html">
+   <LINK REL="Next"  HREF="000057.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r37 - in trunk: . lib/safeclip libs/textedit	libs/textedit/include/gadgets</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r37%20-%20in%20trunk%3A%20.%20lib/safeclip%20libs/textedit%0A%09libs/textedit/include/gadgets&In-Reply-To=%3C200901211650.n0LGoGN1030429%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r37 - in trunk: . lib/safeclip libs/textedit	libs/textedit/include/gadgets">marust at mail.berlios.de
+       </A><BR>
+    <I>Wed Jan 21 17:50:16 CET 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000053.html">[Ignition-commits] r36 - trunk/libs/textedit
+</A></li>
+        <LI>Next message: <A HREF="000057.html">[Ignition-commits] r38 - trunk/add-ons
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#56">[ date ]</a>
+              <a href="thread.html#56">[ thread ]</a>
+              <a href="subject.html#56">[ subject ]</a>
+              <a href="author.html#56">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2009-01-21 17:50:12 +0100 (Wed, 21 Jan 2009)
+New Revision: 37
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=37&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=37&amp;view=rev</A>
+
+Added:
+   trunk/lib/safeclip/generic/
+Removed:
+   trunk/lib/safeclip/gcc-all/
+Modified:
+   trunk/libs/textedit/include/gadgets/TextEdit.h
+   trunk/libs/textedit/pTextEdit.conf
+   trunk/mmakefile.src
+Log:
+* Moved forward declaration &quot;struct EditGData&quot; from
+  TextEdit.h to *.conf file to keep public header free from it.
+* Renamed safeclip/gcc-all to safeclip/generic because there
+  shouldn't be any gcc dependencies.
+
+
+Copied: trunk/lib/safeclip/generic (from rev 34, trunk/lib/safeclip/gcc-all)
+
+Modified: trunk/libs/textedit/include/gadgets/TextEdit.h
+===================================================================
+--- trunk/libs/textedit/include/gadgets/TextEdit.h	2009-01-21 14:14:28 UTC (rev 36)
++++ trunk/libs/textedit/include/gadgets/TextEdit.h	2009-01-21 16:50:12 UTC (rev 37)
+@@ -28,11 +28,4 @@
+ #define EGA_Scroller       TAG_USER+60
+ #define EGA_AutoIndent     TAG_USER+61
+ 
+-/*
+-  Forward declaration, because it's defined in TextEdit_private.h,
+-  but some Library functions need it as parameter.
+-*/
+-
+-struct EditGData;
+-
+ #endif   // GADGETS_TEXTEDIT_H
+
+Modified: trunk/libs/textedit/pTextEdit.conf
+===================================================================
+--- trunk/libs/textedit/pTextEdit.conf	2009-01-21 14:14:28 UTC (rev 36)
++++ trunk/libs/textedit/pTextEdit.conf	2009-01-21 16:50:12 UTC (rev 37)
+@@ -13,6 +13,7 @@
+ 
+ ##begin cdef
+ #include &lt;gadgets/TextEdit.h&gt;
++struct EditGData;
+ ##end cdef
+ 
+ ##begin cdefprivate
+
+Modified: trunk/mmakefile.src
+===================================================================
+--- trunk/mmakefile.src	2009-01-21 14:14:28 UTC (rev 36)
++++ trunk/mmakefile.src	2009-01-21 16:50:12 UTC (rev 37)
+@@ -17,7 +17,7 @@
+ TARGETDIR := $(AROS_CONTRIB)/Office/Ignition
+ 
+ USER_CFLAGS :=
+-USER_INCLUDES := -Ilibs/include -Ilib/safeclip/gcc-all -Ilibs
++USER_INCLUDES := -Ilibs/include -Ilib/safeclip/gcc-generic -Ilibs
+ 
+ FILES := \
+ 	boopsi \
+@@ -55,7 +55,7 @@
+ 	project \
+ 	reference \
+ 	rexx \
+-	lib/safeclip/gcc-all/safeclip \
++	lib/safeclip/generic/safeclip \
+ 	screen \
+ 	search \
+ 	support \
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000053.html">[Ignition-commits] r36 - trunk/libs/textedit
+</A></li>
+	<LI>Next message: <A HREF="000057.html">[Ignition-commits] r38 - trunk/add-ons
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#56">[ date ]</a>
+              <a href="thread.html#56">[ thread ]</a>
+              <a href="subject.html#56">[ subject ]</a>
+              <a href="author.html#56">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

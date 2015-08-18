@@ -1,0 +1,1096 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r6 - in trunk/libs/textedit: . fd include/clib	include/gadgets include/pragmas include/proto test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2008-December/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r6%20-%20in%20trunk/libs/textedit%3A%20.%20fd%20include/clib%0A%09include/gadgets%20include/pragmas%20include/proto%20test&In-Reply-To=%3C200812130636.mBD6acrU027940%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000000.html">
+   <LINK REL="Next"  HREF="000009.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r6 - in trunk/libs/textedit: . fd include/clib	include/gadgets include/pragmas include/proto test</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r6%20-%20in%20trunk/libs/textedit%3A%20.%20fd%20include/clib%0A%09include/gadgets%20include/pragmas%20include/proto%20test&In-Reply-To=%3C200812130636.mBD6acrU027940%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r6 - in trunk/libs/textedit: . fd include/clib	include/gadgets include/pragmas include/proto test">marust at mail.berlios.de
+       </A><BR>
+    <I>Sat Dec 13 07:36:38 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000000.html">[Ignition-commits] r5 - in trunk/libs/scroller: . include/gadgets
+</A></li>
+        <LI>Next message: <A HREF="000009.html">[Ignition-commits] r6 - in trunk/libs/textedit: . fd include/clib include/gadgets include/pragmas include/proto test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#1">[ date ]</a>
+              <a href="thread.html#1">[ thread ]</a>
+              <a href="subject.html#1">[ subject ]</a>
+              <a href="author.html#1">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2008-12-13 07:36:25 +0100 (Sat, 13 Dec 2008)
+New Revision: 6
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/haiku?rev=6&amp;view=rev">http://svn.berlios.de/viewcvs/haiku?rev=6&amp;view=rev</A>
+
+Added:
+   trunk/libs/textedit/TextEdit_lib_aros.c
+   trunk/libs/textedit/mmakefile.src
+   trunk/libs/textedit/pTextEdit.conf
+   trunk/libs/textedit/test/mmakefile.src
+Modified:
+   trunk/libs/textedit/
+   trunk/libs/textedit/SMakefile
+   trunk/libs/textedit/TE_clip.c
+   trunk/libs/textedit/TE_dispatch.c
+   trunk/libs/textedit/TE_draw.c
+   trunk/libs/textedit/TextEdit.c
+   trunk/libs/textedit/TextEdit_includes.h
+   trunk/libs/textedit/TextEdit_lib.c
+   trunk/libs/textedit/TextEdit_rev.i
+   trunk/libs/textedit/TextEdit_romtag.asm
+   trunk/libs/textedit/fd/TextEdit_lib.fd
+   trunk/libs/textedit/include/clib/TextEdit_protos.h
+   trunk/libs/textedit/include/gadgets/TextEdit.h
+   trunk/libs/textedit/include/pragmas/TextEdit_pragmas.h
+   trunk/libs/textedit/include/proto/TextEdit.h
+   trunk/libs/textedit/test/
+   trunk/libs/textedit/test/tedit.c
+Log:
+* AROS/GCC port
+* made struct EditGData public because
+  it's needed as function argument
+
+
+Property changes on: trunk/libs/textedit
+___________________________________________________________________
+Name: svn:ignore
+   + mmakefile
+
+
+
+Property changes on: trunk/libs/textedit/SMakefile
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Modified: trunk/libs/textedit/TE_clip.c
+===================================================================
+--- trunk/libs/textedit/TE_clip.c	2008-12-13 06:21:37 UTC (rev 5)
++++ trunk/libs/textedit/TE_clip.c	2008-12-13 06:36:25 UTC (rev 6)
+@@ -10,14 +10,14 @@
+ #include &quot;dos/dostags.h&quot;
+ 
+ 
+-void PUBLIC internal_Text2Clipboard(reg (d0) UBYTE clipunit,reg (a0) STRPTR t,reg (d1) long len,reg (a6) struct ClassBase *cb)
++void PUBLIC internal_Text2Clipboard(REG(d0, UBYTE clipunit),REG(a0, STRPTR t),REG(d1, long len),REG(a6, struct ClassBase *cb))
+ {
+   struct IFFHandle *iff;
+   long   error;
+ 
+-  if (iff = AllocIFF())
++  if ((iff = AllocIFF()) != 0)
+   {
+-    if (iff-&gt;iff_Stream = (ULONG)OpenClipboard((long)clipunit))
++    if ((iff-&gt;iff_Stream = (ULONG)OpenClipboard((long)clipunit)) != 0)
+     {
+       InitIFFasClip(iff);
+       if (!(error = OpenIFF(iff,IFFF_WRITE)))
+@@ -46,15 +46,15 @@
+ }
+ 
+ 
+-STRPTR PUBLIC internal_TextFromClipboard(reg(d0) UBYTE clipunit,reg (a0) APTR pool,reg (a6) struct ClassBase *cb)
++STRPTR PUBLIC internal_TextFromClipboard(REG(d0, UBYTE clipunit),REG(a0, APTR pool),REG(a6, struct ClassBase *cb))
+ {
+   struct IFFHandle *iff;
+   long   error,size = 1;
+   STRPTR t = NULL,temp;
+ 
+-  if (iff = AllocIFF())
++  if ((iff = AllocIFF()) != 0)
+   {
+-    if (iff-&gt;iff_Stream = (ULONG)OpenClipboard(clipunit))
++    if ((iff-&gt;iff_Stream = (ULONG)OpenClipboard(clipunit)) != 0)
+     {
+       InitIFFasClip(iff);
+ 
+@@ -73,7 +73,7 @@
+ 
+           if ((cn = CurrentChunk(iff)) &amp;&amp; cn-&gt;cn_ID == ID_CHRS &amp;&amp; cn-&gt;cn_Type == ID_FTXT)
+           {
+-            if (temp = AllocPooled(pool,size+cn-&gt;cn_Size+(t ? 1 : 0)))
++            if ((temp = AllocPooled(pool,size+cn-&gt;cn_Size+(t ? 1 : 0))) != 0)
+             {
+               if (t)
+               {
+@@ -119,8 +119,14 @@
+ }
+ 
+ 
+-void PUBLIC Text2Clipboard(reg (d0) UBYTE clipunit,reg (a0) STRPTR t,reg (d1) long len,reg (a6) struct ClassBase *cb)
++LIB_LH3(void, Text2Clipboard,
++  LIB_LHA(UBYTE, clipunit, D0),
++  LIB_LHA(STRPTR, t, A0),
++  LIB_LHA(long, len, D1),
++  struct ClassBase *, cb, 5, pTextEdit)
+ {
++  LIBFUNC_INIT
++
+   struct Task *this;
+ 
+   if (!t || !len || !cb-&gt;cb_IFFParseBase)
+@@ -147,11 +153,18 @@
+   }
+   else
+     internal_Text2Clipboard(clipunit,t,len,cb);
++
++  LIBFUNC_EXIT
+ }
+ 
+ 
+-STRPTR PUBLIC TextFromClipboard(reg(d0) UBYTE clipunit,reg (a0) APTR pool,reg (a6) struct ClassBase *cb)
++LIB_LH2(STRPTR, TextFromClipboard,
++  LIB_LHA(UBYTE, clipunit, A0),
++  LIB_LHA(APTR, pool, A0),
++  struct ClassBase *, cb, 6, pTextEdit)
+ {
++  LIBFUNC_INIT
++
+   struct Task *this;
+ 
+   if (!pool || !cb-&gt;cb_IFFParseBase)
+@@ -184,6 +197,6 @@
+   }
+   else
+     return(internal_TextFromClipboard(clipunit,pool,cb));
++
++  LIBFUNC_EXIT
+ }
+-
+-
+
+
+Property changes on: trunk/libs/textedit/TE_clip.c
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Modified: trunk/libs/textedit/TE_dispatch.c
+===================================================================
+--- trunk/libs/textedit/TE_dispatch.c	2008-12-13 06:21:37 UTC (rev 5)
++++ trunk/libs/textedit/TE_dispatch.c	2008-12-13 06:36:25 UTC (rev 6)
+@@ -7,8 +7,8 @@
+ 
+ 
+ #include &quot;TextEdit_includes.h&quot;
++#include &quot;compatibility.h&quot;
+ 
+-
+ ULONG PRIVATE DispatchEditHandleRawKey(struct ClassBase *cb,struct EditGData *ed,struct gpInput *gpi,struct Gadget *gad,struct InputEvent *ie)
+ {
+   struct RastPort *rp = ObtainGIRPort(gpi-&gt;gpi_GInfo);
+@@ -21,7 +21,7 @@
+   {
+     case CURSORUP:
+     case CURSORDOWN:
+-      if (mln = GetEditCursorLine(ed,ed-&gt;ed_Pos,&amp;line))
++      if ((mln = GetEditCursorLine(ed,ed-&gt;ed_Pos,&amp;line)) != 0)
+         pos = ed-&gt;ed_Text+ed-&gt;ed_Pos-EDITLINE(mln)-&gt;el_Word;
+     case CURSORLEFT:
+     case CURSORRIGHT:
+@@ -37,7 +37,7 @@
+           else
+             mln = ed-&gt;ed_List.mlh_TailPred;
+         }
+-        else if (mln = GetEditCursorLine(ed,ed-&gt;ed_Pos,&amp;line))
++        else if ((mln = GetEditCursorLine(ed,ed-&gt;ed_Pos,&amp;line)) != 0)
+         {
+           struct EditLine *el,*fel = EDITLINE(mln);
+ 
+@@ -98,7 +98,7 @@
+           else
+             for(;mln-&gt;mln_Succ-&gt;mln_Succ &amp;&amp; line &lt; ed-&gt;ed_Lines-1;mln = mln-&gt;mln_Succ,line++);
+         }
+-        else if (mln = GetEditCursorLine(ed,ed-&gt;ed_Pos,&amp;line))
++        else if ((mln = GetEditCursorLine(ed,ed-&gt;ed_Pos,&amp;line)) != 0)
+         {
+           if (ie-&gt;ie_Code == CURSORLEFT)
+             ed-&gt;ed_Pos = EDITLINE(mln)-&gt;el_Word-ed-&gt;ed_Text;
+@@ -167,7 +167,7 @@
+             {
+               case 'c':
+                 DrawEditCursor(cb,rp,gad,ed);
+-                Text2Clipboard(ed-&gt;ed_ClipUnit,ed-&gt;ed_Text+pos,len,cb);
++                Text2Clipboard(ed-&gt;ed_ClipUnit,ed-&gt;ed_Text+pos,len);
+                 ed-&gt;ed_Pos = ed-&gt;ed_MarkPos;
+                 DrawEditCursor(cb,rp,gad,ed);
+                 break;
+@@ -176,9 +176,9 @@
+                 STRPTR t;
+                 long   len;
+ 
+-                if (t = TextFromClipboard(ed-&gt;ed_ClipUnit,ed-&gt;ed_Pool,cb))
++                if ((t = TextFromClipboard(ed-&gt;ed_ClipUnit,ed-&gt;ed_Pool)) != 0)
+                 {
+-                  FreeEditList(cb,ed);
++                  FreeEditList(ed);
+                   if ((len = strlen(t)+1) &gt; ed-&gt;ed_Size-strlen(ed-&gt;ed_Text))
+                     SetEditBuffer(cb,ed,ed-&gt;ed_Size+len);
+                   strins(ed-&gt;ed_Text+ed-&gt;ed_Pos,t);
+@@ -190,16 +190,16 @@
+                 break;
+               }
+               case 'x':
+-                FreeEditList(cb,ed);
++                FreeEditList(ed);
+                 if (len &lt; 2)
+                 {
+-                  Text2Clipboard(ed-&gt;ed_ClipUnit,ed-&gt;ed_Text,strlen(ed-&gt;ed_Text),cb);
++                  Text2Clipboard(ed-&gt;ed_ClipUnit,ed-&gt;ed_Text,strlen(ed-&gt;ed_Text));
+                   *ed-&gt;ed_Text = 0;
+                   ed-&gt;ed_Pos = 0;
+                 }
+                 else
+                 {
+-                  Text2Clipboard(ed-&gt;ed_ClipUnit,ed-&gt;ed_Text+pos,len,cb);
++                  Text2Clipboard(ed-&gt;ed_ClipUnit,ed-&gt;ed_Text+pos,len);
+                   strdel(ed-&gt;ed_Text+pos,len);
+                   ed-&gt;ed_Pos = pos;
+                 }
+@@ -213,7 +213,7 @@
+             switch(c[0])
+             {
+               case 13:   /* Return */
+-                FreeEditList(cb,ed);
++                FreeEditList(ed);
+                 if (ed-&gt;ed_Flags &amp; EDF_AUTOINDENT)
+                 {
+                   int  spaces = 0,pos,i;
+@@ -249,7 +249,7 @@
+                   break;
+                 if (ie-&gt;ie_Qualifier &amp; (IEQUALIFIER_RSHIFT | IEQUALIFIER_LSHIFT | IEQUALIFIER_LALT | IEQUALIFIER_RALT))
+                 {
+-                  if (mln = GetEditCursorLine(ed,ed-&gt;ed_Pos,&amp;line))
++                  if ((mln = GetEditCursorLine(ed,ed-&gt;ed_Pos,&amp;line)) != 0)
+                   {
+                     struct EditLine *el = EDITLINE(mln);
+ 
+@@ -270,13 +270,13 @@
+                         strdel(ed-&gt;ed_Text+ed-&gt;ed_Pos,1);
+                       }
+                     }
+-                    FreeEditList(cb,ed);
++                    FreeEditList(ed);
+                     break;
+                   }
+                 }
+                 else
+                 {
+-                  FreeEditList(cb,ed);
++                  FreeEditList(ed);
+                   if (ed-&gt;ed_Pos &gt; ed-&gt;ed_MarkPos)
+                   {
+                     strdel(ed-&gt;ed_Text+ed-&gt;ed_MarkPos,ed-&gt;ed_Pos-ed-&gt;ed_MarkPos+1);
+@@ -294,7 +294,7 @@
+                   break;
+                 if (ie-&gt;ie_Qualifier &amp; (IEQUALIFIER_RSHIFT | IEQUALIFIER_LSHIFT | IEQUALIFIER_LALT | IEQUALIFIER_RALT))
+                 {
+-                  if (mln = GetEditCursorLine(ed,ed-&gt;ed_Pos,&amp;line))
++                  if ((mln = GetEditCursorLine(ed,ed-&gt;ed_Pos,&amp;line)) != 0)
+                   {
+                     struct EditLine *el = EDITLINE(mln);
+                     STRPTR to = NULL,from = ed-&gt;ed_Text+ed-&gt;ed_Pos;
+@@ -319,12 +319,12 @@
+                     }
+                     if (to)
+                       strdel(from,to-from);
+-                    FreeEditList(cb,ed);
++                    FreeEditList(ed);
+                   }
+                 }
+                 else
+                 {
+-                  FreeEditList(cb,ed);
++                  FreeEditList(ed);
+                   if (ed-&gt;ed_Pos != ed-&gt;ed_MarkPos)
+                   {
+                     strdel(ed-&gt;ed_Text+min(ed-&gt;ed_Pos,ed-&gt;ed_MarkPos),abs(ed-&gt;ed_Pos-ed-&gt;ed_MarkPos)+1);
+@@ -335,7 +335,7 @@
+                 }
+                 break;
+               default:
+-                FreeEditList(cb,ed);
++                FreeEditList(ed);
+                 c[1] = 0;
+                 strins(ed-&gt;ed_Text+ed-&gt;ed_Pos++,c);
+             }
+@@ -343,7 +343,7 @@
+           ed-&gt;ed_MarkPos = ed-&gt;ed_Pos;
+           if (IsListEmpty((struct List *)&amp;ed-&gt;ed_List))
+           {
+-            PrepareEditText(cb,ed,rp,ed-&gt;ed_Text);
++            PrepareEditText(ed,rp,ed-&gt;ed_Text);
+             for(mln = ed-&gt;ed_List.mlh_Head;mln-&gt;mln_Succ &amp;&amp; top;top--,mln = mln-&gt;mln_Succ);
+             ed-&gt;ed_Top = mln;
+ 
+@@ -364,14 +364,14 @@
+   struct DrawInfo *dri;
+   STRPTR t;
+ 
+-  if (dri = (struct DrawInfo *)GetTagData(GA_DrawInfo,NULL,ops-&gt;ops_AttrList))
++  if ((dri = (struct DrawInfo *)GetTagData(GA_DrawInfo,0,ops-&gt;ops_AttrList)) != 0)
+   {
+-    if (ed-&gt;ed_Pool = CreatePool(MEMF_PUBLIC | MEMF_CLEAR,8192,8192))
++    if ((ed-&gt;ed_Pool = CreatePool(MEMF_PUBLIC | MEMF_CLEAR,8192,8192)) != 0)
+     {
+       ed-&gt;ed_GadWidth = ((struct Gadget *)o)-&gt;Width;
+       ed-&gt;ed_LineHeight = dri-&gt;dri_Font-&gt;tf_YSize+2;
+ 
+-      previous = (APTR)GetTagData(GA_Previous,NULL,ops-&gt;ops_AttrList);
++      previous = (APTR)GetTagData(GA_Previous,0,ops-&gt;ops_AttrList);
+       if (GetTagData(EGA_Scroller,FALSE,ops-&gt;ops_AttrList) &amp;&amp; MakeEditScroller(cb,ed,(struct Gadget *)o,previous))
+         ed-&gt;ed_GadWidth -= 16;
+ 
+@@ -388,11 +388,11 @@
+ 
+       if (GetTagData(EGA_ShowControls,0,ops-&gt;ops_AttrList))
+         ed-&gt;ed_Flags |= EDF_SPECIAL;
+-      NewList((struct List *)&amp;ed-&gt;ed_List);
++      NEWLIST((struct List *)&amp;ed-&gt;ed_List);
+       ed-&gt;ed_Top = ed-&gt;ed_List.mlh_Head;
+ 
+-      t = (STRPTR)GetTagData(EGA_Text,NULL,ops-&gt;ops_AttrList);
+-      if (ed-&gt;ed_Text = AllocPooled(ed-&gt;ed_Pool,ed-&gt;ed_Size = (t ? strlen(t) : 0)+4096))
++      t = (STRPTR)GetTagData(EGA_Text,0,ops-&gt;ops_AttrList);
++      if ((ed-&gt;ed_Text = AllocPooled(ed-&gt;ed_Pool,ed-&gt;ed_Size = (t ? strlen(t) : 0)+4096)) != 0)
+       {
+         if (t)
+           CopyMem(t,ed-&gt;ed_Text,strlen(t));
+@@ -405,11 +405,11 @@
+ }
+ 
+ 
+-ULONG PUBLIC DispatchEditGadget(reg (a0) Class *cl,reg (a2) Object *o,reg (a1) Msg msg)
++IPTR DispatchEditGadget(REG(a0, Class *cl), REG(a2, Object *o), REG(a1, Msg msg))
+ {
+   struct EditGData *ed;
+   struct ClassBase *cb;
+-  ULONG  retval = 0;
++  IPTR   retval = 0;
+ 
+   ed = INST_DATA(cl,o);
+   cb = (APTR)cl-&gt;cl_UserData;
+@@ -417,7 +417,7 @@
+   switch(msg-&gt;MethodID)
+   {
+     case OM_NEW:
+-      if (retval = DoSuperMethodA(cl,o,msg))
++      if ((retval = DoSuperMethodA(cl,o,msg)) != 0)
+       {
+         SetAttrs((Object *)retval,GA_TabCycle,TRUE,TAG_END);
+         ed = INST_DATA(cl,retval);
+@@ -425,7 +425,7 @@
+         if (!DispatchEditNew(cb,(struct opSet *)msg,(Object *)retval,ed))
+         {
+           DoSuperMethod(cl,(Object *)retval,OM_DISPOSE);
+-          retval = NULL;
++          retval = 0;
+         }
+       break;
+     }
+@@ -443,7 +443,7 @@
+         struct TagItem *tstate,*ti;
+ 
+         tstate = ((struct opSet *)msg)-&gt;ops_AttrList;
+-        while(ti = NextTagItem(&amp;tstate))
++        while((ti = NextTagItem(&amp;tstate)) != 0)
+         {
+           switch(ti-&gt;ti_Tag)
+           {
+@@ -452,7 +452,7 @@
+               struct RastPort *rp = ObtainGIRPort(((struct opUpdate *)msg)-&gt;opu_GInfo);
+               long   len;
+ 
+-              FreeEditList(cb,ed);
++              FreeEditList(ed);
+               ed-&gt;ed_MarkPos = ed-&gt;ed_Pos = 0;
+               if (ti-&gt;ti_Data)
+               {
+@@ -462,7 +462,7 @@
+               }
+               else
+                 *ed-&gt;ed_Text = 0;
+-              PrepareEditText(cb,ed,rp,ed-&gt;ed_Text);
++              PrepareEditText(ed,rp,ed-&gt;ed_Text);
+               DrawEditGadget(cb,rp,(struct Gadget *)o,((struct opSet *)msg)-&gt;ops_GInfo,ed,FALSE);
+               ReleaseGIRPort(rp);
+               break;
+@@ -510,7 +510,7 @@
+         ed-&gt;ed_Lines = (((struct Gadget *)o)-&gt;Height-2*ed-&gt;ed_BorderV)/ed-&gt;ed_LineHeight;
+         ed-&gt;ed_MinSpace = TextLength(gpr-&gt;gpr_RPort,&quot; &quot;,1);
+         ed-&gt;ed_MaxSpace = 42*ed-&gt;ed_MinSpace;
+-        PrepareEditText(cb,ed,gpr-&gt;gpr_RPort,ed-&gt;ed_Text);
++        PrepareEditText(ed,gpr-&gt;gpr_RPort,ed-&gt;ed_Text);
+ 
+         SetAttrs(ed-&gt;ed_Scroller,PGA_Visible, ed-&gt;ed_Lines,TAG_END);
+         DrawEditGadget(cb,gpr-&gt;gpr_RPort,(struct Gadget *)o,gpr-&gt;gpr_GInfo,ed,TRUE);
+@@ -614,5 +614,3 @@
+   }
+   return(retval);
+ }
+-
+-
+
+
+Property changes on: trunk/libs/textedit/TE_dispatch.c
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Modified: trunk/libs/textedit/TE_draw.c
+===================================================================
+--- trunk/libs/textedit/TE_draw.c	2008-12-13 06:21:37 UTC (rev 5)
++++ trunk/libs/textedit/TE_draw.c	2008-12-13 06:36:25 UTC (rev 6)
+@@ -7,8 +7,8 @@
+ 
+ 
+ #include &quot;TextEdit_includes.h&quot;
++#include &quot;compatibility.h&quot;
+ 
+-
+ void PRIVATE DrawEditCursor(struct ClassBase *cb,struct RastPort *rp,struct Gadget *gad,struct EditGData *ed)
+ {
+   long cx,cy,cw,mx,my,i,j,by,ox,oy;
+@@ -32,11 +32,11 @@
+     GetEditCursorCoord(cb,rp,ed,ed-&gt;ed_MarkPos,&amp;mx,&amp;my,&amp;i);
+     if (cy &gt; my || cy == my &amp;&amp; cx &gt; mx)
+     {
+-      swmem(&amp;cy,&amp;my,sizeof(long));
+-      swmem(&amp;cx,&amp;mx,sizeof(long));
++      swmem((UBYTE *)&amp;cy,(UBYTE *)&amp;my,sizeof(long));
++      swmem((UBYTE *)&amp;cx,(UBYTE *)&amp;mx,sizeof(long));
+     }
+     else
+-      swmem(&amp;cw,&amp;i,sizeof(long));
++      swmem((UBYTE *)&amp;cw,(UBYTE *)&amp;i,sizeof(long));
+ 
+     SetDrMd(rp,COMPLEMENT);
+     if (cy == my &amp;&amp; cy &gt;= 0 &amp;&amp; cy &lt; by)
+@@ -70,11 +70,11 @@
+   {
+     struct Image *im;
+ 
+-    if (im = NewObject(NULL,&quot;frameiclass&quot;,IA_Width,     ed-&gt;ed_GadWidth,
++    if ((im = NewObject(NULL,&quot;frameiclass&quot;,IA_Width,     ed-&gt;ed_GadWidth,
+                                           IA_Height,    gad-&gt;Height,
+                                           IA_FrameType, ed-&gt;ed_FrameType,
+                                           IA_EdgesOnly, TRUE,
+-                                          TAG_END))
++                                          TAG_END)) != 0)
+     {
+       DrawImage(rp,im,gad-&gt;LeftEdge,gad-&gt;TopEdge);
+       DisposeObject(im);
+@@ -141,7 +141,9 @@
+     SetABPenDrMd(rp,ed-&gt;ed_APen,ed-&gt;ed_BPen,JAM1);
+     rp-&gt;AreaPtrn = (unsigned short *)&ghostPtrn;
+     rp-&gt;AreaPtSz = 1;
+-    RectFill(rp,x = gad-&gt;LeftEdge+4,y = gad-&gt;TopEdge+2,x+ed-&gt;ed_GadWidth-10,y+gad-&gt;Height-5);
++    x = gad-&gt;LeftEdge+4;
++    y = gad-&gt;TopEdge+2;
++    RectFill(rp,x,y,x+ed-&gt;ed_GadWidth-10,y+gad-&gt;Height-5);
+     rp-&gt;AreaPtrn = NULL;
+     rp-&gt;AreaPtSz = 0;
+   }
+@@ -151,7 +153,7 @@
+     static long total;
+ 
+     for(mln = ed-&gt;ed_List.mlh_Head;mln-&gt;mln_Succ &amp;&amp; mln != ed-&gt;ed_Top;top++,mln = mln-&gt;mln_Succ);
+-    if (GetAttr(PGA_Top,ed-&gt;ed_Scroller,(ULONG *)&amp;i) &amp;&amp; i == top)
++    if (GetAttr(PGA_Top,(Object *)ed-&gt;ed_Scroller,(IPTR *)&amp;i) &amp;&amp; i == top)
+     {
+       if (total == ed-&gt;ed_TextLines)
+         return;
+@@ -163,5 +165,3 @@
+     DoMethod((APTR)ed-&gt;ed_Scroller,GM_RENDER,gi,rp,GREDRAW_REDRAW);
+   }
+ }
+-
+-
+
+
+Property changes on: trunk/libs/textedit/TE_draw.c
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Modified: trunk/libs/textedit/TextEdit.c
+===================================================================
+--- trunk/libs/textedit/TextEdit.c	2008-12-13 06:21:37 UTC (rev 5)
++++ trunk/libs/textedit/TextEdit.c	2008-12-13 06:36:25 UTC (rev 6)
+@@ -3,71 +3,12 @@
+  * Licensed under the terms of the MIT License.
+  */
+ 
+-//!	init &amp; support functions.
++//!	support functions.
+ 
+ 
+ #include &quot;TextEdit_includes.h&quot;
+ 
+ 
+-Class * PUBLIC GetClass(reg (a6) APTR cb)
+-{
+-  return(((struct ClassBase *)cb)-&gt;cb_Class);
+-}
+-
+-
+-void PRIVATE TE_Exit(struct ClassBase *cb)
+-{
+-  if (FreeClass(cb-&gt;cb_Class))
+-    cb-&gt;cb_Class = NULL;
+-
+-  CloseLibrary(cb-&gt;cb_ScrollerBase);
+-  cb-&gt;cb_ScrollerBase = NULL;
+-  CloseLibrary(cb-&gt;cb_IFFParseBase);
+-  CloseLibrary(cb-&gt;cb_DOSBase);
+-  CloseLibrary(cb-&gt;cb_IntuitionBase);
+-  CloseLibrary((struct Library *)cb-&gt;cb_GfxBase);
+-  CloseLibrary(cb-&gt;cb_UtilityBase);
+-  CloseDevice(&amp;cb-&gt;cb_Console);
+-}
+-
+-
+-int PRIVATE TE_Init(struct ClassBase *cb)
+-{
+-  if (cb-&gt;cb_IntuitionBase = OpenLibrary(&quot;intuition.library&quot;,37))
+-  {
+-    if (cb-&gt;cb_GfxBase = (APTR)OpenLibrary(&quot;graphics.library&quot;,37))
+-    {
+-      if (cb-&gt;cb_UtilityBase = OpenLibrary(&quot;utility.library&quot;,37))
+-      {
+-        if (!OpenDevice(&quot;console.device&quot;,-1,(struct IORequest *)&amp;cb-&gt;cb_Console,0))
+-        {
+-          Class *cl;
+-
+-          if (cl = MakeClass(&quot;pinc-editgadget&quot;,GADGETCLASS,NULL,sizeof(struct EditGData),0))
+-          {
+-            cl-&gt;cl_Dispatcher.h_Entry = (APTR)DispatchEditGadget;
+-            cl-&gt;cl_Dispatcher.h_Data = cb;
+-            cl-&gt;cl_UserData = (ULONG)cb;
+-            AddClass(cl);
+-
+-            if (cb-&gt;cb_IFFParseBase = OpenLibrary(&quot;iffparse.library&quot;,37))
+-              cb-&gt;cb_DOSBase = OpenLibrary(&quot;dos.library&quot;,37);
+-            cb-&gt;cb_Class = cl;
+-
+-            return(TRUE);
+-          }
+-          CloseDevice(&amp;cb-&gt;cb_Console);
+-        }
+-        CloseLibrary(cb-&gt;cb_UtilityBase);
+-      }
+-      CloseLibrary(cb-&gt;cb_GfxBase);
+-    }
+-    CloseLibrary(cb-&gt;cb_IntuitionBase);
+-  }
+-  return(FALSE);
+-}
+-
+-
+ int PRIVATE CountNodes(struct List *l)
+ {
+   struct Node *n;
+@@ -90,19 +31,25 @@
+ }
+ 
+ 
+-void PUBLIC FreeEditList(reg (a6) struct ClassBase *cb,reg (a0) struct EditGData *ed)
++LIB_LH1(VOID, FreeEditList,
++  LIB_LHA(struct EditGData *, ed, A0),
++  struct ClassBase *, cb, 7, pTextEdit)
+ {
++  LIBFUNC_INIT
++
+   struct MinNode *mln;
+   struct EditLine *el;
+   long   count;
+ 
+-  while(mln = (APTR)RemHead((struct List *)&amp;ed-&gt;ed_List))
++  while((mln = (APTR)RemHead((struct List *)&amp;ed-&gt;ed_List)) != 0)
+   {
+     for(count = 0,el = EDITLINE(mln);el-&gt;el_Word;el++,count++);
+     FreePooled(ed-&gt;ed_Pool,mln,sizeof(struct MinNode)+sizeof(STRPTR)+sizeof(ULONG)+sizeof(struct EditLine)*count);
+   }
+   ed-&gt;ed_Top = ed-&gt;ed_List.mlh_Head;
+   ed-&gt;ed_TextLines = 0;
++
++  LIBFUNC_EXIT
+ }
+ 
+ 
+@@ -159,15 +106,21 @@
+ }
+ 
+ 
+-BOOL PUBLIC PrepareEditText(reg (a6) struct ClassBase *cb,reg (a0) struct EditGData *ed,reg (a1) struct RastPort *rp,reg (a2) STRPTR t)
++LIB_LH3(BOOL, PrepareEditText,
++  LIB_LHA(struct EditGData *, ed, A0),
++  LIB_LHA(struct RastPort *, rp, A1),
++  LIB_LHA(STRPTR, t, A2),
++  struct ClassBase *, cb, 8, pTextEdit)
+ {
++  LIBFUNC_INIT
++
+   struct EditLine *stack;
+   long   size = 256;
+   STRPTR s = t;
+ 
+   if (!ed)
+-    return(NULL);
+-  FreeEditList(cb,ed);
++    return 0;
++  FreeEditList(ed);
+ 
+   if (t &amp;&amp; (stack = AllocPooled(ed-&gt;ed_Pool,sizeof(struct EditLine)*size)))
+   {
+@@ -222,7 +175,7 @@
+           else                      /* one word is too long */
+             count++;
+         }
+-        if (mln = AllocPooled(ed-&gt;ed_Pool,sizeof(struct MinNode)+sizeof(STRPTR)+sizeof(ULONG)+sizeof(struct EditLine)*count))
++        if ((mln = AllocPooled(ed-&gt;ed_Pool,sizeof(struct MinNode)+sizeof(STRPTR)+sizeof(ULONG)+sizeof(struct EditLine)*count)) != 0)
+         {
+           AddTail((struct List *)&amp;ed-&gt;ed_List,(struct Node *)mln);
+           if (!*s)
+@@ -251,7 +204,7 @@
+       {
+         struct EditLine *temp;
+ 
+-        if (temp = AllocPooled(ed-&gt;ed_Pool,sizeof(struct EditLine)*(size+256)))
++        if ((temp = AllocPooled(ed-&gt;ed_Pool,sizeof(struct EditLine)*(size+256))) != 0)
+         {
+           CopyMem(stack,temp,(count-1)*sizeof(struct EditLine));
+           FreePooled(ed-&gt;ed_Pool,stack,sizeof(struct EditLine)*size);
+@@ -266,7 +219,7 @@
+     {
+       struct MinNode *mln;
+ 
+-      if (mln = AllocPooled(ed-&gt;ed_Pool,sizeof(struct MinNode)+sizeof(STRPTR)+sizeof(ULONG)+sizeof(struct EditLine)))
++      if ((mln = AllocPooled(ed-&gt;ed_Pool,sizeof(struct MinNode)+sizeof(STRPTR)+sizeof(ULONG)+sizeof(struct EditLine))) != 0)
+       {
+         AddTail((struct List *)&amp;ed-&gt;ed_List,(struct Node *)mln);
+         stack = EDITLINE(mln);
+@@ -278,6 +231,8 @@
+   }
+   ed-&gt;ed_Top = ed-&gt;ed_List.mlh_Head;
+   return(TRUE);
++  
++  LIBFUNC_EXIT
+ }
+ 
+ 
+@@ -395,7 +350,7 @@
+   struct MinNode *cursor,*mln;
+   long   line,top;
+ 
+-  if (cursor = GetEditCursorLine(ed,ed-&gt;ed_Pos,&amp;line))
++  if ((cursor = GetEditCursorLine(ed,ed-&gt;ed_Pos,&amp;line)) != 0)
+   {
+     for(top = 0,mln = ed-&gt;ed_List.mlh_Head;mln-&gt;mln_Succ &amp;&amp; mln != ed-&gt;ed_Top;mln = mln-&gt;mln_Succ,top++);
+     if (line &lt; top || line &gt;= top+ed-&gt;ed_Lines)
+@@ -447,7 +402,7 @@
+ {
+   STRPTR temp;
+ 
+-  if (temp = AllocPooled(ed-&gt;ed_Pool,newsize))
++  if ((temp = AllocPooled(ed-&gt;ed_Pool,newsize)) != 0)
+   {
+     CopyMem(ed-&gt;ed_Text,temp,min(ed-&gt;ed_Size,newsize));
+     if (ed-&gt;ed_Text)
+@@ -456,5 +411,3 @@
+     ed-&gt;ed_Text = temp;
+   }
+ }
+-
+-
+
+
+Property changes on: trunk/libs/textedit/TextEdit.c
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Modified: trunk/libs/textedit/TextEdit_includes.h
+===================================================================
+--- trunk/libs/textedit/TextEdit_includes.h	2008-12-13 06:21:37 UTC (rev 5)
++++ trunk/libs/textedit/TextEdit_includes.h	2008-12-13 06:36:25 UTC (rev 6)
+@@ -6,16 +6,22 @@
+ #define TEXTEDIT_INCLUDES_H
+ 
+ #define INTUI_V36_NAMES_ONLY
+-#define __USE_SYSBASE
+ 
+-#define SysBase cb-&gt;cb_SysBase
+-#define IntuitionBase cb-&gt;cb_IntuitionBase
+-#define GfxBase cb-&gt;cb_GfxBase
+-#define DOSBase cb-&gt;cb_DOSBase
+-#define UtilityBase cb-&gt;cb_UtilityBase
+-#define IFFParseBase cb-&gt;cb_IFFParseBase
++#if !defined(__AROS__)
++#	define __USE_SYSBASE
++
++#	define SysBase cb-&gt;cb_SysBase
++#	define IntuitionBase cb-&gt;cb_IntuitionBase
++#	define GfxBase cb-&gt;cb_GfxBase
++#	define DOSBase cb-&gt;cb_DOSBase
++#	define UtilityBase cb-&gt;cb_UtilityBase
++#	define IFFParseBase cb-&gt;cb_IFFParseBase
++#endif
++
+ #define ConsoleDevice ((struct Library *)cb-&gt;cb_Console.io_Device)
+ 
++#include &quot;SDI_compiler.h&quot;
++
+ #include &lt;exec/execbase.h&gt;
+ #include &lt;exec/libraries.h&gt;
+ #include &lt;exec/nodes.h&gt;
+@@ -33,34 +39,30 @@
+ #include &lt;gadgets/TextEdit.h&gt;
+ #include &lt;dos/dos.h&gt;
+ 
+-#include &lt;clib/exec_protos.h&gt;
+-#include &lt;clib/iffparse_protos.h&gt;
+-#include &lt;clib/console_protos.h&gt;
+-#include &lt;clib/intuition_protos.h&gt;
+-#include &lt;clib/graphics_protos.h&gt;
+-#include &lt;clib/utility_protos.h&gt;
+-#include &lt;clib/dos_protos.h&gt;
++#include &lt;proto/exec.h&gt;
++#include &lt;proto/iffparse.h&gt;
++#include &lt;proto/console.h&gt;
++#include &lt;proto/intuition.h&gt;
++#include &lt;proto/graphics.h&gt;
++#include &lt;proto/utility.h&gt;
++#include &lt;proto/dos.h&gt;
+ 
+-#include &lt;pragmas/exec_pragmas.h&gt;
+-#include &lt;pragmas/iffparse_pragmas.h&gt;
+-#include &lt;pragmas/console_pragmas.h&gt;
+-#include &lt;pragmas/intuition_pragmas.h&gt;
+-#include &lt;pragmas/graphics_pragmas.h&gt;
+-#include &lt;pragmas/utility_pragmas.h&gt;
+-#include &lt;pragmas/dos_pragmas.h&gt;
++#if defined(__SASC)
++#	include &lt;pragmas/exec_pragmas.h&gt;
++#	include &lt;pragmas/iffparse_pragmas.h&gt;
++#	include &lt;pragmas/console_pragmas.h&gt;
++#	include &lt;pragmas/intuition_pragmas.h&gt;
++#	include &lt;pragmas/graphics_pragmas.h&gt;
++#	include &lt;pragmas/utility_pragmas.h&gt;
++#	include &lt;pragmas/dos_pragmas.h&gt;
++#endif
+ 
+ #include &lt;stdlib.h&gt;
+ #include &lt;ctype.h&gt;
+ #include &lt;string.h&gt;
+ #include &lt;math.h&gt;
+ 
+-#define PUBLIC __asm __saveds
+-#define PRIVATE __regargs
+-#define reg(x) register __ ## x
+ 
+-extern void kprintf(STRPTR,...);
+-#define bug kprintf
+-
+ #define ID_FTXT  MAKE_ID('F','T','X','T')
+ #define ID_CHRS  MAKE_ID('C','H','R','S')
+ 
+@@ -85,21 +87,6 @@
+ 
+ /******************************* internal structures *******************************/
+ 
+-struct EditGData
+-{
+-  APTR   ed_Pool;
+-  STRPTR ed_Text;
+-  long   ed_Size,ed_Pos,ed_MarkPos,ed_TextLines;
+-  struct MinList ed_List;
+-  struct MinNode *ed_Top;
+-  UWORD  ed_LineHeight,ed_Spacing,ed_MinSpace,ed_MaxSpace,ed_CharWidth;
+-  UWORD  ed_Width,ed_Lines,ed_MaxSpaces,ed_TabSpaces,ed_GadWidth;
+-  UBYTE  ed_APen,ed_BPen,ed_BorderH,ed_BorderV;
+-  UWORD  ed_Flags;
+-  long   ed_FrameType;
+-  struct Gadget *ed_Scroller;
+-  UBYTE  ed_ClipUnit;
+-};
+ 
+ #define EDF_JUSTIFICATION 3 /* the mask        */
+ #define EDF_MARK 16
+@@ -151,11 +138,17 @@
+ 
+ /** public functions **/
+ 
+-extern Class * PUBLIC GetClass(reg (a6) APTR cb);
+-extern ULONG PUBLIC DispatchEditGadget(reg (a0) Class *cl,reg (a2) Object *o,reg (a1) Msg msg);
+-extern void PUBLIC Text2Clipboard(reg (d0) UBYTE clipunit,reg (a0) STRPTR t,reg (d1) long len,reg (a6) struct ClassBase *cb);
+-extern STRPTR PUBLIC TextFromClipboard(reg (d0) UBYTE clipunit,reg (a0) APTR pool,reg (a6) struct ClassBase *cb);
+-extern void PUBLIC FreeEditList(reg (a6) struct ClassBase *cb,reg (a0) struct EditGData *ed);
+-extern BOOL PUBLIC PrepareEditText(reg (a6) struct ClassBase *cb,reg (a0) struct EditGData *ed,reg (a1) struct RastPort *rp,reg (a2) STRPTR t);
+ 
++#if defined(__AROS__)
++#	include &lt;proto/pTextEdit.h&gt;
++#else
++/* Mazze: ClassBase moved to end of argument list */
++extern Class * PUBLIC GetClass(REG(a6, APTR cb));
++extern void PUBLIC Text2Clipboard(REG(d0, UBYTE clipunit),REG(a0, STRPTR t),REG(d1, long len),REG(a6, struct ClassBase *cb));
++extern STRPTR PUBLIC TextFromClipboard(REG(d0, UBYTE clipunit),REG(a0, APTR pool),REG(a6, struct ClassBase *cb));
++extern IPTR PUBLIC DispatchEditGadget(REG(a0, Class *cl),REG(a2, Object *o),REG(a1, Msg msg));
++extern void PUBLIC FreeEditList(REG(a0, struct EditGData *ed),REG(a6, struct ClassBase *cb));
++extern BOOL PUBLIC PrepareEditText(REG(a0, struct EditGData *ed),REG(a1, struct RastPort *rp),REG(a2, STRPTR t),REG(a6, struct ClassBase *cb));
++#endif
++
+ #endif    // TEXTEDIT_H
+
+
+Property changes on: trunk/libs/textedit/TextEdit_includes.h
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Modified: trunk/libs/textedit/TextEdit_lib.c
+===================================================================
+--- trunk/libs/textedit/TextEdit_lib.c	2008-12-13 06:21:37 UTC (rev 5)
++++ trunk/libs/textedit/TextEdit_lib.c	2008-12-13 06:36:25 UTC (rev 6)
+@@ -9,12 +9,72 @@
+ #include &quot;TextEdit_includes.h&quot;
+ 
+ 
+-struct Library * PUBLIC LibInit(reg (a0) BPTR Segment,reg (d0) struct ClassBase *cb,reg (a6) struct ExecBase *ExecBase);
+-struct Library * PUBLIC LibOpen(reg (a6) struct ClassBase *cb);
+-BPTR PUBLIC LibExpunge(reg (a6) struct ClassBase *cb);
+-BPTR PUBLIC LibClose(reg (a6) struct ClassBase *cb);
+-LONG PUBLIC LibNull(reg (a6) struct ClassBase *cb);
++struct Library * PUBLIC LibInit(REG(a0, BPTR Segment),REG(d0, struct ClassBase *cb),REG(a6, struct ExecBase *ExecBase));
++struct Library * PUBLIC LibOpen(REG(a6, struct ClassBase *cb));
++BPTR PUBLIC LibExpunge(REG(a6, struct ClassBase *cb));
++BPTR PUBLIC LibClose(REG(a6, struct ClassBase *cb));
++LONG PUBLIC LibNull(REG(a6, struct ClassBase *cb));
+ 
++
++Class * PUBLIC GetClass(REG(a6, APTR cb))
++{
++  return(((struct ClassBase *)cb)-&gt;cb_Class);
++}
++
++
++void PRIVATE TE_Exit(struct ClassBase *cb)
++{
++  if (FreeClass(cb-&gt;cb_Class))
++    cb-&gt;cb_Class = NULL;
++
++  CloseLibrary(cb-&gt;cb_ScrollerBase);
++  cb-&gt;cb_ScrollerBase = NULL;
++  CloseLibrary(cb-&gt;cb_IFFParseBase);
++  CloseLibrary(cb-&gt;cb_DOSBase);
++  CloseLibrary(cb-&gt;cb_IntuitionBase);
++  CloseLibrary((struct Library *)cb-&gt;cb_GfxBase);
++  CloseLibrary(cb-&gt;cb_UtilityBase);
++  CloseDevice(&amp;cb-&gt;cb_Console);
++}
++
++
++int PRIVATE TE_Init(struct ClassBase *cb)
++{
++  if (cb-&gt;cb_IntuitionBase = OpenLibrary(&quot;intuition.library&quot;,37))
++  {
++    if (cb-&gt;cb_GfxBase = (APTR)OpenLibrary(&quot;graphics.library&quot;,37))
++    {
++      if (cb-&gt;cb_UtilityBase = OpenLibrary(&quot;utility.library&quot;,37))
++      {
++        if (!OpenDevice(&quot;console.device&quot;,-1,(struct IORequest *)&amp;cb-&gt;cb_Console,0))
++        {
++          Class *cl;
++
++          if (cl = MakeClass(&quot;pinc-editgadget&quot;,GADGETCLASS,NULL,sizeof(struct EditGData),0))
++          {
++            cl-&gt;cl_Dispatcher.h_Entry = (APTR)DispatchEditGadget;
++            cl-&gt;cl_Dispatcher.h_Data = cb;
++            cl-&gt;cl_UserData = (ULONG)cb;
++            AddClass(cl);
++
++            if (cb-&gt;cb_IFFParseBase = OpenLibrary(&quot;iffparse.library&quot;,37))
++              cb-&gt;cb_DOSBase = OpenLibrary(&quot;dos.library&quot;,37);
++            cb-&gt;cb_Class = cl;
++
++            return(TRUE);
++          }
++          CloseDevice(&amp;cb-&gt;cb_Console);
++        }
++        CloseLibrary(cb-&gt;cb_UtilityBase);
++      }
++      CloseLibrary(cb-&gt;cb_GfxBase);
++    }
++    CloseLibrary(cb-&gt;cb_IntuitionBase);
++  }
++  return(FALSE);
++}
++
++
+ STATIC APTR LibVectors[] =
+ {
+   LibOpen,
+@@ -43,7 +103,7 @@
+ };
+ 
+ 
+-struct Library * PUBLIC LibInit(reg (a0) BPTR segment,reg (d0) struct ClassBase *cb,reg (a6) struct ExecBase *ExecBase)
++struct Library * PUBLIC LibInit(REG(a0, BPTR segment),REG(d0, struct ClassBase *cb),REG(a6, struct ExecBase *ExecBase))
+ {
+   if(ExecBase-&gt;LibNode.lib_Version &lt; 37)
+     return(NULL);
+@@ -63,7 +123,7 @@
+ }
+ 
+ 
+-struct Library * PUBLIC LibOpen(reg (a6) struct ClassBase *cb)
++struct Library * PUBLIC LibOpen(REG(a6, struct ClassBase *cb))
+ {
+   cb-&gt;cb_LibNode.lib_Flags &amp;= ~LIBF_DELEXP;
+   cb-&gt;cb_LibNode.lib_OpenCnt++;
+@@ -86,7 +146,7 @@
+ }
+ 
+ 
+-BPTR PUBLIC LibExpunge(reg (a6) struct ClassBase *cb)
++BPTR PUBLIC LibExpunge(REG(a6, struct ClassBase *cb))
+ {
+   if (!cb-&gt;cb_LibNode.lib_OpenCnt &amp;&amp; cb-&gt;cb_LibSegment)
+   {
+@@ -104,7 +164,7 @@
+ }
+ 
+ 
+-BPTR PUBLIC LibClose(reg (a6) struct ClassBase *cb)
++BPTR PUBLIC LibClose(REG(a6, struct ClassBase *cb))
+ {
+   if (cb-&gt;cb_LibNode.lib_OpenCnt)
+     cb-&gt;cb_LibNode.lib_OpenCnt--;
+@@ -122,9 +182,7 @@
+ }
+ 
+ 
+-LONG PUBLIC LibNull(reg (a6) struct ClassBase *cb)
++LONG PUBLIC LibNull(REG(a6, struct ClassBase *cb))
+ {
+   return(NULL);
+ }
+-
+-
+
+
+Property changes on: trunk/libs/textedit/TextEdit_lib.c
+___________________________________________________________________
+Name: svn:keywords
+   + Author Date Id Revision
+Name: svn:eol-style
+   + native
+
+Added: trunk/libs/textedit/TextEdit_lib_aros.c
+===================================================================
+--- trunk/libs/textedit/TextEdit_lib_aros.c	2008-12-13 06:21:37 UTC (rev 5)
++++ trunk/libs/textedit/TextEdit_lib_aros.c	2008-12-13 06:36:25 UTC (rev 6)
+@@ -0,0 +1,43 @@
++/*
++ * Copyright &#169;1999-2008 pinc Software. All Rights Reserved.
++ * Licensed under the terms of the MIT License.
++ */
++
++//!	library init functions for AROS.
++
++
++#include &quot;TextEdit_includes.h&quot;
++
++#include &lt;aros/symbolsets.h&gt;
++
++struct IClass *ptexteditvar;
++struct Library *TextEditBase;
++
++int TE_LibInit(struct ClassBase *cb)
++{
++	TextEditBase = (struct Library *)cb;
++	InitSemaphore(&amp;cb-&gt;cb_LockSemaphore);
++	return TRUE;
++}
++
++int TE_Init(struct ClassBase *cb)
++{
++	cb-&gt;cb_IFFParseBase = IFFParseBase;
++	cb-&gt;cb_Class = ptexteditvar;
++	cb-&gt;cb_Console.io_Message.mn_Length = sizeof(struct IOStdReq);
++	if (!OpenDevice(&quot;console.device&quot;,-1,(struct IORequest *)&amp;cb-&gt;cb_Console,0))
++	    return TRUE;
++
++	return FALSE;
++}
++
++void TE_Exit(struct ClassBase *cb)
++{
++	CloseLibrary(cb-&gt;cb_ScrollerBase);
++	cb-&gt;cb_ScrollerBase = NULL;
++	CloseDevice((struct IORequest *)&amp;cb-&gt;cb_Console);
++}
++
++ADD2INITLIB(TE_LibInit, 0);
++ADD2OPENLIB(TE_Init, 0);
++ADD2CLOSELIB(TE_Exit, 0);
+
+
+Property changes on: trunk/libs/textedit/TextEdit_lib_aros.c
+___________________________________________________________________
+
+[... truncated: 326 lines follow ...]
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000000.html">[Ignition-commits] r5 - in trunk/libs/scroller: . include/gadgets
+</A></li>
+	<LI>Next message: <A HREF="000009.html">[Ignition-commits] r6 - in trunk/libs/textedit: . fd include/clib include/gadgets include/pragmas include/proto test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#1">[ date ]</a>
+              <a href="thread.html#1">[ thread ]</a>
+              <a href="subject.html#1">[ subject ]</a>
+              <a href="author.html#1">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

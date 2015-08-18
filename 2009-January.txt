@@ -1,0 +1,5878 @@
+From marust at mail.berlios.de  Fri Jan  2 16:36:50 2009
+From: marust at mail.berlios.de (marust at mail.berlios.de)
+Date: Fri, 2 Jan 2009 16:36:50 +0100
+Subject: [Ignition-commits] r30 - trunk
+Message-ID: <200901021536.n02FaofO015959@sheep.berlios.de>
+
+Author: marust
+Date: 2009-01-02 16:36:49 +0100 (Fri, 02 Jan 2009)
+New Revision: 30
+ViewCVS: http://svn.berlios.de/viewcvs/ignition?rev=30&view=rev
+
+Modified:
+   trunk/mmakefile.src
+Log:
+* Copying of the *.*descr files didn't work.
+
+Modified: trunk/mmakefile.src
+===================================================================
+--- trunk/mmakefile.src	2008-12-26 15:55:16 UTC (rev 29)
++++ trunk/mmakefile.src	2009-01-02 15:36:49 UTC (rev 30)
+@@ -74,10 +74,13 @@
+ %copy_dir_recursive mmake=contrib-ignition-rexx src=rexx dst=$(TARGETDIR)/rexx
+ %copy_dir_recursive mmake=contrib-ignition-sheets src=distribution/full/sheets dst=$(TARGETDIR)/sheets
+ 
++
++DESCFILES := $(wildcard add-ons/*.gcdescr) $(wildcard add-ons/*.iodescr)
++
+ #MM
+ contrib-ignition-descr :
+-DESCFILES := $(wildcard add-ons/*.gcdescr) $(wildcard add-ons/*.iodescr)
+-%copy_files_q files=$(DESCFILES) src=$(TOP)/$(CURDIR) dst=$(TARGETDIR) maketarget=contrib-ignition-descr
++	$(MKDIR) $(TARGETDIR)/add-ons
++	$(CP) $(DESCFILES) $(TARGETDIR)/add-ons
+ 
+ #MM
+ contrib-ignition-files :
+
+
+
+From axeld at mail.berlios.de  Tue Jan 20 15:59:37 2009
+From: axeld at mail.berlios.de (axeld at BerliOS)
+Date: Tue, 20 Jan 2009 15:59:37 +0100
+Subject: [Ignition-commits] r31 - in trunk: . add-ons libs/include
+	libs/textedit
+Message-ID: <200901201459.n0KExbXb007578@sheep.berlios.de>
+
+Author: axeld
+Date: 2009-01-20 15:59:36 +0100 (Tue, 20 Jan 2009)
+New Revision: 31
+ViewCVS: http://svn.berlios.de/viewcvs/ignition?rev=31&view=rev
+
+Added:
+   trunk/libs/textedit/TextEdit_private.h
+Modified:
+   trunk/Makefile
+   trunk/add-ons/Makefile
+   trunk/add-ons/csv.c
+   trunk/add-ons/iotype.c
+   trunk/add-ons/iotype.h
+   trunk/add-ons/turbocalc.c
+   trunk/add-ons/turbocalc.h
+   trunk/font.h
+   trunk/funcs.h
+   trunk/graphic.h
+   trunk/ignition.c
+   trunk/libs/include/SDI_compiler.h
+   trunk/libs/include/compatibility.h
+   trunk/libs/textedit/TextEdit_includes.h
+   trunk/popper.c
+   trunk/windows.h
+Log:
+* Fixed VARARG68K vs. VARARGS68K typo that prevented building on anything
+  but AROS.
+* Fixed other issues that prevented compilation with SAS/C, however, the add-ons
+  are still broken.
+
+
+Modified: trunk/Makefile
+===================================================================
+--- trunk/Makefile	2009-01-02 15:36:49 UTC (rev 30)
++++ trunk/Makefile	2009-01-20 14:59:36 UTC (rev 31)
+@@ -1,6 +1,6 @@
+ ## ignition-Makefile
+ ##
+-## Copyright ???1996-2008 pinc Software. All Rights Reserved.
++## Copyright 1996-2009 pinc Software. All Rights Reserved.
+ ## Licensed under the terms of the GNU General Public License, version 3.
+ 
+ #CFLAGS         = nostkchk afp math=i ign=147
+@@ -13,13 +13,12 @@
+ CPU             = 68020
+ #CPU            = any
+ DEFINES	        =
+-#DEFINES	     = def=IGNITION_DEMO
+-#DEFINES		 = def=IGNITION_LITE_EDITION
+-DEBUG           = dbg=l def=DEBUG def=GDEBUG
+-#DEBUG          = dbg=l def=DEBUG
+-#DEBUG          = nodbg
+-LIBS            = lib:scmieee.lib lib:scnb.lib lib:amiga.lib lib:debug.lib lib:clip.o lib/safeclip.o
+-GST             = include:allnb.gst
++INCLUDES		= idir=libs/include idir=libs
++DEBUG			= dbg=l def=DEBUG def=GDEBUG
++#DEBUG			= dbg=l def=DEBUG
++#DEBUG			= nodbg
++LIBS			= lib:scmieee.lib lib:scnb.lib lib:amiga.lib lib:debug.lib lib:clip.o lib/safeclip.o
++GST				= include:allnb.gst
+ 
+ all:              ignition addons guides
+ 
+@@ -52,11 +51,12 @@
+ clean:
+ 	delete \#?.o
+ 
+-OBJS            = ignition.o prefs.o prefsio.o edit.o table.o cell.o calc.o font.o functions.o \
+-				  handlewindows.o gadgets.o initwindows.o images.o windows.o objects.o debug.o \
+-                  rexx.o support.o project.o io.o classes.o handleprefs.o color.o reference.o \
+-				  prefsgadgets.o graphic.o clip.o undo.o hooks.o database.o pointer.o ignition_strings.o \
+-				  boopsi.o diagram.o printer.o lock.o cmd.o menu.o popper.o screen.o search.o
++OBJS =	ignition.o prefs.o prefsio.o edit.o table.o cell.o calc.o font.o \
++		functions.o handlewindows.o gadgets.o initwindows.o images.o windows.o \
++		objects.o debug.o rexx.o support.o project.o io.o classes.o \
++		handleprefs.o color.o reference.o prefsgadgets.o graphic.o clip.o \
++		undo.o hooks.o database.o pointer.o ignition_strings.o boopsi.o \
++		diagram.o printer.o lock.o cmd.o menu.o popper.o screen.o search.o
+ 
+ windows.o:        windows.c windefs.h version.h
+ screen.o:         version.h types.h
+@@ -73,13 +73,13 @@
+ 
+ .c.o:
+ 	@echo "compiling $*.c"
+-	@sc $(OPTIMIZE) $(CFLAGS) $(DEFINES) $(DEBUG) gst=$(GST) cpu=$(CPU) $*.c
++	@sc $(OPTIMIZE) $(CFLAGS) $(INCLUDES) $(DEFINES) $(DEBUG) gst=$(GST) cpu=$(CPU) $*.c
+ 
+ .c.oo:
+-	sc $(CFLAGS) $(DEBUG) cpu=$(CPU) gst=$(GST) objname=$*.oo $*.c
++	sc $(CFLAGS) $(INCLUDES) $(DEBUG) cpu=$(CPU) gst=$(GST) objname=$*.oo $*.c
+ 
+ .c.ooo:
+-	sc $(OPTIMIZE) $(CFLAGS) $(DEBUG) gst=$(GST) cpu=any objname=$*.ooo $*.c
++	sc $(OPTIMIZE) $(CFLAGS) $(INCLUDES) $(DEBUG) gst=$(GST) cpu=any objname=$*.ooo $*.c
+ 
+ .asm.o:
+ 	asm -D -DCPU_$(CPU) -u $*.asm
+
+Modified: trunk/add-ons/Makefile
+===================================================================
+--- trunk/add-ons/Makefile	2009-01-02 15:36:49 UTC (rev 30)
++++ trunk/add-ons/Makefile	2009-01-20 14:59:36 UTC (rev 31)
+@@ -1,17 +1,17 @@
+ ## ignition-Modules-Makefile
+ ##
+-## Copyright ???1996-2008 pinc Software. All Rights Reserved.
++## Copyright 1996-2009 pinc Software. All Rights Reserved.
+ ## Licensed under the terms of the GNU General Public License, version 3.
+ 
+ .c.o:
+ 	@echo "compiling $*.c"
+-	@sc $(OPTIMIZE) $(CFLAGS) $(DEFINES) $(DEBUG) gst=$(GST) cpu=$(CPU) idir=/ $*.c
++	@sc $(OPTIMIZE) $(CFLAGS) $(INCLUDES) $(DEFINES) $(DEBUG) gst=$(GST) cpu=$(CPU) idir=/ $*.c
+ 
+ .c.oo:
+-	sc $(CFLAGS) $(DEFINES) $(DEBUG) cpu=$(CPU) gst=$(GST) objname=$*.oo $*.c
++	sc $(CFLAGS) $(INCLUDES) $(DEFINES) $(DEBUG) cpu=$(CPU) gst=$(GST) objname=$*.oo $*.c
+ 
+ .c.ooo:
+-	sc $(OPTIMIZE) $(CFLAGS) $(DEBUG) gst=$(GST) cpu=any objname=$*.ooo $*.c
++	sc $(OPTIMIZE) $(CFLAGS) $(INCLUDES) $(DEBUG) gst=$(GST) cpu=any objname=$*.ooo $*.c
+ 
+ .asm.o:
+ 	asm -D -DCPU_$(CPU) -u $*.asm
+@@ -25,6 +25,7 @@
+ OPTIMIZE		= noopt
+ CPU				= 68040
+ #CPU			= 68020
++INCLUDES		= idir=/libs/include idir=/libs
+ #DEFINES		= def=IGNITION_LITE_EDITION
+ DEFINES			=
+ DEBUG			= dbg=l def=DEBUG
+
+Modified: trunk/add-ons/csv.c
+===================================================================
+--- trunk/add-ons/csv.c	2009-01-02 15:36:49 UTC (rev 30)
++++ trunk/add-ons/csv.c	2009-01-20 14:59:36 UTC (rev 31)
+@@ -1,11 +1,12 @@
+ /* ignition CSV-I/O-Module
+  *
+- * Copyright ?1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+ 
+ #include <stdlib.h>
++
+ #include "iotype.h"
+ 
+ 
+
+Modified: trunk/add-ons/iotype.c
+===================================================================
+--- trunk/add-ons/iotype.c	2009-01-02 15:36:49 UTC (rev 30)
++++ trunk/add-ons/iotype.c	2009-01-20 14:59:36 UTC (rev 31)
+@@ -1,6 +1,6 @@
+ /* ignition I/O-Module-Linkfile
+  *
+- * Copyright ???1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the MIT License.
+  */
+ 
+@@ -63,7 +63,9 @@
+ 
+ 
+ struct ExecBase *SysBase;
++#ifndef __SASC
+ struct Library *DOSBase;
++#endif
+ struct Library *MathIeeeDoubBasBase, *MathIeeeDoubTransBase;
+ struct Library *UtilityBase, *LocaleBase;
+ APTR   pool, ioBase;
+
+Modified: trunk/add-ons/iotype.h
+===================================================================
+--- trunk/add-ons/iotype.h	2009-01-02 15:36:49 UTC (rev 30)
++++ trunk/add-ons/iotype.h	2009-01-20 14:59:36 UTC (rev 31)
+@@ -5,7 +5,7 @@
+ **
+ ** ignition IO-module definitions
+ **
+-** Copyright ?2001-2008 pinc Software
++** Copyright 2001-2009 pinc Software
+ ** All Rights Reserved
+ */
+ 
+@@ -24,7 +24,6 @@
+ #include <proto/dos.h>
+ 
+ #if defined(__SASC)
+-#	include <clib/alib_stdio_protos.h>
+ #	include <pragmas/exec_pragmas.h>
+ #	include <pragmas/dos_pragmas.h>
+ #endif
+@@ -62,7 +61,7 @@
+ #define EVT_RBUTTON 7
+ #define NUM_EVENTS 8
+ 
+-#define PG_DINA3 0      // Seitengr??en
++#define PG_DINA3 0      /* Page sizes */
+ #define PG_DINA4 1
+ #define PG_DINA5 2
+ #define PG_USLETTER 3
+@@ -74,9 +73,9 @@
+   long   mp_Flags;
+   STRPTR mp_Path;
+   struct MinList mp_Pages;
+-  ULONG  mp_mmWidth,mp_mmHeight;
+-  ULONG  mp_MediumWidth,mp_MediumHeight;
+-  ULONG  mp_mmMediumWidth,mp_mmMediumHeight;
++  ULONG  mp_mmWidth, mp_mmHeight;
++  ULONG  mp_MediumWidth, mp_MediumHeight;
++  ULONG  mp_mmMediumWidth, mp_mmMediumHeight;
+   struct MinList mp_Projects;
+   struct Page *mp_actPage;
+   struct Window *mp_Window;
+@@ -101,17 +100,17 @@
+   struct Node pg_Node;
+   struct Window *pg_Window;
+   struct Mappe *pg_Mappe;
+-  long   pg_Width,pg_Height;
++  long   pg_Width, pg_Height;
+   BYTE   pg_Flags;
+-  long   pg_Cols,pg_Rows;
++  long   pg_Cols, pg_Rows;
+   struct MinList pg_Table;
+-  struct tableSize *pg_tfWidth,*pg_tfHeight;
+-  UWORD  pg_wTabX,pg_wTabY,pg_wTabW,pg_wTabH;
+-  long   pg_MarkCol,pg_MarkRow,pg_MarkWidth,pg_MarkHeight;
+-  long   pg_MarkX1,pg_MarkY1,pg_MarkX2,pg_MarkY2;
+-  long   pg_SelectCol,pg_SelectRow,pg_SelectWidth,pg_SelectHeight;
++  struct tableSize *pg_tfWidth, *pg_tfHeight;
++  UWORD  pg_wTabX, pg_wTabY, pg_wTabW, pg_wTabH;
++  long   pg_MarkCol, pg_MarkRow, pg_MarkWidth, pg_MarkHeight;
++  long   pg_MarkX1, pg_MarkY1, pg_MarkX2, pg_MarkY2;
++  long   pg_SelectCol, pg_SelectRow, pg_SelectWidth, pg_SelectHeight;
+   struct Rect32 pg_Select;
+-  WORD   pg_SelectPos,pg_SelectLength;
++  WORD   pg_SelectPos, pg_SelectLength;
+   struct Node *pg_Family;
+   ULONG  pg_DPI;
+   ULONG  pg_PointHeight;
+@@ -123,13 +122,13 @@
+            struct tableField *tf;
+            STRPTR Undo;
+          } pg_Gad;
+-  long   pg_TabW,pg_TabH;     /* scroller gadgets */
+-  long   pg_TabX,pg_TabY;
+-  ULONG  pg_APen,pg_BPen;
++  long   pg_TabW, pg_TabH;     /* scroller gadgets */
++  long   pg_TabX, pg_TabY;
++  ULONG  pg_APen, pg_BPen;
+   UWORD  pg_Zoom;             /* in percent */
+-  UWORD  pg_StdWidth,pg_StdHeight;
+-  ULONG  pg_mmStdWidth,pg_mmStdHeight;
+-  double pg_PropFactorX,pg_PropFactorY;
++  UWORD  pg_StdWidth, pg_StdHeight;
++  ULONG  pg_mmStdWidth, pg_mmStdHeight;
++  double pg_PropFactorX, pg_PropFactorY;
+   struct MinList pg_gFrames;
+   UBYTE  pg_FrameAction;
+   UBYTE  pg_HotSpot;
+@@ -435,15 +434,15 @@
+ STRPTR (*Coord2String)(BOOL,LONG,BOOL,LONG);
+ LONG   (*pixel)(struct Page *,LONG,BOOL);
+ LONG   (*mm)(struct Page *,LONG,BOOL);
+-ULONG  (*FindColorPen)(UBYTE r,UBYTE g,UBYTE b);
+-struct colorPen * (*AddPen)(STRPTR name,UBYTE r,UBYTE g,UBYTE b);
+-STRPTR (*AllocStringLength)(STRPTR,LONG);
++ULONG  (*FindColorPen)(UBYTE r, UBYTE g, UBYTE b);
++struct colorPen *(*AddPen)(STRPTR name, UBYTE r, UBYTE g, UBYTE b);
++STRPTR (*AllocStringLength)(STRPTR, LONG);
+ STRPTR (*AllocString)(STRPTR);
+ void   (*FreeString)(STRPTR);
+-STRPTR (*ita)(double d,long komma ,UBYTE flags);
++STRPTR (*ita)(double d, long comma, UBYTE flags);
+ 
+ // variadic functions must be real functions
+-void   ReportError(STRPTR fmt, ...) VARARG68K;
++void   ReportError(STRPTR fmt, ...) VARARGS68K;
+ 
+ #if defined(__SASC)
+ #	pragma tagcall ioBase ReportError 5a 9802
+@@ -466,7 +465,9 @@
+ 
+ /********************************* Variables ************************************/
+ 
+-extern APTR pool,ioBase;
++extern APTR pool, ioBase;
++#ifndef __SASC
+ extern struct Library *DOSBase;
++#endif
+ 
+ #endif  /* IOTYPE_H */
+
+Modified: trunk/add-ons/turbocalc.c
+===================================================================
+--- trunk/add-ons/turbocalc.c	2009-01-02 15:36:49 UTC (rev 30)
++++ trunk/add-ons/turbocalc.c	2009-01-20 14:59:36 UTC (rev 31)
+@@ -1,6 +1,6 @@
+ /* ignition TurboCalc-I/O-Module
+  *
+- * Copyright ?1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+@@ -9,6 +9,7 @@
+ #include "iotype.h"
+ #include "turbocalc.h"
+ 
++
+ extern APTR ioBase;
+ 
+ 
+
+Modified: trunk/add-ons/turbocalc.h
+===================================================================
+--- trunk/add-ons/turbocalc.h	2009-01-02 15:36:49 UTC (rev 30)
++++ trunk/add-ons/turbocalc.h	2009-01-20 14:59:36 UTC (rev 31)
+@@ -1,6 +1,6 @@
+ /* ignition TurboCalc-IO-Modul
+  *
+- * Copyright ?1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ #ifndef TURBOCALC_H
+
+Modified: trunk/font.h
+===================================================================
+--- trunk/font.h	2009-01-02 15:36:49 UTC (rev 30)
++++ trunk/font.h	2009-01-20 14:59:36 UTC (rev 31)
+@@ -1,5 +1,5 @@
+ /*
+- * Copyright ?1996-2008 pinc Software. All Rights Reserved.
++ * Copyright ?1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ #ifndef IGN_FONT_H
+@@ -99,9 +99,9 @@
+ extern ULONG PUBLIC OutlineHeight(REG(a0, struct FontInfo *fi),REG(a1, STRPTR text),REG(d0, long len));
+ extern void PUBLIC FreeFontInfo(REG(a0, struct FontInfo *fi));
+ extern struct FontInfo * PUBLIC NewFontInfoA(REG(a0, struct FontInfo *fi),REG(d0, ULONG dpi),REG(a1, struct TagItem *ti));
+-extern struct FontInfo *NewFontInfo(struct FontInfo *fi,ULONG dpi,ULONG tag,...) VARARG68K;
++extern struct FontInfo *NewFontInfo(struct FontInfo *fi,ULONG dpi,ULONG tag,...) VARARGS68K;
+ extern struct FontInfo * PUBLIC SetFontInfoA(REG(a0, struct FontInfo *fi),REG(d0, ULONG dpi),REG(a1, struct TagItem *ti));
+-extern struct FontInfo *SetFontInfo(struct FontInfo *fi,ULONG dpi,ULONG tag,...) VARARG68K;
++extern struct FontInfo *SetFontInfo(struct FontInfo *fi,ULONG dpi,ULONG tag,...) VARARGS68K;
+ extern struct FontInfo * PUBLIC CopyFontInfo(REG(a0, struct FontInfo *fi));
+ 
+ #endif   /* IGN_FONT_H */
+
+Modified: trunk/funcs.h
+===================================================================
+--- trunk/funcs.h	2009-01-02 15:36:49 UTC (rev 30)
++++ trunk/funcs.h	2009-01-20 14:59:36 UTC (rev 31)
+@@ -1,6 +1,6 @@
+ /* Public function prototypes
+  *
+- * Copyright ?1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ #ifndef IGN_FUNCS_H
+@@ -8,20 +8,24 @@
+ 
+ 
+ // boopsi.c
+-extern void EraseFatRect(struct RastPort *rp,WORD x1,WORD y1,WORD x2,WORD y2);
+-extern void DrawFatRect(struct RastPort *rp,WORD x1,WORD y1,WORD x2,WORD y2);
++extern void EraseFatRect(struct RastPort *rp, WORD x1, WORD y1, WORD x2,
++	WORD y2);
++extern void DrawFatRect(struct RastPort *rp, WORD x1, WORD y1, WORD x2,
++	WORD y2);
+ extern void FreeAppClasses(void);
+ extern void InitAppClasses(void);
+ 
+ // hooks.c
+-extern void GhostRect(struct RastPort *rp,UWORD pen,UWORD x0,UWORD y0,UWORD x1,UWORD y1);
++extern void GhostRect(struct RastPort *rp, UWORD pen, UWORD x0, UWORD y0,
++	UWORD x1, UWORD y1);
+ extern void FreeLinks(struct MinList *links);
+-extern struct Link *AddLinkNode(struct MinList *links,struct MinNode *ln,APTR func);
+-extern void AddLinkList(struct MinList *links,struct MinList *add,APTR func);
++extern struct Link *AddLinkNode(struct MinList *links, struct MinNode *ln,
++	APTR func);
++extern void AddLinkList(struct MinList *links, struct MinList *add, APTR func);
+ 
+ // images.c
+ extern void FreeImageObj(struct ImageObj *io);
+-extern struct ImageObj *AddImageObj(STRPTR t,struct Image *im);
++extern struct ImageObj *AddImageObj(STRPTR t, struct Image *im);
+ extern void RefreshImageObjs(struct Screen *scr);
+ extern void FreeImage(struct Image *img);
+ extern struct Image *LoadImage(STRPTR t);
+@@ -33,208 +37,243 @@
+ extern int32 CheckSerialNumber(bool init);
+  
+ // handlewindows.c
+-extern void UpdateGInterface(struct Window *giwin,struct MinList *list,struct gObject *go,UBYTE page);
+-extern void HandleGGadget(struct Page *page,struct gObject *go);
++extern void UpdateGInterface(struct Window *giwin, struct MinList *list,
++	struct gObject *go, UBYTE page);
++extern void HandleGGadget(struct Page *page, struct gObject *go);
+ extern void UpdateObjectGadgets(struct Window *win);
+-extern void PUBLIC HandleFileTypeIDCMP(REG(a0, struct Hook *),REG(a2, struct FileRequester *fr),REG(a1, struct IntuiMessage *msg));
++extern void PUBLIC HandleFileTypeIDCMP(REG(a0, struct Hook *),
++	REG(a2, struct FileRequester *fr), REG(a1, struct IntuiMessage *msg));
+ 
+ // pointer.c
+-extern void SetMousePointer(struct Window *win,ULONG which);
++extern void SetMousePointer(struct Window *win, ULONG which);
+ extern void InitPointers(void);
+ extern void FreePointers(void);
+ 
+ // clip.c
+ extern void SetNewTFOrigin(struct MinList *list);
+ extern void PasteCells(struct Page *page, struct MinList *mlh, UBYTE mode);
+-extern struct PasteNode *CutCopyClip(struct Page *page,UBYTE mode);
+-extern struct PasteNode *PasteClip(struct Page *page,struct PasteNode *pn,UBYTE mode);
+-extern struct gGroup *CopyGGroup(struct gGroup *,BOOL objects);
+-extern struct gGroup *DuplicateGGroup(struct Page *page,struct gGroup *cgg,struct UndoNode *un);
++extern struct PasteNode *CutCopyClip(struct Page *page, UBYTE mode);
++extern struct PasteNode *PasteClip(struct Page *page, struct PasteNode *pn,
++	UBYTE mode);
++extern struct gGroup *CopyGGroup(struct gGroup *, bool objects);
++extern struct gGroup *DuplicateGGroup(struct Page *page, struct gGroup *cgg,
++	struct UndoNode *un);
+ 
+ // undo.c
+-extern void AddUndoLink(struct MinList *list,APTR obj);
+-extern struct UndoNode *CreateUndo(struct Page *page,UBYTE type,CONST_STRPTR t);
+-extern struct UndoNode *BeginUndo(struct Page *page,UBYTE type,CONST_STRPTR t);
++extern void AddUndoLink(struct MinList *list, APTR obj);
++extern struct UndoNode *CreateUndo(struct Page *page, UBYTE type,
++	CONST_STRPTR t);
++extern struct UndoNode *BeginUndo(struct Page *page, UBYTE type,
++	CONST_STRPTR t);
+ extern void EndUndo(struct Page *);
+-extern void FreeUndo(struct Page *page,struct UndoNode *un);
+-extern void MakeUndoRedoList(struct Page *page,struct UndoNode *un,struct MinList *list);
+-extern void MakeCellSizeUndo(struct UndoNode *un,UBYTE flags,ULONG mm,long pixel,long pos);
+-extern void ApplyObjectSizeUndoRedo(struct Page *page,struct UndoNode *un,char type);
+-extern void ApplyObjectsMoveUndoRedo(struct Page *page,struct UndoNode *un,char type);
+-extern BOOL ApplyUndo(struct Page *);
+-extern BOOL ApplyRedo(struct Page *);
++extern void FreeUndo(struct Page *page, struct UndoNode *un);
++extern void MakeUndoRedoList(struct Page *page, struct UndoNode *un,
++	struct MinList *list);
++extern void MakeCellSizeUndo(struct UndoNode *un, UBYTE flags, ULONG mm,
++	long pixel, long pos);
++extern void ApplyObjectSizeUndoRedo(struct Page *page, struct UndoNode *un,
++	char type);
++extern void ApplyObjectsMoveUndoRedo(struct Page *page, struct UndoNode *un,
++	char type);
++extern bool ApplyUndo(struct Page *page);
++extern bool ApplyRedo(struct Page *page);
+ 
+ // edit.c
+ extern bool DocumentSecurity(struct Page *page, struct tableField *tf);
+-extern void SetTabGadget(struct Page *page,STRPTR t,long pos);
++extern void SetTabGadget(struct Page *page, STRPTR t, long pos);
+ extern void FreeTabGadget(struct Page *page);
+ extern void HandleTabGadget(struct Page *page);
+-extern void CreateTabGadget(struct Page *page,long col,long row,BOOL makevisible);
+-extern BOOL QueryPassword(CONST_STRPTR t,STRPTR password);
+-extern ULONG PUBLIC PasswordEditHook(REG(a0, struct Hook *hook),REG(a2, struct SGWork *sgw),REG(a1, ULONG *msg));
++extern void CreateTabGadget(struct Page *page, long col, long row,
++	bool makeVisible);
++extern bool QueryPassword(CONST_STRPTR t, STRPTR password);
++extern ULONG PUBLIC PasswordEditHook(REG(a0, struct Hook *hook),
++	REG(a2, struct SGWork *sgw), REG(a1, ULONG *msg));
+ 
+ // database.c
+-extern BOOL IsDBEmpty(struct Database *db);
+-extern struct tableField *GetFields(struct Database *db,long pos);
+-extern STRPTR AllocFieldText(struct Database *db,struct tableField *tf,long pos);
+-extern struct Term *GetField(struct Database *db,STRPTR t);
++extern bool IsDBEmpty(struct Database *db);
++extern struct tableField *GetFields(struct Database *db, long pos);
++extern STRPTR AllocFieldText(struct Database *db, struct tableField *tf,
++	long pos);
++extern struct Term *GetField(struct Database *db, STRPTR t);
+ extern void CreateFields(struct Database *db);
+-extern void UpdateMaskCell(struct Mappe *mp,struct Page *page,struct tableField *tf,struct UndoNode *un);
++extern void UpdateMaskCell(struct Mappe *mp, struct Page *page,
++	struct tableField *tf, struct UndoNode *un);
+ extern struct Mask *IsOverMask(struct Page *page);
+ extern struct Mask *GuessMask(struct Page *page);
+-extern long *GetDBReferences(struct Database *db,struct Database *pdb);
+-extern void RefreshMaskFields(struct Mappe *mp,BOOL refresh);
+-extern void SetDBCurrent(struct Database *db,UBYTE mode,long pos);
+-extern void UpdateDBCurrent(struct Database *db,ULONG current);
++extern long *GetDBReferences(struct Database *db, struct Database *pdb);
++extern void RefreshMaskFields(struct Mappe *mp, bool refresh);
++extern void SetDBCurrent(struct Database *db, UBYTE mode, long pos);
++extern void UpdateDBCurrent(struct Database *db, ULONG current);
+ extern void UpdateIndices(struct Database *db);
+-extern BOOL MakeIndex(struct Database *db,struct Index *in);
+-extern BOOL MakeFilter(struct Database *db, struct Filter *fi);
++extern bool MakeIndex(struct Database *db, struct Index *in);
++extern bool MakeFilter(struct Database *db, struct Filter *fi);
+ extern void PrepareFilter(struct Database *db, struct Term *t);
+-extern void SetFilter(struct Database *db,struct Filter *fi);
++extern void SetFilter(struct Database *db, struct Filter *fi);
+ extern void FreeFilter(struct Filter *fi);
+-extern void MakeSearchFilter(struct Database *db,struct Mask *ma);
++extern void MakeSearchFilter(struct Database *db, struct Mask *ma);
+ 
+ // printer.c
+ extern void FreeWDTPrinter(struct List *list);
+-extern void PrintProject(struct List *list,struct wdtPrinter *wp,WORD unit,ULONG flags);
+-extern BOOL ReadUnitName(char *filename,char *name,int unit);
+-extern void UpdatePrinterGadgets(struct Window *win,struct winData *wd);
++extern void PrintProject(struct List *list, struct wdtPrinter *wp, WORD unit,
++	ULONG flags);
++extern bool ReadUnitName(char *filename, char *name, int unit);
++extern void UpdatePrinterGadgets(struct Window *win, struct winData *wd);
+ extern void InitPrinter(void);
+ 
+ // lock.c
+-extern struct LockNode *FindLockNode(struct MinList *list,ULONG length,...) VARARG68K;
++extern struct LockNode *FindLockNode(struct MinList *list, ULONG length, ...)
++	VARARGS68K;
+ extern void RemLockNode(struct LockNode *ln);
+-extern void RemLockNodeData(struct MinList *list,ULONG length,...) VARARG68K;
+-extern struct LockNode *AddLockNode(struct MinList *list,BYTE pri,APTR func,ULONG length,...) VARARG68K;
+-extern struct LockNode *AddFreeLock(APTR list,struct Window *win);
+-extern struct LockNode *AddListViewLock(struct MinList *list,struct Window *win,struct Gadget *gad);
+-extern struct LockNode *AddTreeLock(struct MinList *list,struct Window *win,struct Gadget *gad);
+-extern struct LockNode *AddTextLock(struct MinList *list,struct Window *win,struct Gadget *gad);
+-extern void UnlockListNode(struct MinList *list,struct MinNode *node,UBYTE flags);
+-extern BOOL LockListNode(struct MinList *list,struct MinNode *node,UBYTE flags);
+-extern void UnlockList(struct MinList *list,UBYTE flags);
+-extern BOOL LockList(struct MinList *list,UBYTE flags);
++extern void RemLockNodeData(struct MinList *list, ULONG length,...) VARARGS68K;
++extern struct LockNode *AddLockNode(struct MinList *list, BYTE pri, APTR func,
++	ULONG length, ...) VARARGS68K;
++extern struct LockNode *AddFreeLock(APTR list, struct Window *win);
++extern struct LockNode *AddListViewLock(struct MinList *list,
++	struct Window *win, struct Gadget *gad);
++extern struct LockNode *AddTreeLock(struct MinList *list, struct Window *win,
++	struct Gadget *gad);
++extern struct LockNode *AddTextLock(struct MinList *list, struct Window *win,
++	struct Gadget *gad);
++extern void UnlockListNode(struct MinList *list, struct MinNode *node,
++	UBYTE flags);
++extern bool LockListNode(struct MinList *list, struct MinNode *node,
++	UBYTE flags);
++extern void UnlockList(struct MinList *list, UBYTE flags);
++extern bool LockList(struct MinList *list, UBYTE flags);
+ extern void RefreshLockList(struct MinList *list);
+ extern void FreeLockList(APTR list);
+-extern void AddLockedTail(struct MinList *list,struct MinNode *ln);
+-extern void AddLockedHead(struct MinList *list,struct MinNode *ln);
+-extern void RemoveFromLockedList(struct MinList *list,struct MinNode *ln);
++extern void AddLockedTail(struct MinList *list, struct MinNode *ln);
++extern void AddLockedHead(struct MinList *list, struct MinNode *ln);
++extern void RemoveFromLockedList(struct MinList *list, struct MinNode *ln);
+ extern void RemoveLocked(struct MinNode *ln);
+ extern struct MinNode *RemLockedHead(struct MinList *list);
+-extern void PUBLIC FreeLock(REG(a0, struct LockNode *ln),REG(a1, struct MinNode *node),REG(d0, UBYTE flags));
+-extern void PUBLIC ListViewLock(REG(a0, struct LockNode *ln),REG(a1, struct MinNode *node),REG(d0, UBYTE flags));
+-extern void PUBLIC TreeLock(REG(a0, struct LockNode *ln),REG(a1, struct MinNode *node),REG(d0, UBYTE flags));
+-extern void PUBLIC TextLock(REG(a0, struct LockNode *ln),REG(a1, struct MinNode *node),REG(d0, UBYTE flags));
++extern void PUBLIC FreeLock(REG(a0, struct LockNode *ln),
++	REG(a1, struct MinNode *node), REG(d0, UBYTE flags));
++extern void PUBLIC ListViewLock(REG(a0, struct LockNode *ln),
++	REG(a1, struct MinNode *node), REG(d0, UBYTE flags));
++extern void PUBLIC TreeLock(REG(a0, struct LockNode *ln),
++	REG(a1, struct MinNode *node), REG(d0, UBYTE flags));
++extern void PUBLIC TextLock(REG(a0, struct LockNode *ln),
++	REG(a1, struct MinNode *node), REG(d0, UBYTE flags));
+ 
+ // search.c
+-extern void SearchReplace(struct Page *page,UWORD mode);
++extern void SearchReplace(struct Page *page, UWORD mode);
+ extern void InitSearch(void);
+ 
+ // cmd.c
+-extern void FreeCommandArray(struct Node **array,ULONG arraySize);
+-extern struct Node **BuildCommandArray(struct MinList *list,ULONG *arraySize);
++extern void FreeCommandArray(struct Node **array, ULONG arraySize);
++extern struct Node **BuildCommandArray(struct MinList *list, ULONG *arraySize);
+ extern ULONG processIntCmd(STRPTR t);
+-extern long ProcessAppCmd(struct Page *page,STRPTR t);
++extern long ProcessAppCmd(struct Page *page, STRPTR t);
+ extern struct AppCmd *NewAppCmd(struct AppCmd *ac);
+-extern void FreeAppCmd(struct AppCmd *);
+-extern struct AppCmd *FindAppCmd(struct Page *page,STRPTR t);
+-extern void CopyAppKeys(struct MinList *from,struct MinList *to);
+-extern void FreeAppKeys(struct MinList *);
++extern void FreeAppCmd(struct AppCmd *ac);
++extern struct AppCmd *FindAppCmd(struct Page *page, STRPTR t);
++extern void CopyAppKeys(struct MinList *from, struct MinList *to);
++extern void FreeAppKeys(struct MinList *list);
+ extern void SetAppKeyName(struct AppKey *ak);
+-extern long handleKey(struct Page *page,struct AppKey *ak);
++extern long handleKey(struct Page *page, struct AppKey *ak);
+ 
+ // rexx.c
+-extern void EditRexxScript(struct Mappe *mp,struct RexxScript *rxs);
++extern void EditRexxScript(struct Mappe *mp, struct RexxScript *rxs);
+ extern void FreeRexxScriptData(struct RexxScript *rxs);
+-extern void DeleteRexxScript(struct Mappe *mp,struct RexxScript *rxs);
++extern void DeleteRexxScript(struct Mappe *mp, struct RexxScript *rxs);
+ extern void NotifyRexxScript(struct RexxScript *rxs);
+-extern struct RexxScript *NewRexxScript(struct Mappe *mp,STRPTR name,BYTE header);
++extern struct RexxScript *NewRexxScript(struct Mappe *mp, STRPTR name,
++	BYTE header);
+ extern void handleRexx(struct RexxMsg *);
+-extern long handleEvent(struct Page *page,BYTE type,long col,long row);
++extern long handleEvent(struct Page *page, BYTE type, long col, long row);
+ extern void RemoveRexxPort(struct RexxPort *rxp);
+ extern void FreeRexxScript(struct RexxScript *rxs);
+-extern ULONG RunRexxScript(UBYTE type,STRPTR name);
+-extern ULONG RexxCall(ULONG (*func)(long *opts),...) VARARG68K;
++extern ULONG RunRexxScript(UBYTE type, STRPTR name);
++extern ULONG RexxCall(ULONG (*func)(long *opts), ...) VARARGS68K;
+ extern void CloseRexx(void);
+ extern void initRexx(void);
+ 
+ // menu.c
+ extern void FreeAppMenus(struct MinList *);
+-extern void CopyAppMenus(struct MinList *from,struct MinList *to);
++extern void CopyAppMenus(struct MinList *from, struct MinList *to);
+ extern void FreeAppMenu(struct Prefs *pr);
+ extern void RefreshMenu(struct Prefs *pr);
+ extern void HandleMenu(void);
+ extern void UpdateMenuSpecials(struct Prefs *pr);
+ extern void CalculateContextMenu(struct MinList *list);
+ extern void FreeContextMenu(struct MinList *list);
+-extern struct ContextMenu *AddContextMenu(struct MinList *list,STRPTR title,STRPTR cmd);
+-extern void CopyContextMenu(struct MinList *from,struct MinList *to);
++extern struct ContextMenu *AddContextMenu(struct MinList *list, STRPTR title,
++	STRPTR cmd);
++extern void CopyContextMenu(struct MinList *from, struct MinList *to);
+ extern void RefreshContextMenus(struct Prefs *pr);
+ extern void InitContextMenus(struct Prefs *pr);
+-extern void HandleContext(struct Page *page,LONG type,ULONG col,ULONG row);
++extern void HandleContext(struct Page *page, LONG type, ULONG col, ULONG row);
+ 
+ // support.c
+-extern void Rect32ToRect(struct Rect32 *rect32,struct Rectangle *rect);
+-extern int cmdcmp(STRPTR *c1,STRPTR *c2);
++extern void Rect32ToRect(struct Rect32 *rect32, struct Rectangle *rect);
++extern int cmdcmp(STRPTR *c1, STRPTR *c2);
+ extern int32 cmdlen(STRPTR t);
+ extern STRPTR PUBLIC AllocString(REG(a0, CONST_STRPTR string));
+-extern STRPTR PUBLIC AllocStringLength(REG(a0, STRPTR string),REG(d0, long len));
++extern STRPTR PUBLIC AllocStringLength(REG(a0, STRPTR string),
++	REG(d0, long len));
+ extern void PUBLIC FreeString(REG(a0, STRPTR string));
+-extern void zstrcpy(STRPTR to,STRPTR from);
+-extern int zstrcmp(STRPTR a,STRPTR b);
+-extern int zstricmp(STRPTR a,STRPTR b);
+-extern int zstrnicmp(STRPTR a,STRPTR b,LONG len);
+-extern void strdel(STRPTR t,long len);
++extern void zstrcpy(STRPTR to, STRPTR from);
++extern int zstrcmp(STRPTR a, STRPTR b);
++extern int zstricmp(STRPTR a, STRPTR b);
++extern int zstrnicmp(STRPTR a, STRPTR b, LONG len);
++extern void strdel(STRPTR t, long len);
+ extern void StringToUpper(STRPTR t);
+-extern struct Node *FindCommand(struct MinList *,STRPTR);
+-extern struct Node *FindTag(struct MinList *,STRPTR);
+-extern STRPTR GetUniqueName(struct MinList *list,STRPTR base);
+-extern void MakeUniqueName(struct MinList *list,STRPTR *name);
++extern struct Node *FindCommand(struct MinList *, STRPTR);
++extern struct Node *FindTag(struct MinList *, STRPTR);
++extern STRPTR GetUniqueName(struct MinList *list, STRPTR base);
++extern void MakeUniqueName(struct MinList *list, STRPTR *name);
+ extern int32 CountNodes(struct MinList *);
+ extern long GetListWidth(struct MinList *);
+-extern void moveList(struct MinList *,struct MinList *);
+-extern void swapLists(struct MinList *,struct MinList *);
+-extern long compareType(struct Node **lna,struct Node **lnb);
+-extern long LinkNameSort(struct Link **la,struct Link **lb);
+-extern void freeSort(APTR sortBuffer,ULONG len);
+-extern APTR allocSort(struct MinList *l,ULONG *len);
++extern void moveList(struct MinList *, struct MinList *);
++extern void swapLists(struct MinList *, struct MinList *);
++extern long compareType(struct Node **lna, struct Node **lnb);
++extern long LinkNameSort(struct Link **la, struct Link **lb);
++extern void freeSort(APTR sortBuffer, ULONG len);
++extern APTR allocSort(struct MinList *l, ULONG *len);
+ extern void sortList(struct MinList *);
+ extern void SortTypeList(struct MinList *);
+-extern void SortListWith(struct MinList *l,APTR func);
+-extern void InsertAt(struct MinList *l,struct Node *n,long pos);
+-extern void MoveTo(struct Node *n,struct MinList *l1,long pos1,struct MinList *l2,long pos2);
+-extern struct NumberLink *FindLink(struct MinList *list,APTR link);
++extern void SortListWith(struct MinList *l, APTR func);
++extern void InsertAt(struct MinList *l, struct Node *n, long pos);
++extern void MoveTo(struct Node *n, struct MinList *l1, long pos1,
++	struct MinList *l2, long pos2);
++extern struct NumberLink *FindLink(struct MinList *list, APTR link);
+ extern struct MinList *FindList(struct MinNode *ln);
+-extern struct Node *FindListNumber(struct MinList *l,long num);
+-extern long FindListEntry(struct MinList *l,struct MinNode *n);
+-extern void ProcentToString(ULONG p,STRPTR t);
++extern struct Node *FindListNumber(struct MinList *l, long num);
++extern long FindListEntry(struct MinList *l, struct MinNode *n);
++extern void ProcentToString(ULONG p, STRPTR t);
+ extern double ConvertDegreeProcent(STRPTR s);
+ extern int32 ConvertTime(STRPTR s);
+-extern double ConvertNumber(STRPTR s,UBYTE targettype);
+-extern void WriteChunkString(APTR iff,STRPTR t);
+-extern void MakeLocaleStrings(struct MinList *list, LONG id, ...) VARARG68K;
+-extern struct List *MakeLocaleStringList(LONG id, ...) VARARG68K;
++extern double ConvertNumber(STRPTR s, UBYTE targettype);
++extern void WriteChunkString(APTR iff, STRPTR t);
++extern void MakeLocaleStrings(struct MinList *list, LONG id, ...) VARARGS68K;
++extern struct List *MakeLocaleStringList(LONG id, ...) VARARGS68K;
+ extern void FreeStringList(struct List *list);
+-extern void MakeStrings(struct MinList *list, const STRPTR string, ...) VARARG68K;
+-extern struct List *MakeStringList(const STRPTR string, ...) VARARG68K;
+-extern ULONG DoClassMethodA(Class *cl,Msg msg);
+-extern BOOL IsDoubleClick(WORD entry);
+-extern struct Node *HandleLVRawKeys(struct Gadget *lvgad,struct Window *win,struct MinList *list,long itemheight);
+-extern ULONG GetCheckBoxFlag(struct Gadget *gad,struct Window *win,ULONG flag);
+-extern LONG WordWrapText(struct List *lh,STRPTR t,long width);
+-extern void FreeListItems(struct MinList *list,APTR free);
+-extern void CopyListItems(struct MinList *from,struct MinList *to,APTR copy);
+-extern struct MinNode *FindLinkCommand(struct MinList *,STRPTR);
+-extern struct Link *FindLinkWithName(struct MinList *list,STRPTR name);
+-extern struct MinNode *FindLinkName(struct MinList *list,STRPTR name);
+-extern void AddLink(struct MinList *list,struct MinNode *node,APTR func);
+-extern LONG GetListNumberOfName(struct MinList *mlh,STRPTR name,BOOL cmd,BOOL link);
+-extern BOOL AddToNameList(STRPTR buffer,STRPTR t,int *plen,int maxlength);
+-extern struct Library *OpenClass(STRPTR secondary,STRPTR name,LONG version);
+-extern void RemoveFromArrayList(struct ArrayList *al,void *entry);
+-extern int32 AddToArrayList(struct ArrayList *al,void *entry);
+-extern BOOL AddListToArrayList(struct ArrayList *source,struct ArrayList *dest);
+-extern BOOL CopyArrayList(struct ArrayList *source,struct ArrayList *dest);
++extern void MakeStrings(struct MinList *list, const STRPTR string, ...)
++	VARARGS68K;
++extern struct List *MakeStringList(const STRPTR string, ...) VARARGS68K;
++extern ULONG DoClassMethodA(Class *cl, Msg msg);
++extern bool IsDoubleClick(WORD entry);
++extern struct Node *HandleLVRawKeys(struct Gadget *lvgad, struct Window *win,
++	struct MinList *list, long itemheight);
++extern ULONG GetCheckBoxFlag(struct Gadget *gad, struct Window *win,
++	ULONG flag);
++extern LONG WordWrapText(struct List *lh, STRPTR t, long width);
++extern void FreeListItems(struct MinList *list, APTR free);
++extern void CopyListItems(struct MinList *from, struct MinList *to, APTR copy);
++extern struct MinNode *FindLinkCommand(struct MinList *list, STRPTR command);
++extern struct Link *FindLinkWithName(struct MinList *list, STRPTR name);
++extern struct MinNode *FindLinkName(struct MinList *list, STRPTR name);
++extern void AddLink(struct MinList *list, struct MinNode *node, APTR func);
++extern LONG GetListNumberOfName(struct MinList *mlh, STRPTR name, bool cmd,
++	bool link);
++extern bool AddToNameList(STRPTR buffer, STRPTR t, int *plen, int maxlength);
++extern struct Library *OpenClass(STRPTR secondary, STRPTR name, LONG version);
++extern void RemoveFromArrayList(struct ArrayList *al, void *entry);
++extern int32 AddToArrayList(struct ArrayList *al, void *entry);
++extern bool AddListToArrayList(struct ArrayList *source,
++	struct ArrayList *dest);
++extern bool CopyArrayList(struct ArrayList *source, struct ArrayList *dest);
+ extern void MakeEmptyArrayList(struct ArrayList *al);
+ #define CountArrayListItems(al) (al)->al_Last
+ #define GetArrayListArray(al) (al)->al_List
+@@ -242,62 +281,63 @@
+ extern void GetLocalizedName(STRPTR names[10], STRPTR *_name, int *_language);
+ 
+ #ifdef DEBUG
+-extern void dump(STRPTR pre,UBYTE *a,long len);
++extern void dump(STRPTR pre, UBYTE *a, long len);
+ #else
+-#  define dump(a,b,c) ;
++#  define dump(a, b, c) ;
+ #endif
+ 
+ // project.c
+ extern struct Page * PUBLIC NewPage(REG(a0, struct Mappe *mp));
+ extern struct Mappe *NewProject(void);
+ extern void DisposePage(struct Page *page);
+-extern BOOL DisposeProject(struct Mappe *mp);
++extern bool DisposeProject(struct Mappe *mp);
+ extern void SetMediumSize(struct Mappe *mp);
+-extern void SetMapName(struct Mappe *mp,STRPTR name);
++extern void SetMapName(struct Mappe *mp, STRPTR name);
+ extern void UpdateModified(struct Mappe *mp);
+ extern void SetMainPage(struct Page *page);
+ extern void UpdateMapTitle(struct Mappe *mp);
+ extern STRPTR GetPageTitle(struct Page *page);
+-extern void SetProjectMouseReport(struct Page *page,BOOL set);
+-extern void UpdatePageFont(struct Page *page,ULONG tag,...) VARARG68K;
+-extern void UpdateProjPage(struct Window *win,struct Page *page);
+-extern void ProjectToGObjects(struct Page *page,struct winData *wd);
++extern void SetProjectMouseReport(struct Page *page, bool set);
++extern void UpdatePageFont(struct Page *page, ULONG tag, ...) VARARGS68K;
++extern void UpdateProjPage(struct Window *win, struct Page *page);
++extern void ProjectToGObjects(struct Page *page, struct winData *wd);
+ extern void ASM handleProjIDCMP(REG(a0, struct TagItem *tags));
+-extern void drawSelect(struct RastPort *rp,long x1,long y1,long x2,long y2);
+-extern void SetCellSecurity(struct Page *page,LONG security);
+-extern void SetCellPattern(struct Page *page,long col,UBYTE pattern);
+-extern void SetAlignment(struct Page *page,BYTE alignH,BYTE alignV);
+-extern void SetMark(struct Page *,long,long,long,long);
+-extern void SetPageColor(struct Page *,struct colorPen *,struct colorPen *);
++extern void drawSelect(struct RastPort *rp, long x1, long y1, long x2, long y2);
++extern void SetCellSecurity(struct Page *page, LONG security);
++extern void SetCellPattern(struct Page *page, long col, UBYTE pattern);
++extern void SetAlignment(struct Page *page, BYTE alignH, BYTE alignV);
++extern void SetMark(struct Page *, long, long, long, long);
++extern void SetPageColor(struct Page *, struct colorPen *, struct colorPen *);
+ extern void SetPageProps(struct Page *);
+-extern void insertFormel(struct Page *page,STRPTR t);
++extern void insertFormel(struct Page *page, STRPTR t);
+ 
+ // ignition.c
+ extern void NormalizeWindowBox(struct IBox *box);
+-extern struct Window *OpenProjWindow(struct Page *,ULONG,...) VARARG68K;
+-extern struct Gadget *MakeProjectGadgets(struct winData *,long w,long h);
+-extern void MakeMarkText(struct Page *page,STRPTR t);
++extern struct Window *OpenProjWindow(struct Page *, ULONG, ...) VARARGS68K;
++extern struct Gadget *MakeProjectGadgets(struct winData *, long w, long h);
++extern void MakeMarkText(struct Page *page, STRPTR t);
+ extern void DisplayTablePos(struct Page *page);
+-extern void DrawStatusFlags(struct Mappe *mp,struct Window *win);
+-extern void DrawStatusText(struct Page *page,CONST_STRPTR t);
+-extern void DrawHelpText(struct Window *win,struct Gadget *gad,CONST_STRPTR t);
++extern void DrawStatusFlags(struct Mappe *mp, struct Window *win);
++extern void DrawStatusText(struct Page *page, CONST_STRPTR t);
++extern void DrawHelpText(struct Window *win, struct Gadget *gad,
++	CONST_STRPTR t);
+ extern void DrawBars(struct Window *win);
+ extern void RefreshToolBar(struct Page *);
+ extern void FreeSession(struct Session *s);
+ extern void RefreshSession(void);
+ extern struct Session *FindInSession(struct Mappe *mp);
+ extern void AddToSession(struct Mappe *mp);
+-extern void UpdateInteractive(struct Mappe *mp,BOOL refresh);
+-extern ULONG IsOverProjSpecial(struct Window *win,LONG x,LONG y);
++extern void UpdateInteractive(struct Mappe *mp, bool refresh);
++extern ULONG IsOverProjSpecial(struct Window *win, LONG x, LONG y);
+ extern void MakeFewFuncs(void);
+-extern void FreeWinIconObjs(struct Window *,struct winData *);
+-extern void RefreshProjectWindow(struct Window *win,BOOL all);
+-extern void RefreshProjWindows(BOOL all);
++extern void FreeWinIconObjs(struct Window *, struct winData *);
++extern void RefreshProjectWindow(struct Window *win, bool all);
++extern void RefreshProjWindows(bool all);
+ extern void EmptyMsgPort(struct MsgPort *port);
+ extern struct MinList *GetIconObjsList(struct Prefs *pr);
+-extern void FreeIconObjs(struct MinList *);
++extern void FreeIconObjs(struct MinList *list);
+ extern struct IconObj *CopyIconObj(struct IconObj *io);
+-extern void AddIconObj(struct MinList *,struct AppCmd *,long);
++extern void AddIconObj(struct MinList *list, struct AppCmd *ac, long);
+ extern void FreeAppIcon(void);
+ extern void InitAppIcon(void);
+ extern void InitHelp(struct Screen *scr);
+@@ -305,9 +345,10 @@
+ /************ misc inline functions ************/
+ 
+ static __inline long
+-pt2pixel(struct Page *page,long pt,BOOL width)
++pt2pixel(struct Page *page, long pt, bool width)
+ {
+-	return (long)(pt*(width ? page->pg_DPI >> 16 : page->pg_DPI & 0xffff) / (72*256));
++	return (long)(pt*(width ? page->pg_DPI >> 16 : page->pg_DPI & 0xffff)
++		/ (72*256));
+ }
+ 
+ #define zstrlen(a) (a ? strlen(a) : 0)
+
+Modified: trunk/graphic.h
+===================================================================
+--- trunk/graphic.h	2009-01-02 15:36:49 UTC (rev 30)
++++ trunk/graphic.h	2009-01-20 14:59:36 UTC (rev 31)
+@@ -1,5 +1,5 @@
+ /*
+- * Copyright ?1996-2008 pinc Software. All Rights Reserved.
++ * Copyright ?1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ #ifndef IGN_GRAPHIC_H
+@@ -710,9 +710,9 @@
+ extern struct gObject *gMakeRefObject(struct Page *page, struct gClass *gc, struct gObject *go, const STRPTR undoText);
+ extern ULONG GetGObjectAttr(struct gObject *go,ULONG tag,ULONG *data);
+ extern void gSetObjectAttrsA(struct Page *page,struct gObject *go,struct TagItem *tags);
+-extern void gSetObjectAttrs(struct Page *page,struct gObject *go,ULONG tag1,...) VARARG68K;
++extern void gSetObjectAttrs(struct Page *page,struct gObject *go,ULONG tag1,...) VARARGS68K;
+ extern void SetGObjectAttrsA(struct Page *page,struct gObject *go,struct TagItem *tag);
+-extern void SetGObjectAttrs(struct Page *page,struct gObject *go,ULONG tag1,...) VARARG68K;
++extern void SetGObjectAttrs(struct Page *page,struct gObject *go,ULONG tag1,...) VARARGS68K;
+ extern void RefreshGObjectBounds(struct Page *page,struct gObject *go);
+ extern void RemoveGObject(struct Page *page,struct gObject *go,BYTE draw);
+ extern void AddGObject(struct Page *page,struct gGroup *gg,struct gObject *go,BYTE draw);
+@@ -728,9 +728,9 @@
+ extern BOOL HandleGObjects(struct Page *page);
+ extern void PrepareCreateObject(struct Page *page,struct gClass *gc,BOOL more);
+ extern ULONG gDoClassMethodA(struct gClass *gc,APTR go,Msg msg);
+-extern ULONG gDoClassMethod(struct gClass *gc,APTR go,ULONG id,...) VARARG68K;
++extern ULONG gDoClassMethod(struct gClass *gc,APTR go,ULONG id,...) VARARGS68K;
+ extern ULONG PUBLIC gDoMethodA(REG(a0, APTR go),REG(a1, Msg msg));
+-extern ULONG gDoMethod(APTR go,ULONG id,...) VARARG68K;
++extern ULONG gDoMethod(APTR go,ULONG id,...) VARARGS68K;
+ extern ULONG PUBLIC gDoSuperMethodA(REG(a0, struct gClass *gc),REG(a1, APTR go),REG(a2, Msg msg));
+ extern BOOL PUBLIC gIsSubclassFrom(REG(a0, struct gClass *gc),REG(a1, struct gClass *supergc));
+ extern void PUBLIC gSuperDraw(REG(d0, struct Page *page),REG(d1, ULONG dpi),REG(a0, struct RastPort *rp),REG(a1, struct gClass *gc),REG(a2, struct gObject *go),REG(a3, struct gBounds *gb));
+
+Modified: trunk/ignition.c
+===================================================================
+--- trunk/ignition.c	2009-01-02 15:36:49 UTC (rev 30)
++++ trunk/ignition.c	2009-01-20 14:59:36 UTC (rev 31)
+@@ -44,7 +44,7 @@
+ BPTR   shelldir;
+ APTR   gAmigaGuide, appicon;
+ struct DiskObject *appdo;
+-struct IntuiText itext = {1,0,1,0,0,NULL,NULL,NULL};
++struct IntuiText itext = {1, 0, 1, 0, 0, NULL, NULL, NULL};
+ WORD   fontheight, barheight, boxwidth, itemheight, itemwidth;
+ WORD   bborder, lborder, rborder, linelen;
+ struct Gadget *gad;
+@@ -499,18 +499,18 @@
+ 
+ 
+ void
+-DrawHelpBar(struct Prefs *pr,struct Window *win, struct winData *wd)
++DrawHelpBar(struct Prefs *pr, struct Window *win, struct winData *wd)
+ {
+-    SetAPen(win->RPort,1);
+-    Move(win->RPort,win->BorderLeft,wd->wd_HelpY);
+-    Draw(win->RPort,win->Width-1-win->BorderRight,wd->wd_HelpY);
+-    Move(win->RPort,win->Width-win->BorderRight-wd_StatusWidth-2,wd->wd_HelpY+2);
+-    Draw(win->RPort,win->Width-win->BorderRight-wd_StatusWidth-2,win->Height-1-win->BorderBottom);
+-    SetAPen(win->RPort,2);
+-    Move(win->RPort,win->BorderLeft,wd->wd_HelpY+1);
+-    Draw(win->RPort,win->Width-1-win->BorderRight,wd->wd_HelpY+1);
+-    Move(win->RPort,win->Width-win->BorderRight-wd_StatusWidth-1,wd->wd_HelpY+2);
+-    Draw(win->RPort,win->Width-win->BorderRight-wd_StatusWidth-1,win->Height-1-win->BorderBottom);
++	SetAPen(win->RPort, 1);
++	Move(win->RPort, win->BorderLeft,wd->wd_HelpY);
++	Draw(win->RPort, win->Width-1-win->BorderRight,wd->wd_HelpY);
++	Move(win->RPort, win->Width-win->BorderRight-wd_StatusWidth-2,wd->wd_HelpY+2);
++	Draw(win->RPort, win->Width-win->BorderRight-wd_StatusWidth-2,win->Height-1-win->BorderBottom);
++	SetAPen(win->RPort, 2);
++	Move(win->RPort, win->BorderLeft,wd->wd_HelpY+1);
++	Draw(win->RPort, win->Width-1-win->BorderRight,wd->wd_HelpY+1);
++	Move(win->RPort, win->Width-win->BorderRight-wd_StatusWidth-1,wd->wd_HelpY+2);
++	Draw(win->RPort, win->Width-win->BorderRight-wd_StatusWidth-1,win->Height-1-win->BorderBottom);
+     DrawStatusFlags(((struct Page *)wd->wd_Data)->pg_Mappe,win);
+ }
+ 
+
+Modified: trunk/libs/include/SDI_compiler.h
+===================================================================
+--- trunk/libs/include/SDI_compiler.h	2009-01-02 15:36:49 UTC (rev 30)
++++ trunk/libs/include/SDI_compiler.h	2009-01-20 14:59:36 UTC (rev 31)
+@@ -210,11 +210,13 @@
+ #if !defined(DEPRECATED)
+   #define DEPRECATED
+ #endif
++#if !defined(ALIGNED)
++  #define ALIGNED
++#endif
+ 
+ /*************************************************************************/
+ 
+ #ifdef __AROS__
+-
+   #undef REG
+   #define REG(reg, arg) arg
+ 
+@@ -227,10 +229,14 @@
+   #undef REGARGS
+   #define REGARGS
+ 
+-  #undef VARARG68K
+-  #define VARARG68K __stackparm
++  #undef VARARGS68K
++  #define VARARGS68K __stackparm
++#else
++  #ifndef CONST_STRPTR
++	#define CONST_STRPTR UBYTE const *
++  #endif
+ #endif /* __AROS__ */
+-
++ 
+ /*************************************************************************/
+ 
+ /* Ignition support */
+
+Modified: trunk/libs/include/compatibility.h
+===================================================================
+--- trunk/libs/include/compatibility.h	2009-01-02 15:36:49 UTC (rev 30)
++++ trunk/libs/include/compatibility.h	2009-01-20 14:59:36 UTC (rev 31)
+@@ -7,8 +7,11 @@
+ #ifndef COMPATIBILITY_H
+ #define COMPATIBILITY_H
+ 
++#ifndef __SASC
+ void swmem(char *dest, char *src, int s);
+ void strins(char *to,const char *from);
+ void dqsort(double *x, int n);
++#endif
++			   
++#endif	/* COMPATIBILITY_H */
+ 
+-#endif
+
+Modified: trunk/libs/textedit/TextEdit_includes.h
+===================================================================
+--- trunk/libs/textedit/TextEdit_includes.h	2009-01-02 15:36:49 UTC (rev 30)
++++ trunk/libs/textedit/TextEdit_includes.h	2009-01-20 14:59:36 UTC (rev 31)
+@@ -20,6 +20,8 @@
+ 
+ #define ConsoleDevice ((struct Library *)cb->cb_Console.io_Device)
+ 
++#include "TextEdit_private.h"
++
+ #include "SDI_compiler.h"
+ 
+ #include <exec/execbase.h>
+
+Added: trunk/libs/textedit/TextEdit_private.h
+===================================================================
+--- trunk/libs/textedit/TextEdit_private.h	2009-01-02 15:36:49 UTC (rev 30)
++++ trunk/libs/textedit/TextEdit_private.h	2009-01-20 14:59:36 UTC (rev 31)
+@@ -0,0 +1,26 @@
++/*
++ * Copyright ??1999-2008 pinc Software. All Rights Reserved.
++ * Licensed under the terms of the MIT License.
+
+[... truncated: 113 lines follow ...]
+
+
+From axeld at mail.berlios.de  Tue Jan 20 17:40:42 2009
+From: axeld at mail.berlios.de (axeld at BerliOS)
+Date: Tue, 20 Jan 2009 17:40:42 +0100
+Subject: [Ignition-commits] r32 - trunk/add-ons
+Message-ID: <200901201640.n0KGegMF018270@sheep.berlios.de>
+
+Author: axeld
+Date: 2009-01-20 17:40:42 +0100 (Tue, 20 Jan 2009)
+New Revision: 32
+ViewCVS: http://svn.berlios.de/viewcvs/ignition?rev=32&view=rev
+
+Modified:
+   trunk/add-ons/line_diagram.c
+   trunk/add-ons/rectangle.c
+Log:
+* Added mm_to_pixel_dpi() function to line_diagram.c that it must use in
+  case draw() is called with a NULL page parameter.
+* Cleanup.
+
+
+Modified: trunk/add-ons/line_diagram.c
+===================================================================
+--- trunk/add-ons/line_diagram.c	2009-01-20 14:59:36 UTC (rev 31)
++++ trunk/add-ons/line_diagram.c	2009-01-20 16:40:42 UTC (rev 32)
+@@ -1,6 +1,6 @@
+ /* gClass-Diagram for ignition
+  *
+- * Copyright ?1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+@@ -23,207 +23,178 @@
+ 
+ const char *version = "$VER: line_diagram.gc 0.3 (7.8.2003)";
+ 
+-/** private instance structure **/
+-
+-/*struct gLine
+-{
+-  UBYTE ga_Frame;
+-};*/
+-
+ /** interface definition **/
+ 
+-//#define GAA_Frame GOA_TagBase+300
+-
+ struct gInterface interface[] = {
+-//  {GAA_Frame,"Fl?che durch einen Rahmen begrenzen",GIT_CHECKBOX,NULL,NULL},
+-	{GAA_Pseudo3D,"Pseudo-3D",GIT_CHECKBOX,NULL,NULL},
+-	{0,           NULL,0,NULL,NULL}
++	{GAA_Pseudo3D, "Pseudo-3D", GIT_CHECKBOX, NULL, NULL},
++	{0, NULL, 0, NULL,??NULL}
+ };
+ 
+ const STRPTR superClass = "diagram";
+-ULONG instanceSize = 0; //sizeof(struct gArea);
++ULONG instanceSize = 0;
+ 	
+ static struct Catalog *sCatalog;
+  
+ 
+-void PUBLIC
+-draw(REG(d0, struct Page *page), REG(d1, ULONG dpi), REG(a0, struct RastPort *rp), REG(a1, struct gClass *gc), REG(a2, struct gDiagram *gd), REG(a3, struct gBounds *gb))
++static long
++mm_to_pixel_dpi(ULONG dpi, LONG mm, bool horiz)
+ {
+-  struct gBounds *agb;
+-  /*struct gArea *this_ga = GINST_DATA(gc,gd);*/
+-  struct gLink *gl;
+-  long   pseudo3D,depth,offset;
+-  long   i,j,k;
+-  ULONG  color;
++	dpi = horiz ? dpi >> 16 : dpi & 0xffff;
++	return (long)(mm * dpi / (25.4*1024));
++}
+ 
+-  gSuperDraw(page,dpi,rp,gc,gd,gb);
+ 
+-  gDoMethod(gd,GCM_GET,GAA_Bounds,&agb);
+-  gDoMethod(gd,GCM_GET,GAA_Pseudo3D,&pseudo3D);
+-  gDoMethod(gd,GCM_GET,GAA_DepthWidth,&depth);
++void PUBLIC
++draw(REG(d0, struct Page *page), REG(d1, ULONG dpi),
++	REG(a0, struct RastPort *rp), REG(a1, struct gClass *gc),
++	REG(a2, struct gDiagram *gd), REG(a3, struct gBounds *gb))
++{
++	struct gBounds *agb;
++	struct gLink *gl;
++	long pseudo3D, depth, offset;
++	long i, j, k;
++	ULONG color;
+ 
+-  if (pseudo3D)
+-    offset = pixel(page, depth - GA_DEPTH_OFFSET, TRUE);
++	gSuperDraw(page, dpi, rp, gc, gd, gb);
+ 
+-  j = gd->gd_Rows;
++	gDoMethod(gd, GCM_GET, GAA_Bounds, &agb);
++	gDoMethod(gd, GCM_GET, GAA_Pseudo3D, &pseudo3D);
++	gDoMethod(gd, GCM_GET, GAA_DepthWidth, &depth);
+ 
+-  for(k = 0;k < gd->gd_Rows;k++)
+-  {
+-    long right,left,x,y,width,zero;
++	if (pseudo3D) {
++		if (page != NULL)
++			offset = pixel(page, depth - GA_DEPTH_OFFSET, true);
++		else
++			offset = mm_to_pixel_dpi(dpi, depth - GA_DEPTH_OFFSET, true);
++	}
+ 
+-    j--;  // Reihenfolge der Reihen ver?ndern
++	j = gd->gd_Rows;
+ 
+-    gDoMethod(gd,GCAM_GETBORDERS,j,&left,&right,&zero);
+-    width = right - left;
+-    if (gd->gd_Cols > 1)
+-      width /= gd->gd_Cols - 1;
++	for (k = 0; k < gd->gd_Rows; k++) {
++		long right, left, x, y, width, zero;
+ 
+-    /** Oberseite **/
+-    if (pseudo3D)
+-    {
+-      //UBYTE lastsign,sign;
+-      //long lasty;
++		j--;  // Change order of the rows
+ 
+-      for(x = left,i = 0;i < gd->gd_Cols;i++)
+-      {
+-        if (!(gl = gGetLink(gd,i,j)))
+-          continue;
++		gDoMethod(gd, GCAM_GETBORDERS, j, &left, &right, &zero);
++		width = right - left;
++		if (gd->gd_Cols > 1)
++			width /= gd->gd_Cols - 1;
+ 
+-        y = gDoMethod(gd,GCAM_GETCOORD,gl->gl_Value,j,1);
++		/** top side **/
++		if (pseudo3D) {
++			for (x = left, i = 0; i < gd->gd_Cols; i++) {
++				if (!(gl = gGetLink(gd, i, j)))
++					continue;
+ 
+-        if (y < agb->gb_Top)
+-          y = agb->gb_Top;
+-        else if (y > agb->gb_Bottom)
+-          y = agb->gb_Bottom;
++				y = gDoMethod(gd, GCAM_GETCOORD, gl->gl_Value, j, 1);
+ 
+-        if (i != 0)
+-        {
+-          gAreaMove(rp, x, y);
+-          gAreaDraw(rp, x + offset, y - offset);
++				if (y < agb->gb_Top)
++					y = agb->gb_Top;
++				else if (y > agb->gb_Bottom)
++					y = agb->gb_Bottom;
+ 
+-          gAreaEnd(rp);
+-        }
+-        else
+-          SetHighColor(rp,color = TintColor(gl->gl_Color,0.7f));
++				if (i != 0) {
++					gAreaMove(rp, x, y);
++					gAreaDraw(rp, x + offset, y - offset);
+ 
+-        if (i < gd->gd_Cols-1)
+-        {
+-          gAreaDraw(rp, x + offset, y - offset);
+-          gAreaDraw(rp, x, y);
+-        }
+-        x += width;
+-      }
+-    }
++					gAreaEnd(rp);
++				} else
++					SetHighColor(rp, color = TintColor(gl->gl_Color, 0.7f));
+ 
+-    /** Vorderseite **/
+-    if (!pseudo3D)
+-    {
+-      for(x = left,i = 0;i < gd->gd_Cols;i++)
+-      {
+-        if (!(gl = gGetLink(gd,i,j)))
+-          continue;
++				if (i < gd->gd_Cols - 1) {
++					gAreaDraw(rp, x + offset, y - offset);
++					gAreaDraw(rp, x, y);
++				}
++				x += width;
++			}
++		}
+ 
+-        y = gDoMethod(gd,GCAM_GETCOORD,gl->gl_Value,j,1);
++		/** front side **/
++		if (!pseudo3D) {
++			for (x = left, i = 0; i < gd->gd_Cols; i++) {
++				if (!(gl = gGetLink(gd, i, j)))
++					continue;
+ 
+-        if (y < agb->gb_Top)
+-          y = agb->gb_Top;
+-        else if (y > agb->gb_Bottom)
+-          y = agb->gb_Bottom;
++				y = gDoMethod(gd,GCAM_GETCOORD,gl->gl_Value,j,1);
+ 
+-        if (i == 0)
+-        {
+-          SetHighColor(rp,color = gl->gl_Color);
+-          Move(rp,x,y);
+-        }
+-        else
+-          Draw(rp,x,y);
++				if (y < agb->gb_Top)
++					y = agb->gb_Top;
++				else if (y > agb->gb_Bottom)
++					y = agb->gb_Bottom;
+ 
+-        x += width;
+-      }
+-    }
+-  }
+-  BNDRYOFF(rp);
++				if (i == 0) {
++					SetHighColor(rp, color = gl->gl_Color);
++					Move(rp, x, y);
++				} else
++					Draw(rp, x, y);
++
++				x += width;
++			}
++		}
++	}
++	BNDRYOFF(rp);
+ }
+ 
+ 
+-ULONG set(struct gDiagram *gd,struct gArea *ga,struct TagItem *tstate)
++ULONG
++set(struct gDiagram *gd, struct gArea *ga, struct TagItem *tstate)
+ {
+-  return GCPR_NONE;
+-
+-/*  struct TagItem *ti;
+-  ULONG  rc = GCPR_NONE;
+-
+-  if (tstate)
+-  {
+-    while(ti = NextTagItem(&tstate))
+-    {
+-      switch(ti->ti_Tag)
+-      {
+-        case GAA_Frame:
+-          if (ga->ga_Frame != ti->ti_Data)
+-          {
+-            ga->ga_Frame = ti->ti_Data;
+-            rc |= GCPR_REDRAW;
+-          }
+-          break;
+-      }
+-    }
+-  }
+-  return(rc);*/
++	return GCPR_NONE;
+ }
+ 
+ 
+-ULONG PUBLIC dispatch(REG(a0, struct gClass *gc), REG(a2, struct gDiagram *gd), REG(a1, Msg msg))
++ULONG PUBLIC
++dispatch(REG(a0, struct gClass *gc), REG(a2, struct gDiagram *gd),
++	REG(a1, Msg msg))
+ {
+-//  struct gLine *gl = GINST_DATA(gc,gd);
+-  ULONG  rc;
++	ULONG rc;
+ 
+-  switch(msg->MethodID)
+-  {
+-    case GCM_NEW:
+-      if ((rc = gDoSuperMethodA(gc, gd, msg)) != 0)
+-      {
+-        set((struct gDiagram *)rc,NULL /*ga*/,((struct gcpSet *)msg)->gcps_AttrList);
+-      }
+-      break;
+-    case GCM_SET:
+-      rc = gDoSuperMethodA(gc,gd,msg) | set(gd,NULL /*ga*/,((struct gcpSet *)msg)->gcps_AttrList);
+-      break;
+-    case GCM_GET:
+-      rc = TRUE;
++	switch (msg->MethodID) {
++		case GCM_NEW:
++			if ((rc = gDoSuperMethodA(gc, gd, msg)) != 0) {
++				set((struct gDiagram *)rc, NULL,
++					((struct gcpSet *)msg)->gcps_AttrList);
++			}
++			break;
++		case GCM_SET:
++			rc = gDoSuperMethodA(gc, gd, msg)
++				| set(gd, NULL, ((struct gcpSet *)msg)->gcps_AttrList);
++			break;
++		case GCM_GET:
++			rc = TRUE;
+ 
+-      switch(((struct gcpGet *)msg)->gcpg_Tag)
+-      {
+-        case GAA_Pseudo3DDepth:
+-          *((struct gcpGet *)msg)->gcpg_Storage = (ULONG)gd->gd_Rows;
+-          break;
+-        default:
+-          rc = gDoSuperMethodA(gc,gd,msg);
+-      }
+-      break;
+-    case GCDM_SETLINKATTR:
+-      if ((rc = gDoSuperMethodA(gc, gd, msg)) != 0) // something has changed
+-      {
+-        struct gcpSetLinkAttr *gcps = (APTR)msg;
+-        ULONG  color = gcps->gcps_Color;
+-        ULONG  row = gcps->gcps_Link->gl_Row,i;
+-        struct gLink *gl;
++			switch (((struct gcpGet *)msg)->gcpg_Tag) {
++				case GAA_Pseudo3DDepth:
++					*((struct gcpGet *)msg)->gcpg_Storage = (ULONG)gd->gd_Rows;
++					break;
++				default:
++					rc = gDoSuperMethodA(gc,gd,msg);
++					break;
++			}
++			break;
++		case GCDM_SETLINKATTR:
++			if ((rc = gDoSuperMethodA(gc, gd, msg)) != 0) {
++				// something has changed
++				struct gcpSetLinkAttr *gcps = (APTR)msg;
++				ULONG  color = gcps->gcps_Color;
++				ULONG  row = gcps->gcps_Link->gl_Row, i;
++				struct gLink *gl;
+ 
+-        for(i = 0;i < gd->gd_Cols;i++)
+-        {
+-          if ((gl = gGetLink(gd,i,row)) == NULL)
+-            continue;
++				for (i = 0; i < gd->gd_Cols; i++) {
++					if ((gl = gGetLink(gd, i, row)) == NULL)
++						continue;
+ 
+-          if (color != ~0L)
+-            gl->gl_Color = color;
+-        }
+-        return(1L);
+-      }
+-      break;
+-    default:
+-	  return gDoSuperMethodA(gc, gd, msg);
+-  }
+-  return rc;
++					if (color != ~0L)
++						gl->gl_Color = color;
++				}
++				return 1L;
++			}
++			break;
++
++		default:
++			return gDoSuperMethodA(gc, gd, msg);
++	}
++	return rc;
+ }
+ 
+ 
+@@ -238,9 +209,10 @@
+ ULONG PUBLIC
+ initClass(REG(a0, struct gClass *gc))
+ {
+-	sCatalog = OpenCatalog(NULL, "ignition.catalog", OC_BuiltInLanguage, "deutsch", TAG_END);
+-	//interface[0].gi_Label = GetCatalogStr(sCatalog, MSG_AREA_OUTLINE_GAD, "Fl?che durch einen Rahmen begrenzen");
+-	interface[0].gi_Label = GetCatalogStr(sCatalog, MSG_PSEUDO_3D_GAD, "Pseudo-3D");
++	sCatalog = OpenCatalog(NULL, "ignition.catalog", OC_BuiltInLanguage,
++		"deutsch", TAG_END);
++	interface[0].gi_Label = GetCatalogStr(sCatalog, MSG_PSEUDO_3D_GAD,
++		"Pseudo-3D");
+ 
+ 	return TRUE;
+ }
+
+Modified: trunk/add-ons/rectangle.c
+===================================================================
+--- trunk/add-ons/rectangle.c	2009-01-20 14:59:36 UTC (rev 31)
++++ trunk/add-ons/rectangle.c	2009-01-20 16:40:42 UTC (rev 32)
+@@ -1,6 +1,6 @@
+ /* gClass for ignition
+  *
+- * Copyright ?1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2008 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+
+
+
+From axeld at mail.berlios.de  Tue Jan 20 17:41:27 2009
+From: axeld at mail.berlios.de (axeld at BerliOS)
+Date: Tue, 20 Jan 2009 17:41:27 +0100
+Subject: [Ignition-commits] r33 - trunk
+Message-ID: <200901201641.n0KGfRn4018317@sheep.berlios.de>
+
+Author: axeld
+Date: 2009-01-20 17:41:27 +0100 (Tue, 20 Jan 2009)
+New Revision: 33
+ViewCVS: http://svn.berlios.de/viewcvs/ignition?rev=33&view=rev
+
+Modified:
+   trunk/classes.c
+   trunk/clip.c
+   trunk/diagram.c
+   trunk/gadgets.c
+   trunk/graphic.c
+   trunk/handlewindows.c
+   trunk/table.c
+   trunk/windows.c
+Log:
+* Minor cleanup.
+
+
+Modified: trunk/classes.c
+===================================================================
+--- trunk/classes.c	2009-01-20 16:40:42 UTC (rev 32)
++++ trunk/classes.c	2009-01-20 16:41:27 UTC (rev 33)
+@@ -1,7 +1,7 @@
+ /* Several graphics base classes
+  *
+- * Copyright ?1996-2007 pinc Software. All Rights Reserved.
+- * Licensed under the terms of the GNU General Public License, version 2.
++ * Copyright 1996-2007 pinc Software. All Rights Reserved.
++ * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+ 
+@@ -761,7 +761,7 @@
+ 			rc = TRUE;
+ 			break;
+ 		case GCM_COMMAND:
+-			/* Befehl ausf?hren */
++			/* Execute command */
+ 			ProcessAppCmd(go->go_Page,go->go_Command);
+ 			break;
+ 		case GCM_SAVE:
+@@ -779,7 +779,7 @@
+ }
+ 
+ 
+-/*************************************** embedded object ***************************************/
++/******************************* embedded object *****************************/
+ 
+ 
+ struct gInterface gEmbeddedInterface[] = {
+
+Modified: trunk/clip.c
+===================================================================
+--- trunk/clip.c	2009-01-20 16:40:42 UTC (rev 32)
++++ trunk/clip.c	2009-01-20 16:41:27 UTC (rev 33)
+@@ -1,6 +1,6 @@
+ /* Clipboard functionality
+  *
+- * Copyright ?1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2008 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+
+Modified: trunk/diagram.c
+===================================================================
+--- trunk/diagram.c	2009-01-20 16:40:42 UTC (rev 32)
++++ trunk/diagram.c	2009-01-20 16:41:27 UTC (rev 33)
+@@ -1,6 +1,6 @@
+ /* 3D and diagram functions
+  *
+- * Copyright ?1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+@@ -190,7 +190,7 @@
+ #endif
+  
+ 
+-long gtfcol,gtfrow;
++long gtfcol, gtfrow;
+ 
+ /** Gibt die Zellen einer Tabelle in der f?r Diagramme richtigen
+  *  Reihenfolge zur?ck.
+@@ -1813,16 +1813,15 @@
+ }
+ 
+ 
+-/** Setzt Parameter eines Diagramms und stellt ?nderungen im Aussehen
+- *  im Vorschaufenster oder auf der Seite an.
+- *  Zus?tzlich werden alle Gadgets des Diagramm-Fensters auf den
+- *  aktuellen Stand gebracht.
+- *
+- *  @param win Fenster des Diagramms (WDT_DIAGRAM)
+- *  @param gd das Diagramm
+- *  @param ti die zu ?ndernden Attribute
+- */
++/*!	Sets the attributes of a diagram, and makes the changes of the diagram
++	visible on either the preview window or directly the page.
++	Additionally, all gadgets in the diagram window are updated to the current
++	values.
+ 
++	@param win the diagram window (WDT_DIAGRAM)
++	@param gd the diagram
++	@param ti the attributes to change
++*/
+ void
+ SetDiagramAttrsA(struct Window *win, struct gDiagram *gd, struct TagItem *ti)
+ {
+@@ -1832,16 +1831,14 @@
+ 	if (!win || !gd)
+ 		return;
+ 
+-	if (wd->u.diagram.wd_OldDiagram != NULL)
+-	{
++	if (wd->u.diagram.wd_OldDiagram != NULL) {
+ 		// If we are only altering an existing diagram, we direct the changes
+ 		// to the standard call which will generate an UndoNode for us
+ 		SetGObjectAttrsA(gd->gd_Object.go_Page, gd, ti);
+ 		return;
+ 	}
+ 
+-	if ((rc = gDoMethod(gd, GCM_SET, ti)) && rc & GCPR_REDRAW)
+-	{
++	if ((rc = gDoMethod(gd, GCM_SET, ti)) && rc & GCPR_REDRAW) {
+ 		RefreshGObjectBounds(wd->wd_Data, gd);
+ 		RefreshDiagram(gd);
+ 	}
+
+Modified: trunk/gadgets.c
+===================================================================
+--- trunk/gadgets.c	2009-01-20 16:40:42 UTC (rev 32)
++++ trunk/gadgets.c	2009-01-20 16:41:27 UTC (rev 33)
+@@ -1,6 +1,6 @@
+ /* Create gadget routines for ignition
+  *
+- * Copyright ?1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2008 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+
+Modified: trunk/graphic.c
+===================================================================
+--- trunk/graphic.c	2009-01-20 16:40:42 UTC (rev 32)
++++ trunk/graphic.c	2009-01-20 16:41:27 UTC (rev 33)
+@@ -1,6 +1,6 @@
+ /* General and 2D graphics routines
+  *
+- * Copyright ?1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2008 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+
+Modified: trunk/handlewindows.c
+===================================================================
+--- trunk/handlewindows.c	2009-01-20 16:40:42 UTC (rev 32)
++++ trunk/handlewindows.c	2009-01-20 16:41:27 UTC (rev 33)
+@@ -1,6 +1,6 @@
+ /* window-handling routines
+  *
+- * Copyright ?1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2008 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+
+Modified: trunk/table.c
+===================================================================
+--- trunk/table.c	2009-01-20 16:40:42 UTC (rev 32)
++++ trunk/table.c	2009-01-20 16:41:27 UTC (rev 33)
+@@ -1,6 +1,6 @@
+ /* Table related functions
+  *
+- * Copyright ?1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2008 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+
+Modified: trunk/windows.c
+===================================================================
+--- trunk/windows.c	2009-01-20 16:40:42 UTC (rev 32)
++++ trunk/windows.c	2009-01-20 16:41:27 UTC (rev 33)
+@@ -1,6 +1,6 @@
+ /* windows related routines
+  *
+- * Copyright ?1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+@@ -1040,17 +1040,14 @@
+ void
+ SetNamePosition(long *x, long *y)
+ {
+-	long hei = barheight+fontheight+12;
++	long hei = barheight + fontheight + 12;
+ 
+-	if (wd->wd_Type == WDT_PROJECT && imsg.Class != IDCMP_MENUPICK)
+-	{
+-		*x = imsg.MouseX+win->LeftEdge-(scr->Width >> 2);
+-		*y = imsg.MouseY+win->TopEdge-(hei >> 1);
+-	}
+-	else
+-	{
++	if (wd->wd_Type == WDT_PROJECT && imsg.Class != IDCMP_MENUPICK) {
++		*x = imsg.MouseX + win->LeftEdge - (scr->Width >> 2);
++		*y = imsg.MouseY + win->TopEdge - (hei >> 1);
++	} else {
+ 		*x = scr->Width >> 2;
+-		*y = (scr->Height-hei) >> 1;
++		*y = (scr->Height - hei) >> 1;
+ 	}
+ }
+ 
+@@ -1061,8 +1058,7 @@
+ 	struct RastPort *rp = win->RPort;
+ 	long   x,y;
+ 
+-	switch (wd->wd_Type)
+-	{
++	switch (wd->wd_Type) {
+ 		case WDT_PREFSCREEN:
+ 			DrawGroupBorder(rp,GetString(&gLocaleInfo, MSG_SCREEN_BORDER),lborder,win->BorderTop+3,win->Width-lborder-rborder,fontheight*4+25);
+ 			DrawGroupBorder(rp,GetString(&gLocaleInfo, MSG_MONITOR_BORDER),lborder,win->BorderTop+30+fontheight*4,win->Width-lborder-rborder,fontheight*2+11);
+@@ -1075,20 +1071,23 @@
+ 			break;
+ 		case WDT_PREFFORMAT:
+ 			x = ((struct Gadget *)wd->wd_ExtData[0])->Width + 6 + lborder;
+-			DrawGroupBorder(rp, GetString(&gLocaleInfo, MSG_PROPERTIES_BORDER), x, win->BorderTop + fontheight + 9, win->Width - x - rborder, fontheight * 6 + 33);
+-			if ((gad = GadgetAddress(win, 9)) != 0)
+-			{
+-				ULONG komma;
++			DrawGroupBorder(rp, GetString(&gLocaleInfo, MSG_PROPERTIES_BORDER),
++				x, win->BorderTop + fontheight + 9, win->Width - x - rborder,
++				fontheight * 6 + 33);
++			if ((gad = GadgetAddress(win, 9)) != 0) {
++				ULONG comma;
+ 
+-				GT_GetGadgetAttrs(gad,win,NULL,GTSL_Level,&komma,TAG_END);
+-				DrawPointSliderValue(rp,gad,komma);
++				GT_GetGadgetAttrs(gad, win, NULL, GTSL_Level, &comma, TAG_END);
++				DrawPointSliderValue(rp, gad, comma);
+ 			}
+-			if ((gad = GadgetAddress(win, 11)) != 0)
+-			{
++			if ((gad = GadgetAddress(win, 11)) != 0) {
+ 				x = gad->LeftEdge - 6;
+-				DrawGroupBorder(rp, GetString(&gLocaleInfo, MSG_MARKED_BORDER), x, gad->TopEdge-fontheight - 2, win->Width - x - rborder, fontheight * 4 + 25);
++				DrawGroupBorder(rp, GetString(&gLocaleInfo, MSG_MARKED_BORDER),
++					x, gad->TopEdge-fontheight - 2, win->Width - x - rborder,
++					fontheight * 4 + 25);
+ 				/*itext.IText = "Negative Werte:";*/
+-				DrawColorField(rp,GadgetAddress(win,12),FindColorPen(0,0,0),TRUE);
++				DrawColorField(rp, GadgetAddress(win, 12),
++					FindColorPen(0, 0, 0), TRUE);
+ 			}
+ 			break;
+ 		case WDT_PREFFILE:
+@@ -1101,27 +1100,40 @@
+ 			DrawGroupBorder(rp,GetString(&gLocaleInfo, MSG_MISC_BORDER),lborder,win->BorderTop+fontheight*6+43,win->Width-lborder-rborder,fontheight*4+25);
+ 			break;
+ 		case WDT_PREFCOLORS:
+-			if ((gad = GadgetAddress(win,2)) != 0)
+-			{
++			if ((gad = GadgetAddress(win, 2)) != 0) {
+ 				DrawGroupBorder(rp,GetString(&gLocaleInfo, MSG_COLOR_BORDER),lborder,win->BorderTop+3,gad->LeftEdge-20-win->BorderLeft,gad->Height+fontheight*4+22);
+ 				DrawGroupBorder(rp,GetString(&gLocaleInfo, MSG_PALETTE_BORDER),gad->LeftEdge-10,win->BorderTop+3,win->Width-gad->LeftEdge+10-rborder,gad->Height+fontheight*4+22);
+ 				showPrefColorsMode(win,0);
+ 			}
+ 			break;
+ 		case WDT_DEFINECMD:
+-			DrawGroupBorder(rp,NULL,lborder,win->BorderTop+3,win->Width-lborder-rborder,fontheight*3+25);
+-			DrawGroupBorder(rp,GetString(&gLocaleInfo, MSG_COMMANDS_BORDER),lborder,win->BorderTop+30+fontheight*3,win->Width-lborder-rborder,fontheight*8+15);
+-			DrawGroupBorder(rp,GetString(&gLocaleInfo, MSG_OUTPUT_BORDER),lborder,win->BorderTop+47+fontheight*11,win->Width-lborder-rborder,fontheight*4+25);
+-			DrawBevelBox(rp,TLn(GetString(&gLocaleInfo, MSG_NAME_GAD))+16+lborder,barheight+15+fontheight,boxwidth*2,fontheight*2+8,GT_VisualInfo,vi,GTBB_Recessed,TRUE,TAG_END);
++			DrawGroupBorder(rp, NULL, lborder, win->BorderTop + 3,
++				win->Width - lborder - rborder, fontheight * 3 + 25);
++			DrawGroupBorder(rp, GetString(&gLocaleInfo, MSG_COMMANDS_BORDER),
++				lborder, win->BorderTop + 30 + fontheight * 3,
++				win->Width - lborder - rborder, fontheight * 8 + 15);
++			DrawGroupBorder(rp, GetString(&gLocaleInfo, MSG_OUTPUT_BORDER),
++				lborder, win->BorderTop + 47 + fontheight * 11,
++				win->Width - lborder - rborder, fontheight * 4 + 25);
++			DrawBevelBox(rp, TLn(GetString(&gLocaleInfo, MSG_NAME_GAD)) + 16
++					+ lborder,
++				barheight + 15 + fontheight, boxwidth * 2, fontheight * 2 + 8,
++				GT_VisualInfo, vi, GTBB_Recessed, TRUE, TAG_END);
+ 			itext.IText = GetString(&gLocaleInfo, MSG_ICON_LABEL);
+-			PrintIText(rp,&itext,8+lborder,barheight+(3*fontheight)/2+18);
+-			if (wd->wd_Data)
+-			{
+-				x = TLn(GetString(&gLocaleInfo, MSG_NAME_GAD))+18+lborder;
+-				if (((struct AppCmd *)wd->wd_Data)->ac_Node.in_Image)
+-				{
+-					makeClip(win,x,barheight+16+fontheight,boxwidth*2-5,fontheight*2+5);
+-					DrawImage(rp,((struct AppCmd *)wd->wd_Data)->ac_Node.in_Image,x-2-(((struct AppCmd *)wd->wd_Data)->ac_Node.in_Image->Width >> 1)+boxwidth,barheight+19+2*fontheight-(((struct AppCmd *)wd->wd_Data)->ac_Node.in_Image->Height >> 1));
++			PrintIText(rp, &itext, 8 + lborder,
++				barheight + (3 * fontheight) / 2 + 18);
++			if (wd->wd_Data) {
++				x = TLn(GetString(&gLocaleInfo, MSG_NAME_GAD)) + 18 + lborder;
++				if (((struct AppCmd *)wd->wd_Data)->ac_Node.in_Image) {
++					makeClip(win, x, barheight + 16 + fontheight,
++						boxwidth * 2 - 5, fontheight * 2 + 5);
++					DrawImage(rp,
++						((struct AppCmd *)wd->wd_Data)->ac_Node.in_Image,
++						x - 2 - (((struct AppCmd *)wd->wd_Data)
++							->ac_Node.in_Image->Width >> 1) + boxwidth,
++						barheight + 19 + 2 * fontheight
++							- (((struct AppCmd *)wd->wd_Data)->ac_Node.in_Image
++								->Height >> 1));
+ 					freeClip(win);
+ 				}
+ 			}
+@@ -1129,24 +1141,30 @@
+ 		case WDT_OBJECT:
+ 		{
+ 			struct gGadget *gg;
+-			long   lines = max((long)wd->wd_ExtData[2],4);
++			long lines = max((long)wd->wd_ExtData[2], 4);
+ 
+-			DrawGroupBorder(rp,GetString(&gLocaleInfo, MSG_POSITION_BORDER),lborder,y = barheight+fontheight+10,(x = (long)wd->wd_ExtData[3])-4-lborder,fontheight+4+(fontheight+7)*lines);
+-			if (wd->wd_ExtData[2])
+-				DrawGroupBorder(rp,GetString(&gLocaleInfo, MSG_MISC_BORDER),x,y,win->Width-x-rborder,fontheight+4+(fontheight+7)*lines);
++			DrawGroupBorder(rp,GetString(&gLocaleInfo, MSG_POSITION_BORDER),
++				lborder, y = barheight + fontheight??+ 10,
++				(x = (long)wd->wd_ExtData[3]) - 4 - lborder,
++				fontheight + 4 + (fontheight + 7) * lines);
++			if (wd->wd_ExtData[2]) {
++				DrawGroupBorder(rp, GetString(&gLocaleInfo, MSG_MISC_BORDER),
++					x, y, win->Width - x - rborder,
++					fontheight + 4 + (fontheight + 7) * lines);
++			}
+ 
+-			for(gg = (APTR)((struct List *)wd->wd_ExtData[4])->lh_Head;gg->gg_Node.mln_Succ;gg = (APTR)gg->gg_Node.mln_Succ)
+-			{
+-				if (gg->gg_Type == GIT_PEN)
+-				{
++			for (gg = (APTR)((struct List *)wd->wd_ExtData[4])->lh_Head;
++					gg->gg_Node.mln_Succ; gg = (APTR)gg->gg_Node.mln_Succ) {
++				if (gg->gg_Type == GIT_PEN) {
+ 					struct gInterface *gi;
+ 
+-					for(gi = ((struct gObject *)wd->wd_Data)->go_Class->gc_Interface;gi && gi->gi_Tag;gi++)
+-					{
+-						if (gg->gg_Tag == gi->gi_Tag)
+-						{
++					for (gi = ((struct gObject *)wd->wd_Data)->go_Class
++							->gc_Interface; gi && gi->gi_Tag; gi++) {
++						if (gg->gg_Tag == gi->gi_Tag) {
+ 							itext.IText = GetGLabel(gi);
+-							PrintIText(rp,&itext,gg->gg_Gadget->LeftEdge-8-2*boxwidth-IntuiTextLength(&itext),gg->gg_Gadget->TopEdge+3);
++							PrintIText(rp, &itext, gg->gg_Gadget->LeftEdge - 8
++									- 2 * boxwidth - IntuiTextLength(&itext),
++								gg->gg_Gadget->TopEdge + 3);
+ 						}
+ 					}
+ 				}
+@@ -1158,13 +1176,15 @@
+ 			struct gObject *go = wd->wd_ExtData[0];
+ 			struct gClass *gc;
+ 
+-			SetAPen(rp, FindColor(scr->ViewPort.ColorMap, 0xffffffff, 0xffffffff, 0xffffffff, -1));
+-			RectFill(rp, win->BorderLeft, win->BorderTop, x = win->Width - 2 - win->BorderRight, y = win->Height - 2 - win->BorderBottom);
++			SetAPen(rp, FindColor(scr->ViewPort.ColorMap,
++				0xffffffff, 0xffffffff, 0xffffffff, -1));
++			RectFill(rp, win->BorderLeft, win->BorderTop,
++				x = win->Width - 2 - win->BorderRight,
++				y = win->Height - 2 - win->BorderBottom);
+ 			EraseRect(rp, x + 1, win->BorderTop, x + 1, y);
+ 			EraseRect(rp, win->BorderLeft, y + 1, x, y + 1);
+ 
+-			if (go && (gc = go->go_Class)->gc_Draw)
+-			{
++			if (go && (gc = go->go_Class)->gc_Draw) {
+ 				struct gBounds gb;
+ 
+ 				SetGRastPort(rp);
+@@ -1180,8 +1200,7 @@
+ 			break;
+ 		}
+ 		case WDT_BORDER:
+-			if ((gad = GadgetAddress(win, 1)) != 0)
+-			{
++			if ((gad = GadgetAddress(win, 1)) != 0) {
+ 				DrawGroupBorder(rp, GetString(&gLocaleInfo, MSG_PRESETS_BORDER), lborder, win->BorderTop + 3, win->Width - lborder - rborder, gad->TopEdge - win->BorderTop - 6);
+ 				DrawBevelBox(rp, lborder, gad->TopEdge + 4 + fontheight, win->Width - lborder - rborder, fontheight*2 + 19, GT_VisualInfo, vi, GTBB_Recessed, TRUE, TAG_END);
+ 			}
+@@ -1277,8 +1296,7 @@
+ bool
+ WindowIsProjectDependent(long type)
+ {
+-	switch (type)
+-	{
++	switch (type) {
+ 		case WDT_PAGE:
+ 		case WDT_DOCUMENT:
+ 		case WDT_DIAGRAM:
+@@ -1301,15 +1319,14 @@
+ 	APTR   data = (APTR)GetTagData(WA_Data, 0, ti);
+ 
+ 	*rwin = NULL;
+-	switch (type)
+-	{
++	switch (type) {
+ 		case WDT_PROJECT:
+ 		case WDT_DEFINECMD:
+ 			break;
+ 		case WDT_OBJECT:
+-			for (win = scr->FirstWindow;win;win = win->NextWindow)
+-			{
+-				if (win->UserPort == iport && ((struct winData *)win->UserData)->wd_Type == type
++			for (win = scr->FirstWindow;win;win = win->NextWindow) {
++				if (win->UserPort == iport
++					&& ((struct winData *)win->UserData)->wd_Type == type
+ 					&& ((struct winData *)win->UserData)->wd_Data == data)
+ 					break;
+ 			}
+@@ -1318,35 +1335,38 @@
+ 		{
+ 			struct gDiagram *current = (APTR)GetTagData(WA_CurrentDiagram, 0, ti);
+ 
+-			for (win = scr->FirstWindow; win; win = win->NextWindow)
+-			{
++			for (win = scr->FirstWindow; win; win = win->NextWindow) {
+ 				struct winData *wd = (APTR)win->UserData;
+ 
+-				if (win->UserPort == iport && wd->wd_Type == type && wd->u.diagram.wd_CurrentDiagram == current)
++				if (win->UserPort == iport && wd->wd_Type == type
++					&& wd->u.diagram.wd_CurrentDiagram == current)
+ 					break;
+ 			}
+ 			break;
+ 		}
+ 		default:
+-			if (type != WDT_PREFS && IsPrefsWindow(type))
+-			{
+-				for (win = scr->FirstWindow;win;win = win->NextWindow)
+-				{
+-					if (win->UserPort == iport && ((struct winData *)win->UserData)->wd_Type == type && ((struct winData *)win->UserData)->wd_Data == data)
++			if (type != WDT_PREFS && IsPrefsWindow(type)) {
++				for (win = scr->FirstWindow; win != NULL;
++						win = win->NextWindow) {
++					if (win->UserPort == iport
++						&& ((struct winData *)win->UserData)->wd_Type == type
++						&& ((struct winData *)win->UserData)->wd_Data == data)
+ 						break;
+ 				}
+-			}
+-			else
++			} else
+ 				win = GetAppWindow(type);
++			break;
+ 	}
+-	if (win)
+-	{
++
++	if (win) {
+ 		long active;
+ 
+ 		wd = (struct winData *)win->UserData;
+ 		active = GetTagData(WA_Page, ~0L, ti);
+-		if (active != ~0L && wd->wd_PageHandlingGadget)
+-			SetGadgetAttrs(wd->wd_PageHandlingGadget, win, NULL, PAGEGA_Active, active, TAG_END);
++		if (active != ~0L && wd->wd_PageHandlingGadget) {
++			SetGadgetAttrs(wd->wd_PageHandlingGadget, win, NULL,
++				PAGEGA_Active, active, TAG_END);
++		}
+ 
+ 		WindowToFront(win);
+ 		ActivateWindow(win);
+@@ -1354,20 +1374,18 @@
+ 		*rwin = win;
+ 		return FALSE;
+ 	}
+-	if (WindowIsProjectDependent(type))
+-	{
+-		if (!rxpage)
+-		{
++	if (WindowIsProjectDependent(type)) {
++		if (!rxpage) {
+ 			ErrorRequest(GetString(&gLocaleInfo, MSG_NO_PROJECT_ERR));
+ 			return FALSE ;
+ 		}
+-		switch (type)
+-		{
++
++		switch (type) {
+ 			case WDT_MASK:
+ 			case WDT_FILTER:
+ 			case WDT_INDEX:
+-				if (IsListEmpty((struct List *)&rxpage->pg_Mappe->mp_Databases))
+-				{
++				if (IsListEmpty((struct List *)&rxpage->pg_Mappe
++						->mp_Databases)) {
+ 					ErrorRequest(GetString(&gLocaleInfo, MSG_NO_DATABASE_ERR));
+ 					return FALSE;
+ 				}
+@@ -1389,18 +1407,18 @@
+ {
+ 	struct Window *win;
+ 	struct winData *wd;
+-	bool   error = false, reopened = false;
+-	int32  idcmp, flags, x, y, minWidth = -1L, minHeight = -1L;
++	bool error = false, reopened = false;
++	int32 idcmp, flags, x, y, minWidth = -1L, minHeight = -1L;
+ 	CONST_STRPTR title;
+ 
+ 	ObtainSemaphore(&gWindowSemaphore);
+ 
+-	if (!TestOpenAppWindow(&win, type, (struct TagItem *)&tag1))
+-	{
++	if (!TestOpenAppWindow(&win, type, (struct TagItem *)&tag1)) {
+ 		ReleaseSemaphore(&gWindowSemaphore);
+ 		return win;
+ 	}
+-	title = (STRPTR)GetTagData(WA_Title, (ULONG)GetString(&gLocaleInfo, MSG_IGNITION_REQUEST_TITLE), (struct TagItem *)&tag1);
++	title = (STRPTR)GetTagData(WA_Title, (ULONG)GetString(&gLocaleInfo,
++		MSG_IGNITION_REQUEST_TITLE), (struct TagItem *)&tag1);
+ 
+ 	if ((wd = (struct winData *)GetTagData(WA_WinData, 0, (struct TagItem *)&tag1)) != 0)
+ 		reopened = true;
+
+
+
+From marust at mail.berlios.de  Wed Jan 21 13:54:05 2009
+From: marust at mail.berlios.de (marust at mail.berlios.de)
+Date: Wed, 21 Jan 2009 13:54:05 +0100
+Subject: [Ignition-commits] r34 - in trunk: . add-ons lib lib/safeclip
+	lib/safeclip/gcc-68k lib/safeclip/gcc-all
+	lib/safeclip/sasc-68k libs/textedit libs/textedit/include/gadgets
+Message-ID: <200901211254.n0LCs584010802@sheep.berlios.de>
+
+Author: marust
+Date: 2009-01-21 13:53:54 +0100 (Wed, 21 Jan 2009)
+New Revision: 34
+ViewCVS: http://svn.berlios.de/viewcvs/ignition?rev=34&view=rev
+
+Added:
+   trunk/lib/safeclip/
+   trunk/lib/safeclip/ReadMe.doc
+   trunk/lib/safeclip/gcc-68k/
+   trunk/lib/safeclip/gcc-68k/Makefile
+   trunk/lib/safeclip/gcc-68k/clip.s
+   trunk/lib/safeclip/gcc-68k/safeclip.c
+   trunk/lib/safeclip/gcc-68k/safeclip.h
+   trunk/lib/safeclip/gcc-all/
+   trunk/lib/safeclip/gcc-all/safeclip.c
+   trunk/lib/safeclip/gcc-all/safeclip.h
+   trunk/lib/safeclip/safeclip.guide
+   trunk/lib/safeclip/sasc-68k/
+   trunk/lib/safeclip/sasc-68k/clip.s
+   trunk/lib/safeclip/sasc-68k/safeclip.c
+   trunk/lib/safeclip/sasc-68k/safeclip.h
+   trunk/lib/safeclip/sasc-68k/smakefile
+Removed:
+   trunk/safeclip.c
+   trunk/safeclip.h
+Modified:
+   trunk/add-ons/gclass_protos.h
+   trunk/add-ons/line_diagram.c
+   trunk/libs/textedit/TextEdit_private.h
+   trunk/libs/textedit/include/gadgets/TextEdit.h
+   trunk/libs/textedit/pTextEdit.conf
+   trunk/mmakefile.src
+   trunk/windows.c
+Log:
+* Made Ignition compiling under AROS again.
+* Because of a double definition error for struct EditGData
+  it's now only a forward declaration in the public header.
+* Copied original SafeClip to lib/safeclip and renamed GCC
+  to gcc-68k and SASC to sasc-68k. Sorry, I can't test if
+  this is compilable.
+* Moved previous safeclip.[ch] to lib/safeclip/gcc-all.
+  (This is what is used for AROS)
+* Fixed some errors about illegal characters \302 and \240
+  in source code.
+* included <stdbool.h> for "bool" and "true"
+
+
+
+Modified: trunk/add-ons/gclass_protos.h
+===================================================================
+--- trunk/add-ons/gclass_protos.h	2009-01-20 16:41:27 UTC (rev 33)
++++ trunk/add-ons/gclass_protos.h	2009-01-21 12:53:54 UTC (rev 34)
+@@ -70,8 +70,8 @@
+ void (*SetOutlineColor)(struct RastPort *rp,ULONG color);
+ 
+ /* variadic functions must be real functions */
+-ULONG gDoMethod(APTR go,LONG data,...) VARARG68K;
+-ULONG gDoSuperMethod(struct gClass *gc,APTR go,LONG data,...) VARARG68K;
+-struct FontInfo *SetFontInfo(struct FontInfo *fi,ULONG dpi,ULONG tag1,...) VARARG68K;
++ULONG gDoMethod(APTR go,LONG data,...) VARARGS68K;
++ULONG gDoSuperMethod(struct gClass *gc,APTR go,LONG data,...) VARARGS68K;
++struct FontInfo *SetFontInfo(struct FontInfo *fi,ULONG dpi,ULONG tag1,...) VARARGS68K;
+ 
+ #endif  /* CLIB_GCLASS_PROTOS_H */
+
+Modified: trunk/add-ons/line_diagram.c
+===================================================================
+--- trunk/add-ons/line_diagram.c	2009-01-20 16:41:27 UTC (rev 33)
++++ trunk/add-ons/line_diagram.c	2009-01-21 12:53:54 UTC (rev 34)
+@@ -18,6 +18,7 @@
+ #include "ignition_strings.h"
+ 
+ #include <string.h>
++#include <stdbool.h>
+ 
+ struct gArea;
+ 
+@@ -27,7 +28,7 @@
+ 
+ struct gInterface interface[] = {
+ 	{GAA_Pseudo3D, "Pseudo-3D", GIT_CHECKBOX, NULL, NULL},
+-	{0, NULL, 0, NULL,?NULL}
++	{0, NULL, 0, NULL, NULL}
+ };
+ 
+ const STRPTR superClass = "diagram";
+
+Added: trunk/lib/safeclip/ReadMe.doc
+===================================================================
+--- trunk/lib/safeclip/ReadMe.doc	2009-01-20 16:41:27 UTC (rev 33)
++++ trunk/lib/safeclip/ReadMe.doc	2009-01-21 12:53:54 UTC (rev 34)
+@@ -0,0 +1,25 @@
++Short:    Polygon/line clipping routines (68020+)
++Uploader: pak at star.sr.bham.ac.uk (Peter Knight)
++Author:   pak at star.sr.bham.ac.uk (Peter Knight)
++Type:     gfx/misc
++Version:  1.0
++
++Description
++-----------
++An easy to use suite of routines that provides an interface to the system 
++rendering functions, but with the added bonus that all drawing operations are 
++clipped against a specified rectangular region. MUCH better at clipping 
++filled polygons than the system routines (the size of the polygon can be up to 
++2^31 pixels). 
++
++Includes full source and object files for both SAS/C and GCC.
++
++Requires
++--------
++o WB 2.0 (or better).
++o 68020 (or better).
++
++
++
++
++
+
+Added: trunk/lib/safeclip/gcc-68k/Makefile
+===================================================================
+--- trunk/lib/safeclip/gcc-68k/Makefile	2009-01-20 16:41:27 UTC (rev 33)
++++ trunk/lib/safeclip/gcc-68k/Makefile	2009-01-21 12:53:54 UTC (rev 34)
+@@ -0,0 +1,23 @@
++# Target: demo
++
++# Flags
++CC = gcc
++CFLAGS = -O -m68020 -noixemul
++LDFLAGS = -L. -s
++
++# Objects
++OBJ = demo.o safeclip.o clip.o
++
++.s.o: 
++	gasp $*.s > t.s
++	as -o $*.o t.s
++	rm -f t.s
++
++demo: $(OBJ)
++	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJ)
++
++$(OBJ): safeclip.h
++
++
++
++
+
+
+Property changes on: trunk/lib/safeclip/gcc-68k/Makefile
+___________________________________________________________________
+Name: svn:keywords
+   + Id Date Revision Author
+Name: svn:eol-style
+   + native
+
+Added: trunk/lib/safeclip/gcc-68k/clip.s
+===================================================================
+--- trunk/lib/safeclip/gcc-68k/clip.s	2009-01-20 16:41:27 UTC (rev 33)
++++ trunk/lib/safeclip/gcc-68k/clip.s	2009-01-21 12:53:54 UTC (rev 34)
+@@ -0,0 +1,355 @@
++|
++| Name:        clip.s 
++| Description: Routines for clipping line segments and filled polygons
++| Author:      pak at star.sr.bham.ac.uk (Peter Knight)
++| Notes:       Requires 68020+
++|
++
++.EXPORT	_lineclip
++.EXPORT	_clip2d
++.EXPORT _CLP_xmin
++.EXPORT _CLP_ymin
++.EXPORT _CLP_xmax
++.EXPORT _CLP_ymax
++
++| Clip to x boundary
++.MACRO  CLIPX
++        movem.l (a0),d2-d5              | get (x1,y1) and (x2,y2)
++        sub.l   d2,d4                   | x2-x1
++        sub.l   d3,d5                   | y2-y1
++        sub.l   d6,d2                   | x1-xint
++        muls.l  d2,d7:d5
++        divs.l  d4,d7:d5
++        sub.l   d5,d3                   | y intercept
++        move.l  d6,(a1)+                | save x intercept
++        move.l  d3,(a1)+                | save y intercept
++.ENDM
++
++| Clip to y boundary
++.MACRO  CLIPY
++        movem.l (a0),d2-d5              | get (x1,y1) and (x2,y2)
++        sub.l   d2,d4                   | x2-x1
++        sub.l   d3,d5                   | y2-y1
++        sub.l   d6,d3                   | y1-xint
++        muls.l  d3,d7:d4
++        divs.l  d5,d7:d4
++        sub.l   d4,d2                   | x intercept
++        move.l  d2,(a1)+                | save x intercept
++        move.l  d6,(a1)+                | save y intercept
++.ENDM
++
++|                
++| lineclip - Clip line segment to viewport
++|
++| on entry:
++| a0.l - address of vertices.
++|
++| on exit:
++| d0.l - TRUE if some part of line drawn, else FALSE
++| all other registers preserved
++|
++_lineclip:
++        movem.l d1-d7/a0-a5,-(sp)       | Save registers.
++
++| Bad return code
++	moveq	#0,d0
++
++| Duplicate first end point
++	move.l	(a0),16(a0)
++	move.l	4(a0),20(a0) 
++
++| Clip against xmin
++	move.l	_CLP_xmin,d6
++	cmp.l	(a0),d6
++	ble.s   ok1
++	cmp.l	8(a0),d6
++	bgt	quit
++	move.l	a0,a1
++	CLIPX
++	bra.s	ok2
++ok1:
++	cmp.l	8(a0),d6
++	ble.s	ok2
++	lea	8(a0),a1
++	CLIPX
++
++| Clip against xmax
++ok2:
++	move.l	_CLP_xmax,d6
++	cmp.l	(a0),d6
++	bge.s	ok3
++	cmp.l	8(a0),d6
++	blt	quit
++	move.l	a0,a1
++	CLIPX
++	bra.s	ok4
++ok3:
++	cmp.l	8(a0),d6
++	bge.s	ok4
++	lea	8(a0),a1
++	CLIPX
++
++| Clip against ymin
++ok4:
++	move.l	_CLP_ymin,d6
++	cmp.l	4(a0),d6
++	ble.s	ok5
++	cmp.l	12(a0),d6
++	bgt	quit
++	move.l	a0,a1
++	CLIPY
++	bra.s	ok6
++ok5:
++	cmp.l	12(a0),d6
++	ble.s	ok6
++	lea	8(a0),a1
++	CLIPY
++
++| Clip against ymax
++ok6:
++	move.l	_CLP_ymax,d6
++	cmp.l	4(a0),d6
++	bge.s	ok7
++	cmp.l	12(a0),d6
++	blt	quit
++	move.l	a0,a1
++	CLIPY
++	bra.s	ok8
++ok7:
++	cmp.l	12(a0),d6
++	bge.s	ok8
++	lea	8(a0),a1
++	CLIPY
++ok8:
++	moveq	#1,d0
++quit:
++        movem.l (sp)+,d1-d7/a0-a5
++        rts
++
++
++|                
++| clip2d - Clip 2-d polygon to viewport
++|
++| on entry:
++| d0.w - number of vertices
++| a0.l - address of vertices.
++| a1.l - address of draw buffer.
++|
++| on exit:
++| d0.w - number of vertices in clipped polygon
++| all other registers preserved
++|
++_clip2d:
++        movem.l d1-d7/a0-a5,-(sp)       | Save registers.
++
++| Save address of draw buffer.
++	move.l	a0,a5
++        move.l  a1,a4
++	exg	d0,d1
++        
++| Clip against xmin.
++        subq.w  #2,d1
++        move.w  d1,d0                   | d0 is from count
++        move.l	a5,a0                   | from buffer
++        move.l	a4,a1                   | to buffer is a1
++        moveq   #0,d1                   | d1 is to count
++        move.l  _CLP_xmin,d6            | d6 is XMIN.
++        cmp.l   (a0),d6
++        bge.s   xmin_loop
++        move.l  (a0),(a1)+
++        addq.w  #1,d1
++        move.l  4(a0),(a1)+
++xmin_loop:
++        cmp.l   (a0),d6
++        blt.s   xmin_over
++        cmp.l   8(a0),d6
++        bge.s   xmin_skip
++	CLIPX
++	addq.w	#1,d1
++        bra.s   xmin_next
++xmin_over:
++        cmp.l   8(a0),d6
++        blt.s   xmin_next
++	CLIPX
++	addq.w	#1,d1
++        bra.s   xmin_skip
++xmin_next:
++        lea     8(a0),a2
++        move.l  (a2)+,(a1)+
++        addq.w  #1,d1
++        move.l  (a2)+,(a1)+
++xmin_skip:
++        lea     8(a0),a0
++        dbra    d0,xmin_loop
++        tst.w   d1
++        beq     exit 
++	move.l	a4,a0
++        move.l  (a0)+,d5
++        move.l  (a0)+,d6
++        lea     -8(a1),a2
++        cmp.l   (a2)+,d5
++        bne.s   xmin_close
++        cmp.l   (a2)+,d6
++        beq.s   clipxmax
++xmin_close:
++        move.l  d5,(a1)+
++        addq.w  #1,d1
++        move.l  d6,(a1)+ 
++        
++| Clip against xmax.
++clipxmax:
++        subq.w  #2,d1
++        move.w  d1,d0                   | d0 is from count
++        move.l	a4,a0                   | from buffer
++        move.l	a5,a1                   | to buffer is a1
++        moveq   #0,d1                   | d1 is to count
++        move.l  _CLP_xmax,d6            | d6 is xmax
++        cmp.l   (a0),d6
++        blt.s   xmax_loop
++        move.l  (a0),(a1)+
++        addq.w  #1,d1
++        move.l  4(a0),(a1)+
++xmax_loop:
++        cmp.l   (a0),d6
++        bge.s   xmax_over
++        cmp.l   8(a0),d6
++        blt.s   xmax_skip
++	CLIPX
++	addq.w	#1,d1
++        bra.s   xmax_next
++xmax_over:
++        cmp.l   8(a0),d6
++        bge.s   xmax_next
++	CLIPX
++	addq.w	#1,d1
++        bra.s   xmax_skip
++xmax_next:
++        lea     8(a0),a2
++        move.l  (a2)+,(a1)+
++        addq.w  #1,d1
++        move.l  (a2)+,(a1)+
++xmax_skip:
++        lea     8(a0),a0
++        dbra    d0,xmax_loop
++        tst.w   d1
++        beq     exit	
++	move.l	a5,a0
++        move.l  (a0)+,d5
++        move.l  (a0)+,d6
++        lea     -8(a1),a2
++        cmp.l   (a2)+,d5
++        bne.s   xmax_close
++        cmp.l   (a2)+,d6
++        beq.s   clipymin
++xmax_close:
++        move.l  d5,(a1)+
++        addq.w  #1,d1
++        move.l  d6,(a1)+
++        
++| Clip against ymin.
++clipymin:
++        subq.w  #2,d1
++        move.w  d1,d0                   | d0 is from count
++        move.l	a5,a0                   | from buffer
++        move.l	a4,a1                   | to buffer is a1
++        moveq   #0,d1                   | d1 is to count
++        move.l  _CLP_ymin,d6            | d6 is ymin
++	cmp.l   4(a0),d6
++        bge.s   ymin_loop
++        move.l  (a0),(a1)+
++        addq.w  #1,d1
++        move.l  4(a0),(a1)+
++ymin_loop:
++        cmp.l   4(a0),d6
++        blt.s   ymin_over
++        cmp.l   12(a0),d6
++        bge.s   ymin_skip
++	CLIPY
++	addq.w	#1,d1
++        bra.s   ymin_next
++ymin_over:
++        cmp.l   12(a0),d6
++        blt.s   ymin_next
++	CLIPY
++	addq.w	#1,d1
++        bra.s   ymin_skip
++ymin_next:
++        lea     8(a0),a2
++        move.l  (a2)+,(a1)+
++        addq.w  #1,d1
++        move.l  (a2)+,(a1)+
++ymin_skip:
++        lea     8(a0),a0
++        dbra    d0,ymin_loop
++        tst.w   d1
++        beq     exit
++	move.l	a4,a0
++        move.l  (a0)+,d5
++        move.l  (a0)+,d6
++        lea     -8(a1),a2
++        cmp.l   (a2)+,d5
++        bne.s   ymin_close
++        cmp.l   (a2)+,d6
++        beq.s   clipymax
++ymin_close:
++        move.l  d5,(a1)+
++        addq.w  #1,d1
++        move.l  d6,(a1)+
++        
++| Clip against ymax.
++clipymax:
++        subq.w  #2,d1
++        move.w  d1,d0                   | d0 is from count
++        move.l  a4,a0                   | from buffer
++        move.l  a5,a1                   | to buffer is a1
++        moveq   #0,d1                   | d1 is to count
++        move.l  _CLP_ymax,d6            | d6 is ymax
++        cmp.l   4(a0),d6
++        blt.s   ymax_loop
++        move.l  (a0),(a1)+
++        addq.w  #1,d1
++        move.l  4(a0),(a1)+
++ymax_loop:
++        cmp.l   4(a0),d6
++        bge.s   ymax_over
++        cmp.l   12(a0),d6
++        blt.s   ymax_skip
++	CLIPY
++	addq.w	#1,d1
++        bra.s   ymax_next
++ymax_over:
++        cmp.l   12(a0),d6
++        bge.s   ymax_next
++	CLIPY
++	addq.w	#1,d1
++        bra.s   ymax_skip
++ymax_next:
++        lea     8(a0),a2
++        move.l  (a2)+,(a1)+
++        addq.w  #1,d1
++        move.l  (a2)+,(a1)+
++ymax_skip:
++        lea     8(a0),a0
++        dbra    d0,ymax_loop
++        tst.w   d1
++        beq.s   exit
++        move.l	a5,a0
++        move.l  (a0)+,d5
++        move.l  (a0)+,d6
++        lea     -8(a1),a2
++        cmp.l   (a2)+,d5
++        bne.s   ymax_close
++        cmp.l   (a2)+,d6
++        beq.s   exit
++ymax_close:
++        move.l  d5,(a1)+
++        addq.w  #1,d1
++        move.l  d6,(a1)+
++        
++| Restore registers and exit.
++exit:
++	move.l	d1,d0
++        movem.l (sp)+,d1-d7/a0-a5
++        rts
++
++.END
+
+Added: trunk/lib/safeclip/gcc-68k/safeclip.c
+===================================================================
+--- trunk/lib/safeclip/gcc-68k/safeclip.c	2009-01-20 16:41:27 UTC (rev 33)
++++ trunk/lib/safeclip/gcc-68k/safeclip.c	2009-01-21 12:53:54 UTC (rev 34)
+@@ -0,0 +1,235 @@
++/****h* Autodoc/safeclip.c [1.0] *
++*  NAME
++*    safeclip.c
++*  FUNCTION
++*    Interface to system rendering routines, but with clipping.
++*  AUTHOR
++*    Peter Knight: All programming.
++*    <pak at star.sr.bham.ac.uk>
++*  CREATION DATE
++*    24-Mar-96
++*  COPYRIGHT
++*    No restriction (Public Domain).
++*    Use these routines as you wish in your programs (a 
++*    mention in the credits would be nice, but it's up to
++*    you).
++**********
++*/
++
++#include <exec/types.h>
++#include <exec/memory.h>
++#include <proto/exec.h>
++#include <proto/graphics.h>
++
++#include "safeclip.h"
++
++/* Global variables. */
++LONG CLP_xmin, CLP_ymin, CLP_xmax, CLP_ymax;
++LONG (*CLP_vert)[2] = NULL, (*CLP_wrk)[2] = NULL;
++LONG CLP_nvert = 0, CLP_nvertmax;
++LONG CLP_lastx, CLP_lasty;
++
++/****i* safeclip.c/Clip2d
++* NAME
++*   Clip2d
++* SYNOPSIS
++*   res = Clip2d (n)
++*   LONG Clip2d (LONG)
++* FUNCTION
++*   C interface to ASM routine for clipping filled polygons.
++* INPUTS
++*   n - Number of vertices in polygon
++* RESULTS
++*   res - Number of vertices in clipped polygon
++* SEE ALSO
++*/
++static __inline LONG
++Clip2d (LONG n)
++{
++  register LONG _res __asm("d0");
++  register LONG *a0 __asm("a0") = &CLP_vert[0][0];
++  register LONG *a1 __asm("a1") = CLP_wrk[0];
++  register LONG d0 __asm("d0") = n;
++  __asm ("jsr _clip2d"
++	 : "=r" (_res)
++	 : "r" (a0), "r" (a1), "r" (d0)
++	 : "d0", "memory");
++  return _res;
++}
++/*********/
++
++/****i* safeclip.c/ClipLine
++* NAME
++*   ClipLine
++* SYNOPSIS
++*   res = ClipLine ()
++*   LONG ClipLine (VOID)
++* FUNCTION
++*   C interface to ASM routine for clipping line segments.
++* INPUTS
++* RESULTS
++*   res - TRUE if any part of line was drawn, otherwise FALSE.
++* SEE ALSO
++*/
++static __inline LONG
++ClipLine (VOID)
++{
++  register LONG _res __asm("d0");
++  register LONG *a0 __asm("a0") = &CLP_vert[0][0];
++  __asm ("jsr _lineclip"
++	 : "=r" (_res)
++	 : "r" (a0)
++	 : "d0", "memory");
++  return _res;
++}
++/*********/
++
++/****** safeclip.c/SafeAreaEnd
++* NAME
++*   SafeAreaEnd
++* SYNOPSIS
++*        SafeAreaEnd (rp)
++*   VOID SafeAreaEnd (struct RastPort *)
++* FUNCTION
++*   Process buffer AreaDraw() instructions
++* INPUTS
++*   rp - Pointer to RastPort on which to draw.
++* RESULTS
++* SEE ALSO
++*   SafeAreaDraw
++*/
++VOID
++SafeAreaEnd (struct RastPort *rp)
++{
++  if (CLP_nvert)
++    {
++      WORD i;
++      SafeAreaDraw (CLP_vert[0][0], CLP_vert[0][1]);  /* ensure shape is closed */
++      CLP_nvert = Clip2d (CLP_nvert);
++      AreaMove (rp, CLP_vert[0][0], CLP_vert[0][1]);
++      for (i = 1; i < CLP_nvert; i++)
++	AreaDraw (rp, CLP_vert[i][0], CLP_vert[i][1]);
++      AreaEnd (rp);
++      CLP_nvert = 0;
++    }
++}
++/*********/
++
++/****** safeclip.c/SafeRectFill
++* NAME
++*   SafeRectFill
++* SYNOPSIS
++*        SafeRectFill (rp, x1, y1, x2, y2)
++*   VOID SafeRectFill (struct RastPort *, LONG, LONG, LONG, LONG)
++* FUNCTION
++*   Draw a filled rectangle
++* INPUTS
++*   rp - Pointer to RastPort on which to draw.
++*   (x1,y1) - Coordinates of upper left corner
++*   (x2,y2) - Coordinates of lower right corner
++* RESULTS
++* SEE ALSO
++*/
++VOID
++SafeRectFill (struct RastPort *rp, LONG x1, LONG y1, LONG x2, LONG y2)
++{
++  SafeAreaDraw (x1, y1);
++  SafeAreaDraw (x2, y1);
++  SafeAreaDraw (x2, y2);
++  SafeAreaDraw (x1, y2);
++  SafeAreaEnd (rp);
++}
++/*********/
++
++/****** safeclip.c/SafeDraw
++* NAME
++*   SafeDraw
++* SYNOPSIS
++*        SafeDraw (rp, x, y)
++*   VOID SafeDraw (struct RastPort *, LONG, LONG)
++* FUNCTION
++*   Move from previous point to new point and draw line.
++* INPUTS
++*   rp - Pointer to RastPort on which to draw.
++*   (x,y) - Coordinates of point to draw to
++* RESULTS
++* SEE ALSO
++*   SafeMove
++*/
++VOID
++SafeDraw (struct RastPort *rp, LONG x, LONG y)
++{
++  CLP_vert[0][0] = CLP_lastx;
++  CLP_vert[0][1] = CLP_lasty;
++  CLP_vert[1][0] = x;
++  CLP_vert[1][1] = y;
++  if (ClipLine ())
++    {
++      Move (rp, CLP_vert[0][0], CLP_vert[0][1]);
++      Draw (rp, CLP_vert[1][0], CLP_vert[1][1]);
++    }
++  CLP_lastx = x;
++  CLP_lasty = y;
++}
++/*********/
++
++/****** safeclip.c/SafeInit
++* NAME
++*   SafeInit
++* SYNOPSIS
++*   res = SafeInit (nvertmax)
++*   ULONG SafeInit (ULONG)
++* FUNCTION
++*   Initialise clipping routines
++* INPUTS
++*   nvertmax - Maximum number of vertices per polygon that you will use
++* RESULTS
++*   res - FALSE if everything was OK, otherwise TRUE
++* SEE ALSO
++*   SafeClose
++*/
++ULONG
++SafeInit (ULONG nvertmax)
++{
++  CLP_nvertmax = nvertmax;
++  if (!(CLP_vert = (LONG (*)[2]) AllocVec (8 * CLP_nvertmax, MEMF_PUBLIC)))
++    return 1;
++  if (!(CLP_wrk = (LONG (*)[2]) AllocVec (8 * CLP_nvertmax, MEMF_PUBLIC)))
++    {
++      FreeVec (CLP_vert);
++      CLP_vert = 0;
++      return 2;
++    }
++  return 0;
++}
++/*********/
++
++/****** safeclip.c/SafeClose
++* NAME
++*   SafeClose
++* SYNOPSIS
++*        SafeClose ()
++*   VOID SafeClose (VOID)
++* FUNCTION
++*   Free memory allocated by SafeInit()
++* INPUTS
++* RESULTS
++* SEE ALSO
++*   SafeInit
++*/
++VOID
++SafeClose (VOID)
++{
++  if (CLP_wrk)
++    {
++      FreeVec (CLP_wrk);
++      CLP_wrk = 0;
++    }
++  if (CLP_vert)
++    {
++      FreeVec (CLP_vert);
++      CLP_vert = 0;
++    }
++}
++/*********/
++
+
+
+Property changes on: trunk/lib/safeclip/gcc-68k/safeclip.c
+___________________________________________________________________
+Name: svn:keywords
+   + Id Date Revision Author
+Name: svn:eol-style
+   + native
+
+Added: trunk/lib/safeclip/gcc-68k/safeclip.h
+===================================================================
+--- trunk/lib/safeclip/gcc-68k/safeclip.h	2009-01-20 16:41:27 UTC (rev 33)
++++ trunk/lib/safeclip/gcc-68k/safeclip.h	2009-01-21 12:53:54 UTC (rev 34)
+@@ -0,0 +1,246 @@
++/****h* Autodoc/safeclip.h [1.0] *
++*  NAME
++*    safeclip.h
++*  FUNCTION
++*    Interface to system rendering routines, but with clipping.
++*  AUTHOR
++*    Peter Knight: All programming.
++*    <pak at star.sr.bham.ac.uk>
++*  CREATION DATE
++*    24-Mar-96
++*  COPYRIGHT
++*    No restriction (Public Domain).
++*    Use these routines as you wish in your programs (a 
++*    mention in the credits would be nice, but it's up to
++*    you).
++**********
++*/
++
++#include <exec/types.h>
++#include <proto/graphics.h>
++
++/* Prototypes for functions from safeclip.c */
++ULONG SafeInit (ULONG nvertmax);
++VOID SafeClose (VOID);
++VOID SafeAreaEnd (struct RastPort *rp);
++VOID SafeRectFill (struct RastPort *rp, LONG x1, LONG y1, LONG x2, LONG y2);
++VOID SafeDraw (struct RastPort *rp, LONG x, LONG y);
++
++/****** safeclip.h/SafeSetLimits
++* NAME
++*   SafeSetLimits
++* SYNOPSIS
++*        SafeSetLimits (x1, y1, x2, y2)
++*   VOID SafeSetLimits (LONG, LONG, LONG, LONG)
++* FUNCTION
++*   Set limits of clipping rectangle
++* INPUTS
++*   (x1,y1) - Coordinates of upper left of clipping rectangle
++*   (x2,y2) - Coordinates of lower right of clipping rectangle
++* RESULTS
++* SEE ALSO
++*/
++static __inline VOID
++SafeSetLimits (LONG x1, LONG y1, LONG x2, LONG y2)
++{
++  extern LONG CLP_xmin, CLP_ymin, CLP_xmax, CLP_ymax;
++  CLP_xmin = x1;
++  CLP_ymin = y1;
++  CLP_xmax = x2;
++  CLP_ymax = y2;
++}
++/*********/
++
++/****** safeclip.h/SafeAreaDraw
++* NAME
++*   SafeAreaDraw
++* SYNOPSIS
++*        SafeAreaDraw (x, y)
++*   VOID SafeAreaDraw (LONG, LONG)
++* FUNCTION
++*   Add a vertex to polygon vertex list.
++* INPUTS
++*   (x,y) - Coordinates of new vertex
++* RESULTS
++* SEE ALSO
++*   safeclip.c/SafeAreaEnd 
++*/
++static __inline VOID
++SafeAreaDraw (LONG x, LONG y)
++{
++  extern LONG CLP_nvert, CLP_nvertmax, (*CLP_vert)[2];
++  if (CLP_nvert < CLP_nvertmax)
++    {
++      CLP_vert[CLP_nvert][0] = x;
++      CLP_vert[CLP_nvert][1] = y;
++      CLP_nvert++;
++    }
++}
++/*********/
++
++/****** safeclip.h/SafeMove
++* NAME
++*   SafeMove
++* SYNOPSIS
++*        SafeMove (x, y)
++*   VOID SafeMove (LONG, LONG)
++* FUNCTION
++*   Move drawing pen to new position.
++* INPUTS
++*   (x,y) - Coordinates of new point.
++* RESULTS
++* SEE ALSO
++*   safeclip.c/SafeDraw
++*/
++static __inline VOID
++SafeMove (LONG x, LONG y)
++{
++  extern LONG CLP_lastx, CLP_lasty;
++  CLP_lastx = x;
++  CLP_lasty = y;
++}
++/*********/
++
++/****** safeclip.h/SafeSetRast
++* NAME
++*   SafeSetRast
++* SYNOPSIS
++*        SafeSetRast (rp, pen)
++*   VOID SafeSetRast (struct RastPort *, UBYTE)
++* FUNCTION
++*   Set the entire clipping region to a certain colour.
++* INPUTS
++*   rp - Pointer to RastPort
++*   pen - Pen number to fill region with.
++* RESULTS
++* SEE ALSO
++*/
++static __inline VOID
++SafeSetRast (struct RastPort *rp, UBYTE pen)
++{
++  extern LONG CLP_xmin, CLP_ymin, CLP_xmax, CLP_ymax;
++  UBYTE oldPen = rp->FgPen;   /* should use GetAPen() if v39+ */
++  SetAPen (rp, pen);
++  RectFill (rp, CLP_xmin, CLP_ymin, CLP_xmax, CLP_ymax);
++  SetAPen (rp, oldPen);
++}
++/*********/
++
++/****** safeclip.h/SafeWritePixel
++* NAME
++*   SafeWritePixel
++* SYNOPSIS
++*        SafeWritePixel (rp, x, y)
++*   VOID SafeWritePixel (struct RastPort *, LONG, LONG)
++* FUNCTION
++*   Set the colour of an individual pixel.
++* INPUTS
++*   rp - Pointer to RastPort
++*   (x,y) - Coordinates of pixel
++* RESULTS
++* SEE ALSO
++*/
++static __inline VOID
++SafeWritePixel (struct RastPort *rp, LONG x, LONG y)
++{
++  extern LONG CLP_xmin, CLP_xmax, CLP_ymin, CLP_ymax;
++  if (x >= CLP_xmin && x <= CLP_xmax && y >= CLP_ymin && y <= CLP_ymax)
++    WritePixel (rp, x, y);
++}
++/*********/
++
++/****** safeclip.h/SafeBltBitMapRastPort
++* NAME
++*   SafeBltBitMapRastPort
++* SYNOPSIS
++*        SafeBltBitMapRastPort (srcbm, srcx, srcy,
++*                               destrp, destx, desty.
++*                               sizex, sizey, minterm)
++*   VOID SafeBltBitMapRastPort (struct BitMap *, LONG, LONG,
++*                               struct RastPort *, LONG, LONG,
++*                               LONG, LONG, UBYTE)
++* FUNCTION
++*   Blit a rectangle region from a BitMap to a RastPort.
++* INPUTS
++*   srcbm - Pointer to source BitMap
++*   (srcx,srcy) - Coordinates of upper left of source rectangle.
++*   destrp - Pointer to destination RastPort
++*   (destx,desty) - Coordinates of upper left of destination rectangle.
++*   sizex, sizey - Size of source rectangle
++*   minterm - Minterm for blitter to use during copy
++* RESULTS
++* SEE ALSO
++*   SafeBltMaskBitMapRastPort
++*/
++static __inline VOID
++SafeBltBitMapRastPort (struct BitMap *srcbm, LONG srcx, LONG srcy,
++		       struct RastPort *destrp, LONG destx, LONG desty,
++		       LONG sizex, LONG sizey, UBYTE minterm)
++{
++  extern LONG CLP_xmin, CLP_xmax, CLP_ymin, CLP_ymax;
++  LONG xlo = destx, xhi = destx + sizex - 1;
++  LONG ylo = desty, yhi = desty + sizey - 1;
++  if (xlo < CLP_xmin) xlo = CLP_xmin;
++  if (ylo < CLP_ymin) ylo = CLP_ymin;
++  if (xhi > CLP_xmax) xhi = CLP_xmax;
++  if (yhi > CLP_ymax) yhi = CLP_ymax;
++  if (xlo <= xhi && ylo <= yhi && 
++      xlo >= CLP_xmin && xhi <= CLP_xmax && 
++      ylo >= CLP_ymin && yhi <= CLP_ymax)
++    {
++      BltBitMapRastPort (srcbm, srcx + (xlo - destx), srcy + (ylo - desty),
++			 destrp, xlo, ylo,
++			 (xhi - xlo) + 1, (yhi - ylo) + 1,
++			 minterm);
++    }
++}
++/*********/
++
++/****** safeclip.h/SafeBltMaskBitMapRastPort
++* NAME
++*   SafeBltMaskBitMapRastPort
++* SYNOPSIS
++*        SafeBltMaskBitMapRastPort (srcbm, srcx, srcy,
++*                               destrp, destx, desty.
++*                               sizex, sizey, minterm, bltmask)
++*   VOID SafeBltMaskBitMapRastPort (struct BitMap *, LONG, LONG,
++*                               struct RastPort *, LONG, LONG,
++*                               LONG, LONG, UBYTE, PLANEPTR)
++* FUNCTION
++*   Blit a rectangle region from a BitMap to a RastPort through
++*   a single plane mask.
++* INPUTS
++*   srcbm - Pointer to source BitMap
++*   (srcx,srcy) - Coordinates of upper left of source rectangle.
++*   destrp - Pointer to destination RastPort
++*   (destx,desty) - Coordinates of upper left of destination rectangle.
++*   sizex, sizey - Size of source rectangle
++*   minterm - Minterm for blitter to use during copy
++*   bltmask - Pointer to single plane mask
++* RESULTS
++* SEE ALSO
++*   SafeBltBitMapRastPort
++*/
++static __inline VOID
++SafeBltMaskBitMapRastPort (struct BitMap *srcbm, LONG srcx, LONG srcy,
++			   struct RastPort *destrp, LONG destx, LONG desty,
++			   LONG sizex, LONG sizey, UBYTE minterm, PLANEPTR bltmask)
++{
++  extern LONG CLP_xmin, CLP_xmax, CLP_ymin, CLP_ymax;
++  LONG xlo = destx, xhi = destx + sizex - 1, ylo = desty, yhi = desty + sizey - 1;
++  if (xlo < CLP_xmin) xlo = CLP_xmin;
++  if (ylo < CLP_ymin) ylo = CLP_ymin;
++  if (xhi > CLP_xmax) xhi = CLP_xmax;
++  if (yhi > CLP_ymax) yhi = CLP_ymax;
++  if (xlo <= xhi && ylo <= yhi && 
++      xlo >= CLP_xmin && xhi <= CLP_xmax && 
++      ylo >= CLP_ymin && yhi <= CLP_ymax)
++    {
++      BltMaskBitMapRastPort (srcbm, srcx + (xlo - destx), srcy + (ylo - desty),
++			     destrp, xlo, ylo,
++			     (xhi - xlo) + 1, (yhi - ylo) + 1,
++			     minterm, bltmask);
++    }
++}
++/*********/
++
+
+
+Property changes on: trunk/lib/safeclip/gcc-68k/safeclip.h
+___________________________________________________________________
+Name: svn:keywords
+   + Id Date Revision Author
+Name: svn:eol-style
+   + native
+
+Copied: trunk/lib/safeclip/gcc-all/safeclip.c (from rev 33, trunk/safeclip.c)
+
+Copied: trunk/lib/safeclip/gcc-all/safeclip.h (from rev 33, trunk/safeclip.h)
+
+Added: trunk/lib/safeclip/safeclip.guide
+===================================================================
+--- trunk/lib/safeclip/safeclip.guide	2009-01-20 16:41:27 UTC (rev 33)
++++ trunk/lib/safeclip/safeclip.guide	2009-01-21 12:53:54 UTC (rev 34)
+@@ -0,0 +1,502 @@
++ at database robodoc.guide
++ at author J.v.Weert and F.N.C.Slothouber
++@(c)
++ at node Main safeclip.doc
++@{b}TABLE OF CONTENTS@{ub}
++@{"Autodoc/safeclip.c" Link "safeclip.c"}
++@{"safeclip.c/SafeAreaEnd" Link "SafeAreaEnd"}
++@{"safeclip.c/SafeClose" Link "SafeClose"}
++@{"safeclip.c/SafeDraw" Link "SafeDraw"}
++@{"safeclip.c/SafeInit" Link "SafeInit"}
++@{"safeclip.c/SafeRectFill" Link "SafeRectFill"}
++@{"safeclip.h/SafeAreaDraw" Link "SafeAreaDraw"}
++@{"safeclip.h/SafeBltBitMapRastPort" Link "SafeBltBitMapRastPort"}
++@{"safeclip.h/SafeBltMaskBitMapRastPort" Link "SafeBltMaskBitMapRastPort"}
+
+[... truncated: 1487 lines follow ...]
+
+
+From marust at mail.berlios.de  Wed Jan 21 14:27:48 2009
+From: marust at mail.berlios.de (marust at mail.berlios.de)
+Date: Wed, 21 Jan 2009 14:27:48 +0100
+Subject: [Ignition-commits] r35 - trunk/libs/include
+Message-ID: <200901211327.n0LDRmK6014079@sheep.berlios.de>
+
+Author: marust
+Date: 2009-01-21 14:26:57 +0100 (Wed, 21 Jan 2009)
+New Revision: 35
+ViewCVS: http://svn.berlios.de/viewcvs/ignition?rev=35&view=rev
+
+Modified:
+   trunk/libs/include/SDI_compiler.h
+Log:
+* Moved definition of ALIGNED to avoid a "redefinition error".
+  (In the future we should remove this macro and instead use
+  AllocDosObject() for all data which needs 4-byte alignment)
+
+
+Modified: trunk/libs/include/SDI_compiler.h
+===================================================================
+--- trunk/libs/include/SDI_compiler.h	2009-01-21 12:53:54 UTC (rev 34)
++++ trunk/libs/include/SDI_compiler.h	2009-01-21 13:26:57 UTC (rev 35)
+@@ -210,9 +210,6 @@
+ #if !defined(DEPRECATED)
+   #define DEPRECATED
+ #endif
+-#if !defined(ALIGNED)
+-  #define ALIGNED
+-#endif
+ 
+ /*************************************************************************/
+ 
+@@ -271,6 +268,11 @@
+    // TODO write LIB_... macros
+ #  define LIBFUNC_INIT
+ #  define LIBFUNC_EXIT
++
++#  if !defined(ALIGNED)
++#    define ALIGNED
++#  endif
++
+ #endif
+ 
+ #if defined(__AROS__)
+
+
+
+From marust at mail.berlios.de  Wed Jan 21 15:15:17 2009
+From: marust at mail.berlios.de (marust at mail.berlios.de)
+Date: Wed, 21 Jan 2009 15:15:17 +0100
+Subject: [Ignition-commits] r36 - trunk/libs/textedit
+Message-ID: <200901211415.n0LEFHeu007919@sheep.berlios.de>
+
+Author: marust
+Date: 2009-01-21 15:14:28 +0100 (Wed, 21 Jan 2009)
+New Revision: 36
+ViewCVS: http://svn.berlios.de/viewcvs/ignition?rev=36&view=rev
+
+Modified:
+   trunk/libs/textedit/TextEdit.c
+Log:
+* Bugfix for:
+  http://developer.berlios.de/bugs/?func=detailbug&bug_id=14893&group_id=8642
+  (Variable "el" was changed and used within one sequence point)
+
+
+Modified: trunk/libs/textedit/TextEdit.c
+===================================================================
+--- trunk/libs/textedit/TextEdit.c	2009-01-21 13:26:57 UTC (rev 35)
++++ trunk/libs/textedit/TextEdit.c	2009-01-21 14:14:28 UTC (rev 36)
+@@ -255,10 +255,10 @@
+       break;
+     i += el->el_Width;
+   }
+-  if (!el->el_Word)  /* last character */
+-    return((--el)->el_Length-1+el->el_Word-ed->ed_Text);
+-  else               /* character in word */
+-  {
++  if (!el->el_Word) { /* last character */
++    --el;
++    return --el->el_Length - 1 + el->el_Word-ed->ed_Text;
++  } else {             /* character in word */
+     struct TextExtent extent;
+     ULONG  fit;
+ 
+
+
+
+From axeld at pinc-software.de  Wed Jan 21 17:04:19 2009
+From: axeld at pinc-software.de (Axel =?utf-8?q?D=C3=B6rfler?=)
+Date: Wed, 21 Jan 2009 17:04:19 +0100 CET
+Subject: [Ignition-commits] r36 - trunk/libs/textedit
+In-Reply-To: <200901211415.n0LEFHeu007919@sheep.berlios.de>
+Message-ID: <35251408016-BeMail@zon>
+
+marust at mail.berlios.de wrote:
+> Log:
+> * Bugfix for:
+>   http://developer.berlios.de/bugs/?func=detailbug&bug_id=14893&group_id=8642
+> >   (Variable "el" was changed and used within one sequence point)
+
+Nobody should write such code, indeed :-)
+It works on SAS/C, though, as the parameter evaluation is obviously 
+different...
+
+Bye,
+   Axel.
+
+
+
+From axeld at pinc-software.de  Wed Jan 21 17:10:45 2009
+From: axeld at pinc-software.de (Axel =?utf-8?q?D=C3=B6rfler?=)
+Date: Wed, 21 Jan 2009 17:10:45 +0100 CET
+Subject: [Ignition-commits]
+ =?utf-8?q?r34_-_in_trunk=3A_=2E_add-ons_lib_li?=
+ =?utf-8?q?b/safeclip_lib/safeclip/gcc-68k_lib/safeclip/gcc-all_lib/safecl?=
+ =?utf-8?q?ip/sasc-68k_libs/textedit_libs/textedit/include/gadgets?=
+In-Reply-To: <200901211254.n0LCs584010802@sheep.berlios.de>
+Message-ID: <35637198130-BeMail@zon>
+
+marust at mail.berlios.de wrote:
+> Log:
+> * Made Ignition compiling under AROS again.
+
+Sorry, I hope this will happen less often in the future (in both 
+directions :-))
+
+> * Because of a double definition error for struct EditGData
+>   it's now only a forward declaration in the public header.
+
+I originally intended to remove that structure from the public header 
+completely (and then obviously forgot about it).
+Is there any reason it has to stay at all?
+
+> * Copied original SafeClip to lib/safeclip and renamed GCC
+>   to gcc-68k and SASC to sasc-68k. Sorry, I can't test if
+>   this is compilable.
+
+I'll do that when I'll find the time, thanks.
+
+> * Moved previous safeclip.[ch] to lib/safeclip/gcc-all.
+>   (This is what is used for AROS)
+
+How about "generic" as the fallback name? At least the outcome 
+shouldn't be compiler dependent anymore.
+
+> * Fixed some errors about illegal characters \302 and \240
+>   in source code.
+
+No idea how that happened; I guess it was at those locations where one 
+does not see any change?
+
+> * included <stdbool.h> for "bool" and "true"
+
+Thanks.
+
+Bye,
+   Axel.
+
+
+
+From mrustler at gmx.de  Wed Jan 21 17:41:40 2009
+From: mrustler at gmx.de (Matthias Rustler)
+Date: Wed, 21 Jan 2009 17:41:40 +0100
+Subject: [Ignition-commits] r34 - in trunk: . add-ons lib
+	lib/safeclip	lib/safeclip/gcc-68k lib/safeclip/gcc-all
+	lib/safeclip/sasc-68k	libs/textedit libs/textedit/include/gadgets
+In-Reply-To: <35637198130-BeMail@zon>
+References: <35637198130-BeMail@zon>
+Message-ID: <1232556100.5039.9.camel@bellodello>
+
+Am Mittwoch, den 21.01.2009, 17:10 +0100 schrieb Axel D?rfler:
+> marust at mail.berlios.de wrote:
+> > Log:
+> > * Made Ignition compiling under AROS again.
+> 
+> Sorry, I hope this will happen less often in the future (in both 
+> directions :-))
+> 
+> > * Because of a double definition error for struct EditGData
+> >   it's now only a forward declaration in the public header.
+> 
+> I originally intended to remove that structure from the public header 
+> completely (and then obviously forgot about it).
+> Is there any reason it has to stay at all?
+
+The generated file clib/pTextEdit_protos.h doesn't compile without it.
+I've found a better solution: I've moved the forward declaration to the
+*.conf file.
+
+> > * Copied original SafeClip to lib/safeclip and renamed GCC
+> >   to gcc-68k and SASC to sasc-68k. Sorry, I can't test if
+> >   this is compilable.
+> 
+> I'll do that when I'll find the time, thanks.
+> 
+> > * Moved previous safeclip.[ch] to lib/safeclip/gcc-all.
+> >   (This is what is used for AROS)
+> 
+> How about "generic" as the fallback name? At least the outcome 
+> shouldn't be compiler dependent anymore.
+
+OK, I'll do that.
+
+> > * Fixed some errors about illegal characters \302 and \240
+> >   in source code.
+> 
+> No idea how that happened; I guess it was at those locations where one 
+> does not see any change?
+
+It looked a bit like when an UTF-8 character is shown in ISO8859. 
+
+302   ?     LATIN CAPITAL LETTER A WITH CIRCUMFLEX
+240         NO-BREAK SPACE
+
+(The latter was indeed invisible :-)
+
+> > * included <stdbool.h> for "bool" and "true"
+> 
+> Thanks.
+> 
+> Bye,
+>    Axel.
+> 
+> _______________________________________________
+> Ignition-commits mailing list
+> Ignition-commits at lists.berlios.de
+> https://lists.berlios.de/mailman/listinfo/ignition-commits
+
+
+
+From marust at mail.berlios.de  Wed Jan 21 17:50:16 2009
+From: marust at mail.berlios.de (marust at mail.berlios.de)
+Date: Wed, 21 Jan 2009 17:50:16 +0100
+Subject: [Ignition-commits] r37 - in trunk: . lib/safeclip libs/textedit
+	libs/textedit/include/gadgets
+Message-ID: <200901211650.n0LGoGN1030429@sheep.berlios.de>
+
+Author: marust
+Date: 2009-01-21 17:50:12 +0100 (Wed, 21 Jan 2009)
+New Revision: 37
+ViewCVS: http://svn.berlios.de/viewcvs/ignition?rev=37&view=rev
+
+Added:
+   trunk/lib/safeclip/generic/
+Removed:
+   trunk/lib/safeclip/gcc-all/
+Modified:
+   trunk/libs/textedit/include/gadgets/TextEdit.h
+   trunk/libs/textedit/pTextEdit.conf
+   trunk/mmakefile.src
+Log:
+* Moved forward declaration "struct EditGData" from
+  TextEdit.h to *.conf file to keep public header free from it.
+* Renamed safeclip/gcc-all to safeclip/generic because there
+  shouldn't be any gcc dependencies.
+
+
+Copied: trunk/lib/safeclip/generic (from rev 34, trunk/lib/safeclip/gcc-all)
+
+Modified: trunk/libs/textedit/include/gadgets/TextEdit.h
+===================================================================
+--- trunk/libs/textedit/include/gadgets/TextEdit.h	2009-01-21 14:14:28 UTC (rev 36)
++++ trunk/libs/textedit/include/gadgets/TextEdit.h	2009-01-21 16:50:12 UTC (rev 37)
+@@ -28,11 +28,4 @@
+ #define EGA_Scroller       TAG_USER+60
+ #define EGA_AutoIndent     TAG_USER+61
+ 
+-/*
+-  Forward declaration, because it's defined in TextEdit_private.h,
+-  but some Library functions need it as parameter.
+-*/
+-
+-struct EditGData;
+-
+ #endif   // GADGETS_TEXTEDIT_H
+
+Modified: trunk/libs/textedit/pTextEdit.conf
+===================================================================
+--- trunk/libs/textedit/pTextEdit.conf	2009-01-21 14:14:28 UTC (rev 36)
++++ trunk/libs/textedit/pTextEdit.conf	2009-01-21 16:50:12 UTC (rev 37)
+@@ -13,6 +13,7 @@
+ 
+ ##begin cdef
+ #include <gadgets/TextEdit.h>
++struct EditGData;
+ ##end cdef
+ 
+ ##begin cdefprivate
+
+Modified: trunk/mmakefile.src
+===================================================================
+--- trunk/mmakefile.src	2009-01-21 14:14:28 UTC (rev 36)
++++ trunk/mmakefile.src	2009-01-21 16:50:12 UTC (rev 37)
+@@ -17,7 +17,7 @@
+ TARGETDIR := $(AROS_CONTRIB)/Office/Ignition
+ 
+ USER_CFLAGS :=
+-USER_INCLUDES := -Ilibs/include -Ilib/safeclip/gcc-all -Ilibs
++USER_INCLUDES := -Ilibs/include -Ilib/safeclip/gcc-generic -Ilibs
+ 
+ FILES := \
+ 	boopsi \
+@@ -55,7 +55,7 @@
+ 	project \
+ 	reference \
+ 	rexx \
+-	lib/safeclip/gcc-all/safeclip \
++	lib/safeclip/generic/safeclip \
+ 	screen \
+ 	search \
+ 	support \
+
+
+
+From marust at mail.berlios.de  Fri Jan 23 18:50:26 2009
+From: marust at mail.berlios.de (marust at mail.berlios.de)
+Date: Fri, 23 Jan 2009 18:50:26 +0100
+Subject: [Ignition-commits] r38 - trunk/add-ons
+Message-ID: <200901231750.n0NHoQss023626@sheep.berlios.de>
+
+Author: marust
+Date: 2009-01-23 18:50:16 +0100 (Fri, 23 Jan 2009)
+New Revision: 38
+ViewCVS: http://svn.berlios.de/viewcvs/ignition?rev=38&view=rev
+
+Modified:
+   trunk/add-ons/gclass_variadic.c
+Log:
+* Bugfix for
+  http://developer.berlios.de/bugs/?func=detailbug&bug_id=15096&group_id=8642
+  (unindend recursion caused crash)
+
+Modified: trunk/add-ons/gclass_variadic.c
+===================================================================
+--- trunk/add-ons/gclass_variadic.c	2009-01-21 16:50:12 UTC (rev 37)
++++ trunk/add-ons/gclass_variadic.c	2009-01-23 17:50:16 UTC (rev 38)
+@@ -13,7 +13,7 @@
+ 
+ ULONG gDoSuperMethod(struct gClass *gc, APTR go, LONG data, ...)
+ {
+-	return gDoSuperMethod(gc, go, &data);
++	return gDoSuperMethodA(gc, go, &data);
+ }
+ 
+ struct FontInfo *SetFontInfo(struct FontInfo *fi, ULONG dpi, ULONG tag1, ...)
+
+
+
+From marust at mail.berlios.de  Fri Jan 23 19:03:02 2009
+From: marust at mail.berlios.de (marust at mail.berlios.de)
+Date: Fri, 23 Jan 2009 19:03:02 +0100
+Subject: [Ignition-commits] r39 - trunk
+Message-ID: <200901231803.n0NI327r007171@sheep.berlios.de>
+
+Author: marust
+Date: 2009-01-23 19:02:59 +0100 (Fri, 23 Jan 2009)
+New Revision: 39
+ViewCVS: http://svn.berlios.de/viewcvs/ignition?rev=39&view=rev
+
+Modified:
+   trunk/reference.c
+Log:
+* Bugfix for
+  http://developer.berlios.de/bugs/?func=detailbug&bug_id=15094&group_id=8642
+  and
+  http://developer.berlios.de/bugs/?func=detailbug&bug_id=15095&group_id=8642
+  (Wrong number of arguments caused segfault because of dereferencing of "f")
+
+Modified: trunk/reference.c
+===================================================================
+--- trunk/reference.c	2009-01-23 17:50:16 UTC (rev 38)
++++ trunk/reference.c	2009-01-23 18:02:59 UTC (rev 39)
+@@ -497,6 +497,9 @@
+ 		{
+ 			struct Function *f = t->t_Function;
+ 
++			if (f == (APTR)~0L)
++				break;
++
+ 			if (f && f != (APTR)~0L && f->f_Code)
+ 			{
+ 				struct FuncArg *fa;
+
+
+
+From marust at mail.berlios.de  Fri Jan 23 19:28:03 2009
+From: marust at mail.berlios.de (marust at mail.berlios.de)
+Date: Fri, 23 Jan 2009 19:28:03 +0100
+Subject: [Ignition-commits] r40 - trunk
+Message-ID: <200901231828.n0NIS3t5032301@sheep.berlios.de>
+
+Author: marust
+Date: 2009-01-23 19:27:55 +0100 (Fri, 23 Jan 2009)
+New Revision: 40
+ViewCVS: http://svn.berlios.de/viewcvs/ignition?rev=40&view=rev
+
+Modified:
+   trunk/io.h
+Log:
+* Bugfix for
+  http://developer.berlios.de/bugs/?func=detailbug&bug_id=15097&group_id=8642
+  (Yet another case where the different order of struct Node on AROS makes troubles)
+
+Modified: trunk/io.h
+===================================================================
+--- trunk/io.h	2009-01-23 18:02:59 UTC (rev 39)
++++ trunk/io.h	2009-01-23 18:27:55 UTC (rev 40)
+@@ -65,7 +65,7 @@
+ /*************************** NumberLink ***************************/
+ 
+ struct NumberLink {
+-	struct MinNode nl_Node;
++	struct Node nl_Node;
+ 	UWORD  nl_Number;
+ 	APTR   nl_Link;
+ };
+
+
+
+From axeld at mail.berlios.de  Fri Jan 23 20:40:30 2009
+From: axeld at mail.berlios.de (axeld at BerliOS)
+Date: Fri, 23 Jan 2009 20:40:30 +0100
+Subject: [Ignition-commits] r41 - trunk
+Message-ID: <200901231940.n0NJeUWK000408@sheep.berlios.de>
+
+Author: axeld
+Date: 2009-01-23 20:40:30 +0100 (Fri, 23 Jan 2009)
+New Revision: 41
+ViewCVS: http://svn.berlios.de/viewcvs/ignition?rev=41&view=rev
+
+Modified:
+   trunk/reference.c
+Log:
+* Properly fixed what r39 tried to do.
+* Minor cleanup.
+
+
+Modified: trunk/reference.c
+===================================================================
+--- trunk/reference.c	2009-01-23 18:27:55 UTC (rev 40)
++++ trunk/reference.c	2009-01-23 19:40:30 UTC (rev 41)
+@@ -1,6 +1,6 @@
+ /* References for the automatic computations
+  *
+- * Copyright ?1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+@@ -497,25 +497,25 @@
+ 		{
+ 			struct Function *f = t->t_Function;
+ 
+-			if (f == (APTR)~0L)
++			if (f == (APTR)~0L || f == NULL)
+ 				break;
+ 
+-			if (f && f != (APTR)~0L && f->f_Code)
+-			{
++			if (f->f_Code) {
+ 				struct FuncArg *fa;
+ 
+ 				foreach (&t->t_Args, fa)
+ 					AddReferences(r, fa->fa_Root);
+ 			}
+-			/* Sonderbehandlung von Verweisen und jetzt()/heute() */
++			
++			/* Special treatment of references and today()/now() */
+ 
+-			switch (f->f_ID)
+-			{
+-				case MAKE_ID('t','d','y','\0'):  // heute()
+-				case MAKE_ID('n','o','w','\0'):  // jetzt()
++			switch (f->f_ID) {
++				case MAKE_ID('t','d','y','\0'):  // today()
++				case MAKE_ID('n','o','w','\0'):  // now()
+ 					if ((r->r_Type & RTYPE_TIMED) == 0) {
+-						// only add the timed reference, if it hasn't been added already
+-						// (there might be more than one timed reference per object)
++						// only add the timed reference, if it hasn't been added
++						// already (there might be more than one timed reference
++						// per object)
+ 						D(bug("** time reference detected (0x%08lx)!\n", r));
+ 						AddToArrayList(&gTimedRefs, r);
+ 						r->r_Type |= RTYPE_TIMED;
+@@ -524,17 +524,17 @@
+ 				case MAKE_ID('e','x','t','\0'):  // extern()
+ 					D(bug("not implemented reference: extern()\n"));
+ 					break;
+-				case MAKE_ID('p','a','g','\0'):  // seite()
+-					D(bug("not implemented reference: seite()\n"));
++				case MAKE_ID('p','a','g','\0'):  // page()
++					D(bug("not implemented reference: page()\n"));
+ 					break;
+-				case MAKE_ID('r','e','f','\0'):  // bezug()
+-					D(bug("not implemented reference: bezug()\n"));
++				case MAKE_ID('r','e','f','\0'):  // reference()
++					D(bug("not implemented reference: reference()\n"));
+ 					break;
+-				case MAKE_ID('c','o','l','\0'):  // spalte()
+-					D(bug("not implemented reference: spalte()\n"));
++				case MAKE_ID('c','o','l','\0'):  // column()
++					D(bug("not implemented reference: column()\n"));
+ 					break;
+-				case MAKE_ID('r','o','w','\0'):  // reihe()
+-					D(bug("not implemented reference: reihe()\n"));
++				case MAKE_ID('r','o','w','\0'):  // row()
++					D(bug("not implemented reference: row()\n"));
+ 					break;
+ 			}
+ 			break;
+
+
+
+From axeld at pinc-software.de  Fri Jan 23 20:41:14 2009
+From: axeld at pinc-software.de (Axel =?utf-8?q?D=C3=B6rfler?=)
+Date: Fri, 23 Jan 2009 20:41:14 +0100 CET
+Subject: [Ignition-commits] r39 - trunk
+In-Reply-To: <200901231803.n0NI327r007171@sheep.berlios.de>
+Message-ID: <38800565753-BeMail@zon>
+
+marust at mail.berlios.de wrote:
+> +			if (f == (APTR)~0L)
+> +				break;
+> +
+>  			if (f && f != (APTR)~0L && f->f_Code)
+
+A look a bit deeper would have shown just another possible NULL 
+dereference, and also, the check in the line above is now partially 
+superfluous. Fixed that in r41 now, though.
+
+Bye,
+   Axel.
+
+
+
+From mrustler at gmx.de  Fri Jan 23 21:11:11 2009
+From: mrustler at gmx.de (Matthias Rustler)
+Date: Fri, 23 Jan 2009 21:11:11 +0100
+Subject: [Ignition-commits] r39 - trunk
+In-Reply-To: <38800565753-BeMail@zon>
+References: <38800565753-BeMail@zon>
+Message-ID: <1232741471.8198.13.camel@bellodello>
+
+Am Freitag, den 23.01.2009, 20:41 +0100 schrieb Axel D?rfler:
+> marust at mail.berlios.de wrote:
+> > +			if (f == (APTR)~0L)
+> > +				break;
+> > +
+> >  			if (f && f != (APTR)~0L && f->f_Code)
+> 
+> A look a bit deeper would have shown just another possible NULL 
+> dereference, and also, the check in the line above is now partially 
+> superfluous. Fixed that in r41 now, though.
+
+Of course, it would be better if *you* fix the bugs.
+
+I have now a segfault for probably the same reason as above:
+
+Wenn a cell contains an error message like #err-args and I try to close
+Ignition and click "no" in the safety requester:
+
+#0  0xb7e4c25b in strlen () from /lib/tls/i686/cmov/libc.so.6
+#1  0x0805df17 in Dos_FPuts (file=0xb5f190e8, string=0x1b <Address 0x1b
+out of bounds>, DOSBase=0xb5e5901c) at fputs.c:54
+#2  0xb6518cd0 in SaveSession (name=0xb65f1ff0
+"config/ignition.session") at ignition.c:1446
+#3  0xb6519866 in CloseApp () at ignition.c:1701
+#4  0xb651c9bc in main (argc=1, argv=0xb5e67390) at ignition.c:2572
+
+Frame #2:
+FPuts(file,(char *)&((struct Function *)ln->ln_Name)->f_ID);
+
+(gdb) print *ln
+$1 = {ln_Succ = 0xb5e6ed9c, ln_Pred = 0xb5e6ed98, ln_Name = 0xffffffff
+<Address 0xffffffff out of bounds>, ln_Type = 0 '\0', ln_Pri = 0 '\0'}
+
+Is it enough to check for (APTR)~0L?
+
+Regards,
+Matthias
+
+
+
+
+From axeld at pinc-software.de  Sat Jan 24 00:08:51 2009
+From: axeld at pinc-software.de (Axel =?utf-8?q?D=C3=B6rfler?=)
+Date: Sat, 24 Jan 2009 00:08:51 +0100 CET
+Subject: [Ignition-commits] r39 - trunk
+In-Reply-To: <1232741471.8198.13.camel@bellodello>
+Message-ID: <51257067919-BeMail@zon>
+
+Matthias Rustler <mrustler at gmx.de> wrote:
+> Am Freitag, den 23.01.2009, 20:41 +0100 schrieb Axel D?rfler:
+> > marust at mail.berlios.de wrote:
+> > > +			if (f == (APTR)~0L)
+> > > +				break;
+> > > +
+> > >  			if (f && f != (APTR)~0L && f->f_Code)
+> > A look a bit deeper would have shown just another possible NULL 
+> > dereference, and also, the check in the line above is now partially 
+> > superfluous. Fixed that in r41 now, though.
+> Of course, it would be better if *you* fix the bugs.
+
+Why would it be better? I don't think it matters who fixes what, as 
+long as it's fixed. I just don't have the time to fix all the bugs, 
+anymore, obviously.
+I'm just wondering why this didn't crash earlier for me :-)
+
+> I have now a segfault for probably the same reason as above:
+> 
+> Wenn a cell contains an error message like #err-args and I try to 
+> close
+> Ignition and click "no" in the safety requester:
+> 
+> #0  0xb7e4c25b in strlen () from /lib/tls/i686/cmov/libc.so.6
+> #1  0x0805df17 in Dos_FPuts (file=0xb5f190e8, string=0x1b <Address 
+> 0x1b
+> out of bounds>, DOSBase=0xb5e5901c) at fputs.c:54
+> #2  0xb6518cd0 in SaveSession (name=0xb65f1ff0
+> "config/ignition.session") at ignition.c:1446
+> #3  0xb6519866 in CloseApp () at ignition.c:1701
+> #4  0xb651c9bc in main (argc=1, argv=0xb5e67390) at ignition.c:2572
+> 
+> Frame #2:
+> FPuts(file,(char *)&((struct Function *)ln->ln_Name)->f_ID);
+> 
+> (gdb) print *ln
+> $1 = {ln_Succ = 0xb5e6ed9c, ln_Pred = 0xb5e6ed98, ln_Name = 
+> 0xffffffff
+> <Address 0xffffffff out of bounds>, ln_Type = 0 '\0', ln_Pri = 0 '\
+> 0'}
+> 
+> Is it enough to check for (APTR)~0L?
+
+Not that I would remember, but it seems that shouldn't hurt :-)
+
+Bye,
+   Axel.
+
+
+
+From marust at mail.berlios.de  Sat Jan 24 03:47:56 2009
+From: marust at mail.berlios.de (marust at mail.berlios.de)
+Date: Sat, 24 Jan 2009 03:47:56 +0100
+Subject: [Ignition-commits] r42 - trunk
+Message-ID: <200901240247.n0O2luBT007936@sheep.berlios.de>
+
+Author: marust
+Date: 2009-01-24 03:47:54 +0100 (Sat, 24 Jan 2009)
+New Revision: 42
+ViewCVS: http://svn.berlios.de/viewcvs/ignition?rev=42&view=rev
+
+Modified:
+   trunk/ignition.c
+Log:
+* Write nothing if ln_Name == -1.
+  This avoids a segfault while writing the session file.
+
+Modified: trunk/ignition.c
+===================================================================
+--- trunk/ignition.c	2009-01-23 19:40:30 UTC (rev 41)
++++ trunk/ignition.c	2009-01-24 02:47:54 UTC (rev 42)
+@@ -1441,14 +1441,15 @@
+         FPuts(file,"[recent functions]\n");
+         count = 0;
+ 
+-        foreach(&usedfuncs,ln)
+-        {
+-            FPuts(file,(char *)&((struct Function *)ln->ln_Name)->f_ID);
+-            FPutC(file,'\n');
++	foreach(&usedfuncs, ln) {
++		if (ln->ln_Name != (APTR)-1L) {
++			FPuts(file, (char *)&((struct Function *)ln->ln_Name)->f_ID);
++			FPutC(file, '\n');
+ 
+-            if (++count > MAX_RECENTFUNCS)
+-                break;
+-        }
++			if (++count > MAX_RECENTFUNCS)
++				break;
++		}
++	}
+ 
+         /** write font sizes **/
+ 
+
+
+
+From marust at mail.berlios.de  Sat Jan 24 04:17:27 2009
+From: marust at mail.berlios.de (marust at mail.berlios.de)
+Date: Sat, 24 Jan 2009 04:17:27 +0100
+Subject: [Ignition-commits] r43 - trunk
+Message-ID: <200901240317.n0O3HR16010837@sheep.berlios.de>
+
+Author: marust
+Date: 2009-01-24 04:17:24 +0100 (Sat, 24 Jan 2009)
+New Revision: 43
+ViewCVS: http://svn.berlios.de/viewcvs/ignition?rev=43&view=rev
+
+Modified:
+   trunk/ignition.c
+Log:
+* Fixed identation. (My tabulator settings were wrong in last commit)
+
+
+Modified: trunk/ignition.c
+===================================================================
+--- trunk/ignition.c	2009-01-24 02:47:54 UTC (rev 42)
++++ trunk/ignition.c	2009-01-24 03:17:24 UTC (rev 43)
+@@ -1441,15 +1441,15 @@
+         FPuts(file,"[recent functions]\n");
+         count = 0;
+ 
+-	foreach(&usedfuncs, ln) {
+-		if (ln->ln_Name != (APTR)-1L) {
+-			FPuts(file, (char *)&((struct Function *)ln->ln_Name)->f_ID);
+-			FPutC(file, '\n');
++		foreach(&usedfuncs, ln) {
++			if (ln->ln_Name != (APTR)-1L) {
++				FPuts(file, (char *)&((struct Function *)ln->ln_Name)->f_ID);
++				FPutC(file, '\n');
+ 
+-			if (++count > MAX_RECENTFUNCS)
+-				break;
++				if (++count > MAX_RECENTFUNCS)
++					break;
++			}
+ 		}
+-	}
+ 
+         /** write font sizes **/
+ 
+
+
+
+From mrustler at gmx.de  Sat Jan 24 05:14:29 2009
+From: mrustler at gmx.de (Matthias Rustler)
+Date: Sat, 24 Jan 2009 05:14:29 +0100
+Subject: [Ignition-commits] r39 - trunk
+In-Reply-To: <51257067919-BeMail@zon>
+References: <51257067919-BeMail@zon>
+Message-ID: <1232770469.9365.17.camel@bellodello>
+
+Am Samstag, den 24.01.2009, 00:08 +0100 schrieb Axel D?rfler:
+> Matthias Rustler <mrustler at gmx.de> wrote:
+> > Am Freitag, den 23.01.2009, 20:41 +0100 schrieb Axel D?rfler:
+> > > marust at mail.berlios.de wrote:
+> > > > +			if (f == (APTR)~0L)
+> > > > +				break;
+> > > > +
+> > > >  			if (f && f != (APTR)~0L && f->f_Code)
+> > > A look a bit deeper would have shown just another possible NULL 
+> > > dereference, and also, the check in the line above is now partially 
+> > > superfluous. Fixed that in r41 now, though.
+> > Of course, it would be better if *you* fix the bugs.
+> 
+> Why would it be better?
+
+Because you know your source better than me ;-). It's easy to add checks
+to avoid dereferencing of illegal pointers, but the question is: Is it
+really intended that such pointers exist? See bottom of this mail.
+
+> I'm just wondering why this didn't crash earlier for me :-)
+
+Under UAE and systems with no MMU you'd just get undefined behaviour, I
+guess.
+
+> > I have now a segfault for probably the same reason as above:
+> > 
+> > Wenn a cell contains an error message like #err-args and I try to 
+> > close
+> > Ignition and click "no" in the safety requester:
+> > 
+> > #0  0xb7e4c25b in strlen () from /lib/tls/i686/cmov/libc.so.6
+> > #1  0x0805df17 in Dos_FPuts (file=0xb5f190e8, string=0x1b <Address 
+> > 0x1b
+> > out of bounds>, DOSBase=0xb5e5901c) at fputs.c:54
+> > #2  0xb6518cd0 in SaveSession (name=0xb65f1ff0
+> > "config/ignition.session") at ignition.c:1446
+> > #3  0xb6519866 in CloseApp () at ignition.c:1701
+> > #4  0xb651c9bc in main (argc=1, argv=0xb5e67390) at ignition.c:2572
+> > 
+> > Frame #2:
+> > FPuts(file,(char *)&((struct Function *)ln->ln_Name)->f_ID);
+> > 
+> > (gdb) print *ln
+> > $1 = {ln_Succ = 0xb5e6ed9c, ln_Pred = 0xb5e6ed98, ln_Name = 
+> > 0xffffffff
+> > <Address 0xffffffff out of bounds>, ln_Type = 0 '\0', ln_Pri = 0 '\
+> > 0'}
+> > 
+> > Is it enough to check for (APTR)~0L?
+> 
+> Not that I would remember, but it seems that shouldn't hurt :-)
+
+Done. Now I have a similar crash in the function requester when a cell
+contains an error. Again, adding a check is easy, but why do such
+illegal nodes exist in the list with the used functions?
+
+Regards,
+Matthias
+
+
+
+
+From axeld at mail.berlios.de  Sat Jan 24 11:41:58 2009
+From: axeld at mail.berlios.de (axeld at BerliOS)
+Date: Sat, 24 Jan 2009 11:41:58 +0100
+Subject: [Ignition-commits] r44 - trunk
+Message-ID: <200901241041.n0OAfwig028404@sheep.berlios.de>
+
+Author: axeld
+Date: 2009-01-24 11:41:57 +0100 (Sat, 24 Jan 2009)
+New Revision: 44
+ViewCVS: http://svn.berlios.de/viewcvs/ignition?rev=44&view=rev
+
+Modified:
+   trunk/edit.c
+Log:
+* trackFunctions() did try to add ~0 functions to the recently used function
+  list.
+* Cleanup.
+
+
+Modified: trunk/edit.c
+===================================================================
+--- trunk/edit.c	2009-01-24 03:17:24 UTC (rev 43)
++++ trunk/edit.c	2009-01-24 10:41:57 UTC (rev 44)
+@@ -1,6 +1,6 @@
+ /* functions for the text/formula edit field
+  *
+- * Copyright ?1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+@@ -11,8 +11,11 @@
+ #define RIGHTOFFSET 10
+ 
+ extern bool gSessionChanged;
++extern struct MinList flangs;
+ 
++long complen, comppos;
+ 
++
+ bool
+ DocumentSecurity(struct Page *page, struct tableField *tf)
+ {
+@@ -77,8 +80,6 @@
+ 	return b;
+ }
+ 
+-extern struct MinList flangs;
+-long complen,comppos;
+ 
+ int
+ compcmp(STRPTR *a, STRPTR *b)
+@@ -100,7 +101,8 @@
+ 	BOOL rc = FALSE;
+ 	STRPTR t;
+ 
+-	if (!page || page->pg_Gad.DispPos <= PGS_FRAME || !(tf = page->pg_Gad.tf) || !tf->tf_Text)
++	if (!page || page->pg_Gad.DispPos <= PGS_FRAME || !(tf = page->pg_Gad.tf)
++		|| !tf->tf_Text)
+ 		return FALSE;
+ 
+ 	if (!comppos) {
+@@ -109,8 +111,9 @@
+ 		l = (APTR)page->pg_Mappe->mp_Names.mlh_Head;
+ 		fpos = 0;
+ 	} else {
+-		tf->tf_Text = RemoveString(tf->tf_Text,comppos,page->pg_Gad.DispPos-comppos);
+-		if (imsg.Qualifier & IEQUALIFIER_SHIFT)
++		tf->tf_Text = RemoveString(tf->tf_Text, comppos,
++			page->pg_Gad.DispPos - comppos);
++		if ((imsg.Qualifier & IEQUALIFIER_SHIFT) != 0)
+ 			fpos--;
+ 		else
+ 			fpos++;
+@@ -121,7 +124,7 @@
+ 			else
+ 				l = (APTR)l->l_Node.mln_Succ;
+ 		}
+-		if (imsg.Qualifier & IEQUALIFIER_ALT && fl != (APTR)~0L) {
++		if ((imsg.Qualifier & IEQUALIFIER_ALT) != 0 && fl != (APTR)~0L) {
+ 			second = FALSE;
+ 			rc = TRUE;
+ 		}
+@@ -130,22 +133,34 @@
+ 		return TRUE;
+ 
+ 	complen = 0;
+-	for (t = tf->tf_Text+comppos-1;IsAlNum(loc,*t) || *t == '_';t--,complen++);
++	for (t = tf->tf_Text + comppos - 1; IsAlNum(loc, t[0]) || t[0] == '_';
++			t--, complen++)
++		;
++
+ 	t++;
+ 
+ 	if (!(imsg.Qualifier & IEQUALIFIER_ALT) && fl != (APTR)~0L) {
+ 		do {
+-			for (;fl->fl_Node.ln_Succ;fl = (APTR)fl->fl_Node.ln_Succ) {
+-				if (!fl->fl_Node.ln_Succ->ln_Succ)  // interne Funktionsnamen werden nicht gepr?ft
++			for (; fl->fl_Node.ln_Succ; fl = (APTR)fl->fl_Node.ln_Succ) {
++				if (!fl->fl_Node.ln_Succ->ln_Succ) {
++					// internal function names aren't checked
+ 					break;
++				}
+ 
+-				while (fpos < fl->fl_Length && strnicmp(fl->fl_Array[fpos].fn_Name,t,complen) < 0)
++				while (fpos < fl->fl_Length
++					&& strnicmp(fl->fl_Array[fpos].fn_Name, t, complen) < 0) {
+ 					fpos++;
++				}
+ 
+-				if (fpos < fl->fl_Length && !strnicmp(fl->fl_Array[fpos].fn_Name,t,complen)) {
+-					for(;IsAlNum(loc,*(fl->fl_Array[fpos].fn_Name+len));len++);
+-					tf->tf_Text = InsertString(tf->tf_Text,fl->fl_Array[fpos].fn_Name+complen,comppos,len-complen);
+-					page->pg_Gad.DispPos = comppos+len-complen;
++				if (fpos < fl->fl_Length
++					&& !strnicmp(fl->fl_Array[fpos].fn_Name, t, complen)) {
++					for (; IsAlNum(loc, *(fl->fl_Array[fpos].fn_Name + len));
++							len++)
++						;
++					tf->tf_Text = InsertString(tf->tf_Text,
++						fl->fl_Array[fpos].fn_Name + complen, comppos,
++						len - complen);
++					page->pg_Gad.DispPos = comppos + len - complen;
+ 					return TRUE;
+ 				}
+ 			}
+@@ -158,10 +173,13 @@
+ 	fl = (APTR)~0L;
+ 
+ 	do {
+-		for (;l->l_Node.mln_Succ;l = (APTR)l->l_Node.mln_Succ) {
+-			if (!strnicmp((nm = (struct Name *)l->l_Link)->nm_Node.ln_Name,t,complen)) {
+-				tf->tf_Text = InsertString(tf->tf_Text,nm->nm_Node.ln_Name+complen,comppos,(len = strlen(nm->nm_Node.ln_Name))-complen);
+-				page->pg_Gad.DispPos = comppos+len-complen;
++		for (; l->l_Node.mln_Succ; l = (APTR)l->l_Node.mln_Succ) {
++			if (!strnicmp((nm = (struct Name *)l->l_Link)->nm_Node.ln_Name, t,
++					complen)) {
++				len = strlen(nm->nm_Node.ln_Name);
++				tf->tf_Text = InsertString(tf->tf_Text, nm->nm_Node.ln_Name
++					+ complen, comppos, len - complen);
++				page->pg_Gad.DispPos = comppos + len - complen;
+ 				return TRUE;
+ 			}
+ 		}
+@@ -177,7 +195,7 @@
+ 
+ 
+ BOOL
+-TestForCompletion(struct Page *page,struct tableField *tf)
++TestForCompletion(struct Page *page, struct tableField *tf)
+ {
+ 	return (BOOL)(page->pg_Gad.DispPos > 1 && *tf->tf_Text == '=');
+ }
+@@ -189,33 +207,39 @@
+ 	struct FunctionLanguage *fl;
+ 	struct FunctionName *fn;
+ 	struct tableField *tf;
+-	long   x,y;
++	long   x, y;
+ 	STRPTR t;
+ 
+-	if (!page || page->pg_Gad.DispPos <= PGS_FRAME || !(tf = page->pg_Gad.tf) || !tf->tf_Text || *(tf->tf_Text+page->pg_Gad.DispPos-1) != '(')
++	if (!page || page->pg_Gad.DispPos <= PGS_FRAME || !(tf = page->pg_Gad.tf)
++		|| !tf->tf_Text || *(tf->tf_Text + page->pg_Gad.DispPos - 1) != '(')
+ 		return;
+ 
+-	t = tf->tf_Text+page->pg_Gad.DispPos-2;
+-	if (!IsAlNum(loc,*t))
++	t = tf->tf_Text + page->pg_Gad.DispPos - 2;
++	if (!IsAlNum(loc, *t))
+ 		return;
+-	for(;IsAlNum(loc,*t) || *t == '_';t--);
++	for (; IsAlNum(loc, *t) || *t == '_'; t--);
+ 	t++;
+ 
+-	x = page->pg_Gad.cp.cp_X;  y = page->pg_Gad.cp.cp_Y+page->pg_Gad.cp.cp_H;
++	x = page->pg_Gad.cp.cp_X;
++	y = page->pg_Gad.cp.cp_Y + page->pg_Gad.cp.cp_H;
++
+ 	if (x < page->pg_wTabX)
+ 		x = page->pg_wTabX;
+-	if (y > page->pg_wTabY+page->pg_wTabH)
+-		y = page->pg_wTabY+page->pg_wTabH;
+-	x += 5+page->pg_Window->LeftEdge;  y += 5+page->pg_Window->TopEdge;
++	if (y > page->pg_wTabY + page->pg_wTabH)
++		y = page->pg_wTabY + page->pg_wTabH;
+ 
+-	foreach (&flangs, fl)
+-	{
+-		if (!fl->fl_Node.ln_Succ->ln_Succ)  // interne Funktionsnamen werden nicht gepr?ft
++	x += 5 + page->pg_Window->LeftEdge;
++	y += 5 + page->pg_Window->TopEdge;
++
++	foreach (&flangs, fl) {
++		if (!fl->fl_Node.ln_Succ->ln_Succ) {
++			// internal function names aren't checked
+ 			break;
++		}
+ 
+-		if ((fn = bsearch(&t, fl->fl_Array, fl->fl_Length, sizeof(struct FunctionName), (APTR)cmdcmp)) != 0)
+-		{
+-			ShowPopUpText(fn->fn_Name,x,y);
++		if ((fn = bsearch(&t, fl->fl_Array, fl->fl_Length,
++				sizeof(struct FunctionName), (APTR)cmdcmp)) != 0) {
++			ShowPopUpText(fn->fn_Name, x, y);
+ 			return;
+ 		}
+ 	}
+@@ -247,8 +271,9 @@
+ 	struct tableField *tf;
+ 	bool oldCell = page->pg_Gad.tf != NULL;
+ 
+-	if ((page->pg_Gad.tf = tf = AllocTableField(page, page->pg_Gad.cp.cp_Col, page->pg_Gad.cp.cp_Row)) != 0)
+-	{
++	page->pg_Gad.tf = tf = AllocTableField(page, page->pg_Gad.cp.cp_Col,
++		page->pg_Gad.cp.cp_Row);
++	if (tf != NULL) {
+ 		if (page->pg_Gad.Undo)
+ 			FreeTableField(page->pg_Gad.Undo);
+ 
+@@ -263,19 +288,18 @@
+ 			tf->tf_Original = NULL;
+ 		}
+ 
+-		if (!tf->tf_Text && !(tf->tf_Flags & TFF_FONTSET))
+-		{
++		if (!tf->tf_Text && !(tf->tf_Flags & TFF_FONTSET)) {
+ 			tf->tf_FontInfo = SetFontInfo(tf->tf_FontInfo, page->pg_DPI,
+-									FA_Family,	   page->pg_Family,
+-									FA_PointHeight,  page->pg_PointHeight,
++									FA_Family,		page->pg_Family,
++									FA_PointHeight,	page->pg_PointHeight,
+ 									TAG_END);
+-			if (prefs.pr_Table->pt_Flags & PTF_AUTOCELLSIZE)
+-			{
+-				char t[20];
++			if ((prefs.pr_Table->pt_Flags & PTF_AUTOCELLSIZE) != 0) {
++				char t[32];
++				sprintf(t, "%ld pt", ((page->pg_PointHeight * 4) >> 16) / 3);
+ 
+-				sprintf(t,"%ld pt",((page->pg_PointHeight*4) >> 16)/3);
+-				if (ConvertNumber(t,CNT_MM) > (page->pg_tfHeight+tf->tf_Row-1)->ts_mm/1024.0)
+-					ChangeCellSize(page,NULL,t,CCS_STANDARD,NULL);
++				if (ConvertNumber(t, CNT_MM)
++						> (page->pg_tfHeight + tf->tf_Row - 1)->ts_mm / 1024.0)
++					ChangeCellSize(page, NULL, t, CCS_STANDARD, NULL);
+ 			}
+ 		}
+ 	}
+@@ -287,88 +311,89 @@
+ SetTabGadget(struct Page *page, STRPTR t, long pos)
+ {
+ 	struct tableField *tf;
+-	BYTE   changed = FALSE;
++	BYTE changed = FALSE;
+ 
+ 	if (page->pg_Gad.DispPos == PGS_NONE)
+ 		return;
+-	if ((!t || t == (STRPTR)~0L) && pos <= PGS_FRAME && !GetTableField(page,page->pg_Gad.cp.cp_Col,page->pg_Gad.cp.cp_Row))
++	if ((!t || t == (STRPTR)~0L) && pos <= PGS_FRAME
++		&& !GetTableField(page, page->pg_Gad.cp.cp_Col, page->pg_Gad.cp.cp_Row))
+ 		return;
+ 	if (DocumentSecurity(page, tf = page->pg_Gad.tf))
+ 		return;
+ 
+-	if (!t && tf || t != (STRPTR)~0L)
+-	{
++	if (!t && tf || t != (STRPTR)~0L) {
+ 		long prepos;
+ 
+ 		prepos = page->pg_Gad.DispPos;
+ 		if (prepos == PGS_FRAME)
+ 			BeginTabGadget(page);
+-		if (tf)
+-		{
++		if (tf) {
+ 			FreeString(tf->tf_Text);
+ 			tf->tf_Text = AllocString(t);
+ 			SetTFWidth(page,tf);
+-			/* MERKER: falls cp_W-Aktualisierung aus SetTFWidth() rausfliegt, mu? sie hierhin...*/
++			/* TODO: if the cp_W-update is removed from SetTFWidth(),
++			   it must end up here... */
+ 			changed = TRUE;
+ 		}
+-		if (prepos == PGS_FRAME && pos == PGS_IGNORE)
+-			CreateTabGadget(page,page->pg_Gad.cp.cp_Col,page->pg_Gad.cp.cp_Row,FALSE);
++		if (prepos == PGS_FRAME && pos == PGS_IGNORE) {
++			CreateTabGadget(page, page->pg_Gad.cp.cp_Col,
++				page->pg_Gad.cp.cp_Row, FALSE);
++		}
+ 	}
+-	if (pos != PGS_IGNORE)
+-	{
++
++	if (pos != PGS_IGNORE) {
+ 		long len;
+ 
+ 		if (pos == PGS_NONE)
+ 			FreeTabGadget(page);
+-		else if (pos == PGS_FRAME)
+-		{
+-			if (page->pg_Gad.DispPos > PGS_FRAME)
+-				CreateTabGadget(page,page->pg_Gad.cp.cp_Col,page->pg_Gad.cp.cp_Row,FALSE);
+-		}
+-		else if (page->pg_Gad.DispPos == PGS_FRAME)
++		else if (pos == PGS_FRAME) {
++			if (page->pg_Gad.DispPos > PGS_FRAME) {
++				CreateTabGadget(page, page->pg_Gad.cp.cp_Col,
++					page->pg_Gad.cp.cp_Row, FALSE);
++			}
++		} else if (page->pg_Gad.DispPos == PGS_FRAME)
+ 			BeginTabGadget(page);
+-		if ((tf = page->pg_Gad.tf) && pos > (len = tf->tf_Text ? strlen(tf->tf_Text) : 0))
++
++		tf = page->pg_Gad.tf;
++		if (tf != NULL && pos > (len = tf->tf_Text ? strlen(tf->tf_Text) : 0))
+ 			pos = len;
+ 		page->pg_Gad.DispPos = pos;
+ 		if (tf)
+ 			changed = TRUE;
+ 	}
+ 	if (changed)
+-		DrawTableField(page,tf);
++		DrawTableField(page, tf);
+ }
+ 
+ 
+-/** F?gt alle im Term enthaltenen Funktionen zu den zuletzt
+- *  benutzten Funktionen hinzu, falls diese nicht bereits
+- *  darin erfa?t waren.
+- *  ?ndert sich diese Liste, wird daf?r gesorgt, da? sie
+- *  bei Programmende gespeichert wird (gSessionChanged).
+- *
+- *  @param t der zu untersuchende Term
+- */
++/*!	Adds all functions contained in the term to the list of the
++	least recently used functions, if they are not yet part of it.
++	Existing entries are moved to the top of the list.
+ 
++	If the list changes, the gSessionChanged variable is set, which
++	causes it to be changed on program exit.
++
++	@param t The term to be scanned.
++*/
+ void
+ trackFunctions(struct Term *t)
+ {
+ 	if (!t)
+ 		return;
+ 
+-	if (t->t_Op == OP_FUNC)
+-	{
++	if (t->t_Op == OP_FUNC) {
+ 		struct Function *f = t->t_Function;
+ 		struct FuncArg *fa;
+ 		struct Node *ln;
+ 
+-		if (f == NULL)
++		if (f == NULL || f == (APTR)~0L)
+ 			return;
+-		if ((ln = (APTR)FindLink(&usedfuncs, f)) != 0)
+-		{
++
++		if ((ln = (APTR)FindLink(&usedfuncs, f)) != 0) {
+ 			if ((APTR)usedfuncs.mlh_Head != ln)
+ 				gSessionChanged = true;
+ 			MyRemove(ln);
+-		}
+-		else if ((ln = AllocPooled(pool, sizeof(struct Node))) != 0)
+-		{
++		} else if ((ln = AllocPooled(pool, sizeof(struct Node))) != 0) {
+ 			ln->ln_Name = (APTR)f;
+ 			gSessionChanged = true;
+ 		}
+@@ -376,11 +401,9 @@
+ 		if (ln)
+ 			MyAddHead(&usedfuncs, ln);
+ 
+-		foreach(&t->t_Args,fa)
++		foreach (&t->t_Args, fa)
+ 			trackFunctions(fa->fa_Root);
+-	}
+-	else
+-	{
++	} else {
+ 		trackFunctions(t->t_Left);
+ 		trackFunctions(t->t_Right);
+ 	}
+@@ -392,14 +415,14 @@
+ {
+ 	struct UndoNode *un = NULL;
+ 	struct tableField *tf;
+-	char   t[128];
+-	int32  x,y,w,h,a,b;
+-	bool   changed = false;
++	char t[128];
++	int32 x, y, w, h, a, b;
++	bool changed = false;
+ 
+ 	if (page->pg_Gad.DispPos == PGS_NONE)
+ 		return;
+-	else if (page->pg_Gad.DispPos >= 0)
+-	{
++
++	if (page->pg_Gad.DispPos >= 0) {
+ 		changed = true;  comppos = 0;
+ 		if (strcmp(page->pg_Gad.tf->tf_Text ? page->pg_Gad.tf->tf_Text : (STRPTR)"",
+ 				page->pg_Gad.Undo && page->pg_Gad.Undo->tf_Original ? page->pg_Gad.Undo->tf_Original : (STRPTR)""))
+@@ -436,27 +459,32 @@
+ 
+ 		WriteTabGadget(page, un);
+ 
+-		if (un)
+-		{
++		if (un) {
+ 			un->un_Node.ln_Type &= ~UNDO_NOREDO;
+ 			if ((tf = CopyCell(page, page->pg_Gad.tf)) != 0)
+ 				MyAddTail(&un->un_RedoList, tf);
+ 		}
+-		handleEvent(page, EVT_FIELDEND, page->pg_Gad.cp.cp_Col, page->pg_Gad.cp.cp_Row);
++		handleEvent(page, EVT_FIELDEND, page->pg_Gad.cp.cp_Col,
++			page->pg_Gad.cp.cp_Row);
+ 
+-		/*** benutzte Funktionen herausfiltern ***/
++		/* track used functions */
+ 
+ 		if (page->pg_Gad.tf->tf_Type & TFT_FORMULA)
+ 			trackFunctions(page->pg_Gad.tf->tf_Root);
+ 	}
++
+ 	x = page->pg_Gad.cp.cp_X;  y = page->pg_Gad.cp.cp_Y;
+ 	w = page->pg_Gad.cp.cp_W;  h = page->pg_Gad.cp.cp_H;
+ 	page->pg_Gad.DispPos = PGS_NONE;
+ 	page->pg_Gad.tf = NULL;
+-	if (page->pg_Window)
+-	{
+-		if ((a = max(x-2,page->pg_wTabX)) < page->pg_wTabX+page->pg_wTabW && (b = max(y-2,page->pg_wTabY)) < page->pg_wTabY+page->pg_wTabH)
+-			DrawTableCoord(page,a,b,changed ? page->pg_wTabX+page->pg_wTabW : min(x+w,page->pg_wTabX+page->pg_wTabW),min(y+h,page->pg_wTabY+page->pg_wTabH));
++
++	if (page->pg_Window) {
++		if ((a = max(x - 2, page->pg_wTabX)) < page->pg_wTabX + page->pg_wTabW
++			&& (b = max(y - 2, page->pg_wTabY)) < page->pg_wTabY + page->pg_wTabH)
++			DrawTableCoord(page, a, b, changed
++					? page->pg_wTabX + page->pg_wTabW
++					: min(x + w, page->pg_wTabX + page->pg_wTabW),
++				min(y + h, page->pg_wTabY + page->pg_wTabH));
+ 	}
+ }
+ 
+@@ -464,8 +492,11 @@
+ void
+ RefreshTabGadgetLine(struct Page *page)
+ {
+-	SetTFWidth(page,GetRealTableField(page,page->pg_Gad.cp.cp_Col,page->pg_Gad.cp.cp_Row));
+-	DrawTableCoord(page,page->pg_wTabX,page->pg_Gad.cp.cp_Y,page->pg_wTabX+page->pg_wTabW,page->pg_Gad.cp.cp_Y+page->pg_Gad.cp.cp_H);
++	SetTFWidth(page, GetRealTableField(page, page->pg_Gad.cp.cp_Col,
++		page->pg_Gad.cp.cp_Row));
++	DrawTableCoord(page, page->pg_wTabX, page->pg_Gad.cp.cp_Y,
++		page->pg_wTabX + page->pg_wTabW,
++		page->pg_Gad.cp.cp_Y + page->pg_Gad.cp.cp_H);
+ }
+ 
+ 
+@@ -474,15 +505,14 @@
+ {
+ 	struct tableField *tf;
+ 	struct RastPort *rp = page->pg_Window->RPort;
+-	STRPTR t,st;
+-	BOOL   firsttab = FALSE,changed = FALSE;
+-	long   col,row,len = -1,i,j,oldw,oldfc,bspace = page->pg_CellTextSpace;
++	STRPTR t, st;
++	BOOL firsttab = FALSE,changed = FALSE;
++	long col, row, len = -1, i, j, oldw, oldfc, bspace = page->pg_CellTextSpace;
+ 
+ 	if (imsg.Qualifier & (IEQUALIFIER_RCOMMAND | IEQUALIFIER_LCOMMAND))
+ 		return;
+ 
+-	if (page->pg_Gad.DispPos == PGS_NONE)
+-	{
++	if (page->pg_Gad.DispPos == PGS_NONE) {
+ 		CreateTabGadget(page, 1, 1, TRUE);
+ 		if (!(imsg.Class == IDCMP_VANILLAKEY && imsg.Code != 13))
+ 			return;
+@@ -493,112 +523,103 @@
+ 	col = page->pg_Gad.cp.cp_Col;
+ 	row = page->pg_Gad.cp.cp_Row;
+ 
+-	if (page->pg_Gad.DispPos == PGS_FRAME)
+-	{
+-		if (imsg.Class == IDCMP_VANILLAKEY && imsg.Code != 13)
+-		{
++	if (page->pg_Gad.DispPos == PGS_FRAME) {
++		if (imsg.Class == IDCMP_VANILLAKEY && imsg.Code != 13) {
+ 			if (imsg.Class == IDCMP_VANILLAKEY && imsg.Code == 9)
+ 				firsttab = TRUE;
+-			if ((tf = BeginTabGadget(page)) != 0)
+-				page->pg_Gad.DispPos = tf->tf_Text ? strlen(tf->tf_Text) : 0;
+-			else
++			
++			tf = BeginTabGadget(page);
++			if (tf == NULL)
+ 				return;
++
++			page->pg_Gad.DispPos = tf->tf_Text ? strlen(tf->tf_Text) : 0;
+ 		}
+ 
+ 		// draw cell with cursor
+-		if (page->pg_Gad.DispPos >= 0)
+-		{
++		if (page->pg_Gad.DispPos >= 0) {
+ 			SetTFWidth(page, tf);
+ 			DrawTableField(page, tf);
+ 		}
+ 	}
+ 
+-	if (tf && page->pg_Gad.DispPos >= 0)
+-	{
+-		i = page->pg_Gad.cp.cp_X + bspace
+-			+ OutlineLength(tf->tf_FontInfo, tf->tf_Text + page->pg_Gad.FirstChar, page->pg_Gad.DispPos - page->pg_Gad.FirstChar);
++	if (tf && page->pg_Gad.DispPos >= 0) {
++		i = page->pg_Gad.cp.cp_X + bspace + OutlineLength(tf->tf_FontInfo,
++				tf->tf_Text + page->pg_Gad.FirstChar,
++				page->pg_Gad.DispPos - page->pg_Gad.FirstChar);
+ 
+ 		if (i < wd->wd_TabX
+ 			|| i > wd->wd_TabX + wd->wd_TabW
+ 			|| page->pg_Gad.cp.cp_Y < wd->wd_TabY
+-			|| page->pg_Gad.cp.cp_Y > wd->wd_TabY + wd->wd_TabH)
+-		{
++			|| page->pg_Gad.cp.cp_Y > wd->wd_TabY + wd->wd_TabH) {
+ 			page->pg_Gad.cp.cp_X -= wd->wd_TabX;
+ 			page->pg_Gad.cp.cp_Y -= wd->wd_TabY;
+ 			ShowTable(page, &page->pg_Gad.cp, 0, 0);
+ 		}
+ 
+ 		page->pg_Gad.DispPos = -page->pg_Gad.DispPos - 1;
+-		DrawTableCoord(page,i,page->pg_Gad.cp.cp_Y + 1, i + 1, page->pg_Gad.cp.cp_Y + page->pg_Gad.cp.cp_H - 3);
++		DrawTableCoord(page,i,page->pg_Gad.cp.cp_Y + 1, i + 1,
++			page->pg_Gad.cp.cp_Y + page->pg_Gad.cp.cp_H - 3);
+ 		page->pg_Gad.DispPos = -page->pg_Gad.DispPos - 1;
+ 
+-		if (imsg.Class == IDCMP_RAWKEY)
+-		{
+-			if (imsg.Code == CURSORLEFT && page->pg_Gad.DispPos > 0)
+-			{
++		if (imsg.Class == IDCMP_RAWKEY) {
++			if (imsg.Code == CURSORLEFT && page->pg_Gad.DispPos > 0) {
+ 				if (imsg.Qualifier & 3)
+ 					page->pg_Gad.DispPos = 0;
+ 				else
+ 					page->pg_Gad.DispPos--;
+-			}
+-			else if (imsg.Code == CURSORRIGHT && tf->tf_Text && page->pg_Gad.DispPos < strlen(tf->tf_Text))
+-			{
+-				if (imsg.Qualifier & 3)
++			} else if (imsg.Code == CURSORRIGHT && tf->tf_Text
++				&& page->pg_Gad.DispPos < strlen(tf->tf_Text)) {
++				if ((imsg.Qualifier & 3) != 0)
+ 					page->pg_Gad.DispPos = strlen(tf->tf_Text);
+ 				else
+ 					page->pg_Gad.DispPos++;
+-			}
+-			else if (imsg.Code < 96 || imsg.Code > 101)
+-			{
+-				if (imsg.Code == 66 && TestForCompletion(page, tf))
+-				{
++			} else if (imsg.Code < 96 || imsg.Code > 101) {
++				if (imsg.Code == 66 && TestForCompletion(page, tf)) {
+ 					if (CompleteFunctionNames(page))
+ 						RefreshTabGadgetLine(page);
+-				}
+-				else
++				} else
+ 					page->pg_Gad.DispPos = PGS_FRAME;
+ 			}
+-		}
+-		else
+-		{
++		} else {
+ 			if (imsg.Code != 9)
+ 				comppos = 0;
+ 
+-			switch (imsg.Code)
+-			{
++			switch (imsg.Code) {
+ 				case 9:	 // Tab
+ 					if (firsttab)
+ 						break;
+-					if (TestForCompletion(page, tf))
+-					{
++					if (TestForCompletion(page, tf)) {
+ 						if (CompleteFunctionNames(page))
+ 							RefreshTabGadgetLine(page);
+ 						break;
+ 					}
++					// supposed to fall through
++
+ 				case 13:	// Return
+ 					page->pg_Gad.DispPos = PGS_FRAME;
+ 					break;
++
+ 				case 27:  	// Escape
+ 					page->pg_Gad.DispPos = PGS_FRAME;
+ 					FreeString(tf->tf_Text);
+ 					
+ 					// Restore old text
+-					if (page->pg_Gad.Undo)
+-						tf->tf_Text = AllocString(page->pg_Gad.Undo->tf_Original);
+-					else
++					if (page->pg_Gad.Undo) {
++						tf->tf_Text
++							= AllocString(page->pg_Gad.Undo->tf_Original);
++					} else
+ 						tf->tf_Text = NULL;
+ 					break;
++
+ 				case 8:		// backspace
+-					if (page->pg_Gad.DispPos == 0)
+-					{
++					if (page->pg_Gad.DispPos == 0) {
+ 						DisplayBeep(NULL);
+ 						break;
+ 					}
+-					if (imsg.Qualifier & 3)
+-					{
+-						if ((t = tf->tf_Text) != 0)
+-						{
+-							tf->tf_Text = AllocString(tf->tf_Text + page->pg_Gad.DispPos);
++					if ((imsg.Qualifier & 3) != 0) {
++						if ((t = tf->tf_Text) != NULL) {
++							tf->tf_Text = AllocString(tf->tf_Text
++								+ page->pg_Gad.DispPos);
+ 							FreeString(t);
+ 							len = page->pg_Gad.DispPos = 0;
+ 							break;
+@@ -606,30 +627,31 @@
+ 						break;
+ 					}
+ 					page->pg_Gad.DispPos--;
++					// supposed to fall through
++
+ 				case 127:	// delete
+-					if (imsg.Qualifier & 3)
+-					{
+-						if ((t = tf->tf_Text) && (tf->tf_Text = AllocPooled(pool,page->pg_Gad.DispPos+1)))
+-						{
+-							CopyMem(t,tf->tf_Text,page->pg_Gad.DispPos);
++					if ((imsg.Qualifier & 3) != 0) {
++						if ((t = tf->tf_Text)
++							&& (tf->tf_Text = AllocPooled(pool,
++								page->pg_Gad.DispPos + 1))) {
++							CopyMem(t, tf->tf_Text, page->pg_Gad.DispPos);
+ 							FreeString(t);
+ 							len = page->pg_Gad.DispPos;
+ 							break;
+ 						}
+ 						break;
+ 					}
+-					if (tf->tf_Text && strlen(tf->tf_Text) > page->pg_Gad.DispPos)
+-					{
+-						if (strlen(tf->tf_Text) > 1 && (st = t = AllocPooled(pool,strlen(tf->tf_Text))))
+-						{
+-							for(i = 0;*(tf->tf_Text+i);i++)
+-							{
++					if (tf->tf_Text && strlen(tf->tf_Text)
++							> page->pg_Gad.DispPos) {
++						if (strlen(tf->tf_Text) > 1 && (st = t
++								= AllocPooled(pool, strlen(tf->tf_Text)))) {
++							for (i = 0; tf->tf_Text[i]; i++) {
+ 								if (i != page->pg_Gad.DispPos)
+-									*(st++) = *(tf->tf_Text+i);
++									*(st++) = tf->tf_Text[i];
+ 							}
+-						}
+-						else
++						} else
+ 							t = NULL;
++
+ 						FreeString(tf->tf_Text);
+ 						tf->tf_Text = t;
+ 						if (!tf->tf_Text)
+@@ -637,12 +659,11 @@
+ 						len = page->pg_Gad.DispPos;
+ 					}
+ 					break;
++
+ 				default:
+ 					len = ((st = tf->tf_Text) ? strlen(st) : 0);
+-					if ((t = AllocPooled(pool, len + 2)) != 0)
+-					{
+-						for (i = 0; i < len + 1; i++)
+-						{
++					if ((t = AllocPooled(pool, len + 2)) != NULL) {
++						for (i = 0; i < len + 1; i++) {
+ 							if (i == page->pg_Gad.DispPos)
+ 								*(t+i) = imsg.Code;
+ 							else
+@@ -655,8 +676,9 @@
+ 						tf->tf_Text = t;
+ 						if (!st)
+ 							RefreshTabGadgetLine(page);
+-						
+-						// if it's a formula and the parameter starts '(', show function help
++
++						// if it's a formula and the parameter starts '(',
++						// show function help
+ 						if (imsg.Code == '(' && t[0] == '=')
+ 							ShowFunctionHelp(page);
+ 					}
+@@ -665,30 +687,37 @@
+ 		}
+ 		if (page->pg_Gad.DispPos == PGS_FRAME)
+ 			changed = TRUE;
+-		else
+-		{
+-			i = bspace + OutlineLength(tf->tf_FontInfo, tf->tf_Text, tf->tf_Text ? strlen(tf->tf_Text) : 0);
++		else {
++			i = bspace + OutlineLength(tf->tf_FontInfo, tf->tf_Text,
++				tf->tf_Text ? strlen(tf->tf_Text) : 0);
+ 
+-			if (tf->tf_WidthSet == 0xffff && tf->tf_Width != tf->tf_MaxWidth)
+-			{
++			if (tf->tf_WidthSet == 0xffff && tf->tf_Width != tf->tf_MaxWidth) {
+ 				oldw = page->pg_Gad.cp.cp_W;
+-				for(page->pg_Gad.cp.cp_W = 0,j = page->pg_Gad.cp.cp_Col;i > page->pg_Gad.cp.cp_W;page->pg_Gad.cp.cp_W += GetTFWidth(page,j++));
+-				if (oldw != page->pg_Gad.cp.cp_W)
+-				{
+-					SetTFWidth(page,tf);
+-					DrawTableCoord(page,min(oldw,page->pg_Gad.cp.cp_W)+page->pg_Gad.cp.cp_X-4,page->pg_Gad.cp.cp_Y-2,wd->wd_TabX+wd->wd_TabW,page->pg_Gad.cp.cp_Y+page->pg_Gad.cp.cp_H/*+2*/);
++				for (page->pg_Gad.cp.cp_W = 0, j = page->pg_Gad.cp.cp_Col;
++					i > page->pg_Gad.cp.cp_W;
++					page->pg_Gad.cp.cp_W += GetTFWidth(page, j++))
++					;
++				if (oldw != page->pg_Gad.cp.cp_W) {
++					SetTFWidth(page, tf);
++					DrawTableCoord(page, min(oldw, page->pg_Gad.cp.cp_W)
++							+ page->pg_Gad.cp.cp_X - 4,
++						page->pg_Gad.cp.cp_Y - 2, wd->wd_TabX + wd->wd_TabW,
++						page->pg_Gad.cp.cp_Y + page->pg_Gad.cp.cp_H/*+2*/);
+ 				}
+ 			}
+ 
+ 			oldfc = page->pg_Gad.FirstChar;
+ 
+-			if (page->pg_Gad.DispPos > page->pg_Gad.FirstChar)
+-			{
+-				i = bspace+OutlineLength(tf->tf_FontInfo,tf->tf_Text+page->pg_Gad.FirstChar,page->pg_Gad.DispPos-page->pg_Gad.FirstChar);
+-				for(;i > page->pg_Gad.cp.cp_W;i = bspace+OutlineLength(tf->tf_FontInfo,tf->tf_Text+ ++page->pg_Gad.FirstChar,page->pg_Gad.DispPos-page->pg_Gad.FirstChar));
+-			}
+-			else
+-			{
++			if (page->pg_Gad.DispPos > page->pg_Gad.FirstChar) {
++				i = bspace + OutlineLength(tf->tf_FontInfo,
++					tf->tf_Text + page->pg_Gad.FirstChar,
++					page->pg_Gad.DispPos - page->pg_Gad.FirstChar);
++				for (; i > page->pg_Gad.cp.cp_W;
++					i = bspace + OutlineLength(tf->tf_FontInfo,
++						tf->tf_Text + ++page->pg_Gad.FirstChar,
++						page->pg_Gad.DispPos - page->pg_Gad.FirstChar))
++					;
++			} else {
+ 				i = bspace;
+ 				if ((page->pg_Gad.FirstChar = page->pg_Gad.DispPos) < 0)
+ 					page->pg_Gad.FirstChar = 0;
+@@ -699,58 +728,74 @@
+ 
+ 				i += page->pg_Gad.cp.cp_X;
+ 
+-				if (i > wd->wd_TabX+(wd->wd_TabW*(RIGHTOFFSET-1)/RIGHTOFFSET)-3)
++				if (i > wd->wd_TabX + (wd->wd_TabW * (RIGHTOFFSET - 1)
++						/ RIGHTOFFSET) - 3)
+ 					i += wd->wd_TabW/RIGHTOFFSET-wd->wd_TabW,  scroll = TRUE;
+ 				else if (i < wd->wd_TabX)
+ 					scroll = TRUE;
+ 
+ 				// ScrollTable(page->pg_Window,page->pg_TabX-wd->wd_TabX+i,page->pg_TabY+j);
+ 
+-				if (scroll)
+-					ScrollTable(page->pg_Window,page->pg_TabX+(scroll ? i-wd->wd_TabX : 0),page->pg_TabY);
++				if (scroll) {
++					ScrollTable(page->pg_Window,
++						page->pg_TabX + (scroll ? i - wd->wd_TabX : 0),
++						page->pg_TabY);
++				}
+ 			}
+ 
+-			if (oldfc != page->pg_Gad.FirstChar)
+-				DrawTableCoord(page,page->pg_Gad.cp.cp_X,page->pg_Gad.cp.cp_Y,page->pg_Gad.cp.cp_X+page->pg_Gad.cp.cp_W,page->pg_Gad.cp.cp_Y+page->pg_Gad.cp.cp_H);
+-			else
+-			{
+-				i = page->pg_Gad.cp.cp_X+bspace+OutlineLength(tf->tf_FontInfo,tf->tf_Text+page->pg_Gad.FirstChar,page->pg_Gad.DispPos-page->pg_Gad.FirstChar);
+-				if (imsg.Class == IDCMP_VANILLAKEY)
+-				{
+-					j = 0;  oldw = page->pg_Gad.cp.cp_X+page->pg_Gad.cp.cp_W-3;
+-					if (len >= 0)
+-						j = page->pg_Gad.cp.cp_X+bspace+OutlineLength(tf->tf_FontInfo,tf->tf_Text+page->pg_Gad.FirstChar,len-page->pg_Gad.FirstChar);
+-					else if (page->pg_Gad.DispPos > 0)
+-					{
+-						j = page->pg_Gad.cp.cp_X+bspace+OutlineLength(tf->tf_FontInfo,tf->tf_Text+page->pg_Gad.FirstChar,page->pg_Gad.DispPos-1-page->pg_Gad.FirstChar);
++			if (oldfc != page->pg_Gad.FirstChar) {
++				DrawTableCoord(page, page->pg_Gad.cp.cp_X, page->pg_Gad.cp.cp_Y,
++					page->pg_Gad.cp.cp_X + page->pg_Gad.cp.cp_W,
++					page->pg_Gad.cp.cp_Y + page->pg_Gad.cp.cp_H);
++			} else {
++				i = page->pg_Gad.cp.cp_X + bspace
++					+ OutlineLength(tf->tf_FontInfo,
++						tf->tf_Text + page->pg_Gad.FirstChar,
++						page->pg_Gad.DispPos - page->pg_Gad.FirstChar);
++				if (imsg.Class == IDCMP_VANILLAKEY) {
++					j = 0;
++					oldw = page->pg_Gad.cp.cp_X + page->pg_Gad.cp.cp_W - 3;
++					if (len >= 0) {
++						j = page->pg_Gad.cp.cp_X + bspace
++							+ OutlineLength(tf->tf_FontInfo,
++								tf->tf_Text + page->pg_Gad.FirstChar,
++								len - page->pg_Gad.FirstChar);
++					} else if (page->pg_Gad.DispPos > 0) {
++						j = page->pg_Gad.cp.cp_X + bspace
++							+ OutlineLength(tf->tf_FontInfo,
++								tf->tf_Text + page->pg_Gad.FirstChar,
++								page->pg_Gad.DispPos - 1
++									- page->pg_Gad.FirstChar);
+ 						if (len == -1)
+ 							oldw = i;
+ 					}
+-					if (j)
+-						DrawTableCoord(page,j,page->pg_Gad.cp.cp_Y,oldw,page->pg_Gad.cp.cp_Y+page->pg_Gad.cp.cp_H-2);
++
++					if (j) {
++						DrawTableCoord(page, j, page->pg_Gad.cp.cp_Y, oldw,
++							page->pg_Gad.cp.cp_Y + page->pg_Gad.cp.cp_H - 2);
++					}
+ 				}
+-				makeClip(page->pg_Window,wd->wd_TabX,wd->wd_TabY,wd->wd_TabW,wd->wd_TabH);
++				makeClip(page->pg_Window, wd->wd_TabX, wd->wd_TabY,
++					wd->wd_TabW, wd->wd_TabH);
+ 				if (tf->tf_BPen == page->pg_APen)
+-					SetHighColor(rp,tf->tf_APen);
++					SetHighColor(rp, tf->tf_APen);
+ 				else
+-					SetHighColor(rp,page->pg_APen);
+-				RectFill(rp,i,page->pg_Gad.cp.cp_Y+1,i+1,page->pg_Gad.cp.cp_Y+page->pg_Gad.cp.cp_H-3);
++					SetHighColor(rp, page->pg_APen);
++				RectFill(rp, i, page->pg_Gad.cp.cp_Y + 1, i + 1,
++					page->pg_Gad.cp.cp_Y + page->pg_Gad.cp.cp_H - 3);
+ 				freeClip(win);
+ 			}
+ 		}
+ 	}
+ 
+-	if (page->pg_Gad.DispPos == PGS_FRAME)
+-	{
++	if (page->pg_Gad.DispPos == PGS_FRAME) {
+ 		struct Mask *ma = NULL;
+ 
+ 		if (page->pg_MarkCol != -1)
+ 			SetMark(page, -1, 0, 0, 0);
+ 
+-		if (imsg.Class == IDCMP_RAWKEY)
+-		{
+-			switch (imsg.Code)
+-			{
++		if (imsg.Class == IDCMP_RAWKEY) {
++			switch (imsg.Code) {
+ 				case CURSORDOWN:
+ 					row++;
+ 					break;
+@@ -759,46 +804,44 @@
+ 					break;
+ 				case CURSORLEFT:
+ 					col--;
+-					if (imsg.Qualifier & 3)
++					if ((imsg.Qualifier & 3) != 0)
+ 						col = 1;
+ 					break;
+ 				case CURSORRIGHT:
+ 					col++;
+ 					break;
+ 				case 66:  // TAB
+-					if (imsg.Qualifier & 3)
++					if ((imsg.Qualifier & 3) != 0)
+ 						col--;
+ 					else
+ 						col++;
+ 					break;
+ 			}
+-		}
+-		else
+-		{
+-			if (page->pg_Mappe->mp_Flags & MPF_SCRIPTS && (imsg.Code == 13 || imsg.Code == 9) && (ma = IsOverMask(page)))
+-			{
++		} else {
++			if ((page->pg_Mappe->mp_Flags & MPF_SCRIPTS) != 0
++				&& (imsg.Code == 13 || imsg.Code == 9)
++				&& (ma = IsOverMask(page))) {
+ 				struct MaskField *mf;
+ 
+-				foreach (&ma->ma_Fields, mf)
+-				{
++				foreach (&ma->ma_Fields, mf) {
+ 					if (mf->mf_Col == col && mf->mf_Row == row)
+ 						break;
+ 				}
+-				if ((mf = (struct MaskField *)mf->mf_Node.ln_Succ) && mf->mf_Node.ln_Succ)
+-				{
++				if ((mf = (struct MaskField *)mf->mf_Node.ln_Succ) != NULL
++					&& mf->mf_Node.ln_Succ) {
+ 					col = mf->mf_Col;  row = mf->mf_Row;
+ 					ma = NULL;
++				} else if (mf == NULL) {
++					/* not the last field */
++					ma = NULL;
+ 				}
+-				else if (!mf)  /* not the last field */
+-					ma = NULL;
+-			}
+-			else if (imsg.Code == 13)
++			} else if (imsg.Code == 13)
+ 				row++;
+ 			else if (imsg.Code == 9)
+ 				col++;
+ 		}
+-		if (col <= 0 || row <= 0)
+-		{
++
++		if (col <= 0 || row <= 0) {
+ 			DisplayBeep(NULL);
+ 			return;
+ 		}
+@@ -813,15 +856,16 @@
+ 
+ 		if (changed)
+ 			page->pg_Gad.DispPos = 0;
+-		if (changed || col != page->pg_Gad.cp.cp_Col || row != page->pg_Gad.cp.cp_Row)
++		if (changed || col != page->pg_Gad.cp.cp_Col
++			|| row != page->pg_Gad.cp.cp_Row)
+ 			FreeTabGadget(page);
+ 
+-		if (ma)	  /* update indices/filter or start db-search */
+-		{
++		if (ma) {
++			/* update indices/filter or start db-search */
+ 			struct Database *db;
+ 
+-			if ((db = (APTR)MyFindName(&page->pg_Mappe->mp_Databases, ma->ma_Node.ln_Name)) != 0)
+-			{
++			if ((db = (APTR)MyFindName(&page->pg_Mappe->mp_Databases,
++					ma->ma_Node.ln_Name)) != NULL) {
+ 				if (ma->ma_Node.ln_Type)
+ 					MakeSearchFilter(db, ma);
+ 				else
+@@ -830,7 +874,8 @@
+ 			}
+ 		}
+ 
+-		if (changed || col != page->pg_Gad.cp.cp_Col || row != page->pg_Gad.cp.cp_Row)
++		if (changed || col != page->pg_Gad.cp.cp_Col
++			|| row != page->pg_Gad.cp.cp_Row)
+ 			CreateTabGadget(page, col, row, TRUE);
+ 	}
+ }
+@@ -858,8 +903,7 @@
+ 
+ 	if (makevisible)
+ 		ShowTable(page, cp, 0, 0);
+-	else
+-	{
++	else {
+ 		cp->cp_X += page->pg_wTabX;
+ 		cp->cp_Y += page->pg_wTabY;
+ 	}
+@@ -870,7 +914,8 @@
+ 	page->pg_Gad.tf = GetTableField(page, cp->cp_Col, cp->cp_Row);
+ 	page->pg_SelectPos = -1;  page->pg_SelectLength = 0;
+ 
+-	DrawTableCoord(page, cp->cp_X - 2, cp->cp_Y - 2, cp->cp_X + cp->cp_W + 2, cp->cp_Y + cp->cp_H);
++	DrawTableCoord(page, cp->cp_X - 2, cp->cp_Y - 2, cp->cp_X + cp->cp_W + 2,
++		cp->cp_Y + cp->cp_H);
+ 	DisplayTablePos(page);
+ 	RefreshToolBar(page);
+ }
+@@ -884,7 +929,7 @@
+ 	struct IntuiMessage *msg;
+ 	struct Window *win;
+ 	CONST_STRPTR s[4];
+-	long i,w;
++	long i, w;
+ 
+ 	if (!(gad = CreateContext(&gadlist)))
+ 		return false;
+@@ -914,7 +959,9 @@
+ 	ngad.ng_Width = gWidth - ngad.ng_LeftEdge - rborder;
+ 	ngad.ng_Flags = PLACETEXT_LEFT;
+ 	ngad.ng_GadgetID = 1;				   // 1
+-	if ((pgad = CreateGadget(STRING_KIND, gad, &ngad, GT_Underscore, '_', GTST_String, NULL, GTST_EditHook, &passwordEditHook, GTST_MaxChars, 32, TAG_END)) != 0)
++	if ((pgad = CreateGadget(STRING_KIND, gad, &ngad, GT_Underscore, '_',
++			GTST_String, NULL, GTST_EditHook, &passwordEditHook,
++			GTST_MaxChars, 32, TAG_END)) != 0)
+ 		pgad->UserData = AllocPooled(pool,32);
+ 
+ 	ngad.ng_LeftEdge = lborder;
+@@ -930,20 +977,22 @@
+ 	ngad.ng_GadgetID++;					 // 3
+ 	gad = CreateGadget(BUTTON_KIND, gad, &ngad, TAG_END);
+ 
+-	if ((win = OpenWindowTags(NULL, WA_Flags,		WFLG_DRAGBAR | WFLG_DEPTHGADGET | WFLG_ACTIVATE,
+-								   WA_Left,			(scr->Width - gWidth) >> 1,
+-								   WA_Top,			(scr->Height - gHeight) >> 1,
+-								   WA_Title,		GetString(&gLocaleInfo, MSG_SECURITY_CHECK_TITLE),
+-								   WA_Width,		gWidth,
+-								   WA_Height,		gHeight,
+-								   WA_PubScreen,	scr,
+-								   WA_Gadgets,		gadlist,
+-								   WA_IDCMP,		IDCMP_GADGETUP,
+-								   TAG_END)) != 0) {
++	if ((win = OpenWindowTags(NULL,
++			WA_Flags,		WFLG_DRAGBAR | WFLG_DEPTHGADGET | WFLG_ACTIVATE,
++			WA_Left,		(scr->Width - gWidth) >> 1,
++			WA_Top,			(scr->Height - gHeight) >> 1,
+
+[... truncated: 38 lines follow ...]
+
+
+From axeld at mail.berlios.de  Sat Jan 24 12:09:44 2009
+From: axeld at mail.berlios.de (axeld at BerliOS)
+Date: Sat, 24 Jan 2009 12:09:44 +0100
+Subject: [Ignition-commits] r45 - trunk
+Message-ID: <200901241109.n0OB9igb008380@sheep.berlios.de>
+
+Author: axeld
+Date: 2009-01-24 12:09:43 +0100 (Sat, 24 Jan 2009)
+New Revision: 45
+ViewCVS: http://svn.berlios.de/viewcvs/ignition?rev=45&view=rev
+
+Modified:
+   trunk/classes.c
+   trunk/edit.c
+   trunk/gadgets.c
+   trunk/ignition.c
+   trunk/io.c
+   trunk/prefs.c
+   trunk/printer.c
+   trunk/project.c
+   trunk/rexx.c
+   trunk/types.h
+   trunk/version.h
+   trunk/windows.c
+   trunk/windows.h
+Log:
+* Removed all demo and lite version support; they won't be needed anymore.
+
+
+Modified: trunk/classes.c
+===================================================================
+--- trunk/classes.c	2009-01-24 10:41:57 UTC (rev 44)
++++ trunk/classes.c	2009-01-24 11:09:43 UTC (rev 45)
+@@ -1336,16 +1336,16 @@
+ 
+ 
+ struct gClass *
+-MakeGClass(STRPTR name, UBYTE type, struct gClass *sgc, STRPTR label, STRPTR image, APTR dispatch,
+-	APTR draw, struct gInterface *gi, ULONG objsize)
++MakeGClass(STRPTR name, UBYTE type, struct gClass *sgc, STRPTR label,
++	STRPTR image, APTR dispatch, APTR draw, struct gInterface *gi,
++	ULONG objsize)
+ {
+ 	struct gClass *gc;
+ 
+ 	if (!(type & GCT_ROOT) && !sgc)
+ 		return NULL;
+ 
+-	if ((gc = AllocPooled(pool, sizeof(struct gClass))) != 0)
+-	{
++	if ((gc = AllocPooled(pool, sizeof(struct gClass))) != NULL) {
+ 		gc->gc_Node.in_Name = label;
+ 		gc->gc_Node.in_Type = type;
+ 		gc->gc_Node.in_Image = LoadImage(image);
+@@ -1377,41 +1377,37 @@
+ BOOL
+ LoadGClass(struct gClass *gc)
+ {
+-	BOOL ASM (*initGCSegment)(REG(a0, APTR), REG(a1, APTR *), REG(a2, APTR), REG(a3, APTR), REG(a6, APTR),
+-		REG(d0, APTR), REG(d1, APTR), REG(d2, APTR), REG(d3, APTR), REG(d4, long));
+-	BPTR dir,olddir,segment;
++	BOOL ASM (*initGCSegment)(REG(a0, APTR), REG(a1, APTR *), REG(a2, APTR),
++		REG(a3, APTR), REG(a6, APTR), REG(d0, APTR), REG(d1, APTR),
++		REG(d2, APTR), REG(d3, APTR), REG(d4, long));
++	BPTR dir, olddir, segment;
+ 
+ 	if (gc->gc_Segment || !gc->gc_ClassName)
+ 		return TRUE;
+ 
+-	if ((dir = Lock(CLASSES_PATH, ACCESS_READ)) != 0)
+-	{
++	if ((dir = Lock(CLASSES_PATH, ACCESS_READ)) != 0) {
+ 		olddir = CurrentDir(dir);
+-		if ((segment = LoadSeg(gc->gc_ClassName)) != 0)
+-		{
++		if ((segment = LoadSeg(gc->gc_ClassName)) != 0) {
+ 			initGCSegment = MKBADDR(segment) + sizeof(APTR);
+-			if (initGCSegment(gc, gClassFuncTable, pool, GfxBase, SysBase, MathIeeeDoubBasBase,
+-					MathIeeeDoubTransBase, UtilityBase, LocaleBase,
+-#ifdef IGNITION_LITE_EDITION
+-					MAKE_ID('I','G','L',0)))
+-#else
+-					MAKE_ID('I','G','N',0)))
+-#endif
++			if (initGCSegment(gc, gClassFuncTable, pool, GfxBase, SysBase,
++					MathIeeeDoubBasBase, MathIeeeDoubTransBase, UtilityBase,
++					LocaleBase, MAKE_ID('I','G','N',0)))
+ 				gc->gc_Segment = segment;
+-			else
+-			{
+-				ErrorRequest(GetString(&gLocaleInfo, MSG_INIT_CLASS_ERR), gc->gc_ClassName);
++			else {
++				ErrorRequest(GetString(&gLocaleInfo, MSG_INIT_CLASS_ERR),
++					gc->gc_ClassName);
+ 				UnLoadSeg(segment);
+ 			}
++		} else {
++			ErrorRequest(GetString(&gLocaleInfo, MSG_CLASS_NOT_FOUND_ERR),
++				gc->gc_ClassName);
+ 		}
+-		else
+-			ErrorRequest(GetString(&gLocaleInfo, MSG_CLASS_NOT_FOUND_ERR),gc->gc_ClassName);
+ 
+ 		CurrentDir(olddir);
+ 		UnLock(dir);
+ 	}
+-	if (!gc->gc_Segment)  // Klasse entfernen
+-	{
++	if (!gc->gc_Segment) {
++		// remove class
+ 		RemoveLocked((struct Node *)gc);
+ 		FreeGClass(gc);
+ 
+@@ -1438,7 +1434,7 @@
+ void
+ InitGClasses(void)
+ {
+-	struct gClass *gc,*dgc;
++	struct gClass *gc, *dgc;
+ 	struct AnchorPath ALIGNED ap;
+ 	BPTR dir, olddir, dat;
+ 	char t[512];
+@@ -1448,7 +1444,7 @@
+ 	MyNewList(&gdiagrams);
+ 	MyNewList(&intclasses);
+ 
+-	/*** initialize internal classes ***/
++	/* initialize internal classes */
+ 
+ 	if ((gc = MakeGClass("root", GCT_ROOT | GCT_INTERNAL, NULL, NULL, NULL, gRootDispatch, NULL, gRootInterface, sizeof(struct gObject))) != 0) {
+ 		if ((dgc = MakeGClass("diagram", GCT_ROOT | GCT_INTERNAL, gc, NULL, NULL, gDiagramDispatch, NULL, gDiagramInterface,
+@@ -1465,7 +1461,7 @@
+ 			MakeGClass(gcNames[i], gcTypes[i] | GCT_INTERNAL, FindGClass(gcSuper[i]), gcLabels[i], gcImages[i], gcDispatch[i], gcDraw[i], gcInterface[i], gcObjSize[i]);
+ 	}
+ 
+-	/*** externe Klassenbeschreibungen laden ***/
++	/* load external class descriptions */
+ 
+ 	if ((dir = Lock(CLASSES_PATH, ACCESS_READ)) != 0) {
+ 		olddir = CurrentDir(dir);
+
+Modified: trunk/edit.c
+===================================================================
+--- trunk/edit.c	2009-01-24 10:41:57 UTC (rev 44)
++++ trunk/edit.c	2009-01-24 11:09:43 UTC (rev 45)
+@@ -846,14 +846,6 @@
+ 			return;
+ 		}
+ 
+-#ifdef IGNITION_LITE_EDITION
+-		// the maximum table size is 30 x 50
+-		if (col > 30)
+-			col = 30;
+-		if (row > 50)
+-			row = 50;
+-#endif
+-
+ 		if (changed)
+ 			page->pg_Gad.DispPos = 0;
+ 		if (changed || col != page->pg_Gad.cp.cp_Col
+@@ -889,14 +881,6 @@
+ 	if (page->pg_Gad.DispPos != PGS_NONE)
+ 		FreeTabGadget(page);
+ 
+-#ifdef IGNITION_LITE_EDITION
+-		// the maximum table size is 30 x 50
+-		if (col > 30)
+-			col = 30;
+-		if (row > 50)
+-			row = 50;
+-#endif
+-
+ 	DeselectGObjects(page);
+ 	cp = &page->pg_Gad.cp;
+ 	setCoordPkt(page, cp, col, row);
+
+Modified: trunk/gadgets.c
+===================================================================
+--- trunk/gadgets.c	2009-01-24 10:41:57 UTC (rev 44)
++++ trunk/gadgets.c	2009-01-24 11:09:43 UTC (rev 45)
+@@ -1,6 +1,6 @@
+ /* Create gadget routines for ignition
+  *
+- * Copyright 1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+@@ -1416,9 +1416,6 @@
+ 	gad = CreateGadget(CHECKBOX_KIND, gad, &ngad,
+ 			GTCB_Scaled,	TRUE,
+ 			GTCB_Checked,	mp->mp_Flags & MPF_SCRIPTS,
+-#ifdef IGNITION_LITE_EDITION
+-			GA_Disabled,		TRUE,
+-#endif
+             TAG_END);
+ 
+     ngad.ng_TopEdge += fontheight+7;
+@@ -1493,9 +1490,6 @@
+ 			GTLV_Labels,		wd->wd_ExtData[3],
+ 			GTLV_ShowSelected,	NULL,
+ 			GTLV_CallBack,		&selectHook,
+-#ifdef IGNITION_LITE_EDITION
+-			GA_Disabled,		TRUE,
+-#endif
+             TAG_END);
+ 
+     i = (ngad.ng_LeftEdge += 6+ngad.ng_Width);
+
+Modified: trunk/ignition.c
+===================================================================
+--- trunk/ignition.c	2009-01-24 10:41:57 UTC (rev 44)
++++ trunk/ignition.c	2009-01-24 11:09:43 UTC (rev 45)
+@@ -1,6 +1,6 @@
+ /* Main application
+  *
+- * Copyright ?1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+@@ -539,7 +539,8 @@
+ }
+ 
+ 
+-uint32 IsOverProjSpecial(struct Window *win,int32 x,int32 y)
++uint32
++IsOverProjSpecial(struct Window *win, int32 x, int32 y)
+ {
+     struct winData *wd;
+     struct Prefs *pr;
+@@ -563,30 +564,23 @@
+ void
+ UpdateInteractive(struct Mappe *mp, bool refresh)
+ {
+-    struct Node *ln;
+-
+-#ifdef IGNITION_LITE_EDITION
+-	// lite edition doesn't have the interactive mode
+-	mp->mp_Flags &= ~MPF_SCRIPTS;
+-#endif
+- 
+-    if (mp->mp_Flags & MPF_SCRIPTS)
+-    {
+-        foreach(&mp->mp_Pages,ln)
+-        {
++	struct Node *ln;
++	
++	if ((mp->mp_Flags & MPF_SCRIPTS) != 0) {
++		foreach(&mp->mp_Pages, ln) {
+ 			SetMark((struct Page *)ln, -1, 0, 0, 0);
+-            DeselectGObjects((struct Page *)ln);
+-        }
++			DeselectGObjects((struct Page *)ln);
++		}
+ 		RefreshMaskFields(mp, refresh);
+-    }
+-    if (mp->mp_Window)
+-    {
+-        if (mp->mp_Flags & MPF_SCRIPTS)
+-            mp->mp_Window->Flags |= WFLG_RMBTRAP;
+-        else
+-            mp->mp_Window->Flags &= ~WFLG_RMBTRAP;
++	}
++
++	if (mp->mp_Window) {
++		if (mp->mp_Flags & MPF_SCRIPTS)
++			mp->mp_Window->Flags |= WFLG_RMBTRAP;
++		else
++			mp->mp_Window->Flags &= ~WFLG_RMBTRAP;
+ 		DrawStatusFlags(mp, mp->mp_Window);
+-    }
++	}
+ }
+ 
+ 
+@@ -906,20 +900,18 @@
+ void
+ FreeWinIconObjs(struct Window *win,struct winData *wd)
+ {
+-    struct winObj *wo,*swo;
++	struct winObj *wo, *swo;
+ 
+-    for(wo = (APTR)wd->wd_Objs.mlh_Head;wo->wo_Node.mln_Succ;)
+-    {
+-        swo = (struct winObj *)wo->wo_Node.mln_Succ;
+-        if (wo->wo_Type == WOT_GADGET || wo->wo_Type == WOT_ICONIMG)
+-        {
+-            MyRemove(wo);
+-            DisposeObject(wo->wo_Obj);
+-            FreePooled(pool,wo,sizeof(struct winObj));
+-        }
+-        wo = swo;
+-    }
+-    wd->wd_ExtData[0] = NULL;
++	for (wo = (APTR)wd->wd_Objs.mlh_Head; wo->wo_Node.mln_Succ;) {
++		swo = (struct winObj *)wo->wo_Node.mln_Succ;
++		if (wo->wo_Type == WOT_GADGET || wo->wo_Type == WOT_ICONIMG) {
++			MyRemove(wo);
++			DisposeObject(wo->wo_Obj);
++			FreePooled(pool, wo, sizeof(struct winObj));
++		}
++		wo = swo;
++	}
++	wd->wd_ExtData[0] = NULL;
+ }
+ 
+ 
+
+Modified: trunk/io.c
+===================================================================
+--- trunk/io.c	2009-01-24 10:41:57 UTC (rev 44)
++++ trunk/io.c	2009-01-24 11:09:43 UTC (rev 45)
+@@ -1,6 +1,6 @@
+ /* I/O routines and the standard file format implementation (old and current)
+  *
+- * Copyright ?1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+@@ -2587,9 +2587,6 @@
+ 					calcflags = (calcflags & ~CF_REQUESTER) | CF_SUSPEND; /* setzt Berechnung der Zellen aus */
+ 
+ 					if (!(rc = io->io_Load(dat, mp))) {
+-#ifdef IGNITION_LITE_EDITION
+-						mp->mp_Flags &= ~MPF_SCRIPTS;
+-#endif
+ 						// initialize format template preferences
+ 						if (!IsListEmpty((struct List *)&mp->mp_Prefs.pr_Formats))
+ 						{
+@@ -2637,28 +2634,6 @@
+ 									gDoMethod(go, GCM_INITAFTERLOAD);
+ 							}
+ 
+-#ifdef IGNITION_LITE_EDITION
+-							{
+-								struct tableField *next;
+-								bool any = false;
+-
+-								// the lite edition does only support a limited sheet size of 30x50
+-								tf = (struct tableField *)page->pg_Table.mlh_Head;
+-								while (tf->tf_Node.mln_Succ) {
+-									next = (struct tableField *)tf->tf_Node.mln_Succ;
+-
+-									if (tf->tf_Row > 50 || tf->tf_Col > 30) {
+-										RemoveCell(page, tf, true);
+-										FreeTableField(tf);
+-										any = true;
+-									}
+-
+-									tf = next;
+-								}
+-								if (any)
+-									ErrorRequest(GetString(&gLocaleInfo, MSG_LITE_EDITION_CELL_LIMIT));
+-							}
+-#endif
+ 							foreach (&page->pg_Table, tf)
+ 							{
+ 								// Gespeichert werden nur die internen kurzen Funktionsnamen
+@@ -2800,10 +2775,6 @@
+ int32
+ SaveProject(struct Mappe *mp, struct IOType *io, bool confirmOverwrite)
+ {
+-#ifdef IGNITION_DEMO
+-	NotAvailableInDemo();
+-	return 0;
+-#else
+ 	struct tableField *tf;
+ 	struct Page *page;
+ 	struct Node *ln;
+@@ -2971,7 +2942,6 @@
+ 		return rc;
+ 	}
+ 	return RC_WARN;
+-#endif	// !IGNITION_DEMO
+ }
+ 
+ 
+
+Modified: trunk/prefs.c
+===================================================================
+--- trunk/prefs.c	2009-01-24 10:41:57 UTC (rev 44)
++++ trunk/prefs.c	2009-01-24 11:09:43 UTC (rev 45)
+@@ -1,6 +1,6 @@
+ /* Preferences management and related functionality
+  *
+- * Copyright ?1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+@@ -489,21 +489,16 @@
+ 
+ 
+ void
+-AddPrefsModuleToTree(struct Prefs *pr, struct PrefsModule *pm, struct MinList *tree)
++AddPrefsModuleToTree(struct Prefs *pr, struct PrefsModule *pm,
++	struct MinList *tree)
+ {
+ 	struct TreeNode *tn;
+-	long   flags;
++	long flags;
+ 					
+ 	// In beginner mode, not all preferences are available
+ 	if (!pm || (gIsBeginner && (pm->pm_Type == WDT_PREFCMDS || pm->pm_Type == WDT_PREFMENU || pm->pm_Type == WDT_PREFCONTEXT || pm->pm_Type == WDT_PREFKEYS)))
+ 		return;
+ 
+-#ifdef IGNITION_LITE_EDITION
+-	// in the lite edition, some modules are missing as well
+-	if (pm->pm_Type == WDT_PREFMENU || pm->pm_Type == WDT_PREFCONTEXT)
+-		return;
+-#endif
+-
+ 	flags = TNF_SORT;
+ 	if (pr != &prefs && pr != &recycledprefs && pm->pm_Flags & (PMF_ADD | PMF_REPLACE))
+ 		flags |= (pm->pm_Flags & PMF_ADD) ? TNF_ADD : TNF_REPLACE;
+
+Modified: trunk/printer.c
+===================================================================
+--- trunk/printer.c	2009-01-24 10:41:57 UTC (rev 44)
++++ trunk/printer.c	2009-01-24 11:09:43 UTC (rev 45)
+@@ -1,6 +1,6 @@
+ /* Print support implementation
+  *
+- * Copyright ?1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+@@ -1235,10 +1235,6 @@
+ void
+ PrintProject(struct List *list, struct wdtPrinter *wp, WORD unit, ULONG flags)
+ {
+-#ifdef IGNITION_DEMO
+-	NotAvailableInDemo();
+-	return;
+-#else
+ 	STRPTR error = NULL;
+ 
+ 	{
+@@ -1313,7 +1309,6 @@
+ 		ClosePrintWindow(wps);
+ 	}
+ 	SetBusy(FALSE, BT_APPLICATION);
+-#endif	// !IGNITION_DEMO
+ }
+ 
+ 
+
+Modified: trunk/project.c
+===================================================================
+--- trunk/project.c	2009-01-24 10:41:57 UTC (rev 44)
++++ trunk/project.c	2009-01-24 11:09:43 UTC (rev 45)
+@@ -1,6 +1,6 @@
+ /* Project related functions
+  *
+- * Copyright ?1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2008 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+@@ -355,11 +355,10 @@
+ 	if (ff != (APTR)~0L)
+ 		page->pg_Family = ff;		/* Auswahl f?r folgende ?bernehmen */
+ 	if (height != ~0L) {
+-#ifndef IGNITION_LITE_EDITION
+ 		// limit maximal font size to 128 pt
+ 		if (height > (128L << 16)) {
+ 			height = 128L << 16;
+-#else
++#if 0
+ 		// limit maximal font size to 72 pt (because of MorphOS broken ft2.library)
+ 		if (height > (72L << 16)) {
+ 			height = 72L << 16;
+
+Modified: trunk/rexx.c
+===================================================================
+--- trunk/rexx.c	2009-01-24 10:41:57 UTC (rev 44)
++++ trunk/rexx.c	2009-01-24 11:09:43 UTC (rev 45)
+@@ -1,6 +1,6 @@
+ /* ARexx interface and implementation of exported functions
+  *
+- * Copyright ?1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+@@ -2680,7 +2680,7 @@
+ ULONG
+ rxPrefs(long *opts)
+ {
+-	long   flags = 0,i;
++	long flags = 0,i;
+ 
+ 	for(i = 0;i < PREFS_REQ;i++)
+ 		flags |= (opts[i] & 1) << i;
+@@ -2688,24 +2688,17 @@
+ 	if (opts[PREFS_LOAD])
+ 		flags |= (opts[PREFS_ADD] ? PRF_ADDCONTENTS : 0) | (opts[PREFS_KEEP] ? PRF_KEEPOLDCONTENTS : 0);
+ 
+-	if (opts[PREFS_REQ])
+-	{
++	if (opts[PREFS_REQ]) {
+ 		struct Mappe *mp = NULL;
+-		long   type;
++		long type;
+ 
+ 		if (!opts[PREFS_GLOBAL] && rxpage)
+ 			mp = rxpage->pg_Mappe;
+ 
+-		for (i = 0x10000; i; i >>= 1)
+-		{
++		for (i = 0x10000; i; i >>= 1) {
+ 			if ((flags & i) == 0 || (type = GetPrefsModuleType(i)) == 0)
+ 				continue;
+ 
+-#ifdef IGNITION_LITE_EDITION
+-			// the lite edition doesn't contain all configuration possibilities
+-			if (type == WDT_PREFMENU)
+-				continue;
+-#endif
+ 			OpenAppWindow(type, WA_Data, mp, TAG_END);
+ 		}
+ 
+@@ -2715,43 +2708,39 @@
+ 	if (!(flags & PRF_ALL))
+ 		flags |= PRF_ALL;
+ 
+-	if (opts[PREFS_LOAD] || opts[PREFS_SAVE])
+-	{
++	if (opts[PREFS_LOAD] || opts[PREFS_SAVE]) {
+ 		char dest[256], doit = FALSE;
+ 
+-		if (!opts[PREFS_REQ])
+-		{
++		if (!opts[PREFS_REQ]) {
+ 			if (!opts[PREFS_NAME])
+ 				strcpy(dest, CONFIG_PATH "/ignition.prefs");
+ 			else
+ 				strcpy(dest, (STRPTR)opts[PREFS_NAME]);
+ 
+ 			doit = TRUE;
+-		}
+-		else if (AslRequestTags(fileReq, ASLFR_Window,		scr->FirstWindow,
+-										 ASLFR_TitleText,	 opts[PREFS_LOAD] ? GetString(&gLocaleInfo, MSG_LOAD_PREFERENCES_TITLE) : GetString(&gLocaleInfo, MSG_SAVE_PREFERENCES_TITLE),
+-										 ASLFR_InitialDrawer, CONFIG_PATH,
+-										 ASLFR_InitialFile,   "ignition.prefs",
+-										 ASLFR_InitialPattern,"#?.prefs",
+-										 ASLFR_DoSaveMode,	opts[PREFS_SAVE],
+-										 ASLFR_DoPatterns,	TRUE,
+-										 ASLFR_DrawersOnly,   FALSE,
+-										 TAG_END))
+-		{
++		} else if (AslRequestTags(fileReq,
++				ASLFR_Window,			scr->FirstWindow,
++				ASLFR_TitleText,		opts[PREFS_LOAD]
++					? GetString(&gLocaleInfo, MSG_LOAD_PREFERENCES_TITLE)
++					: GetString(&gLocaleInfo, MSG_SAVE_PREFERENCES_TITLE),
++				ASLFR_InitialDrawer,	CONFIG_PATH,
++				ASLFR_InitialFile,  	"ignition.prefs",
++				ASLFR_InitialPattern,	"#?.prefs",
++				ASLFR_DoSaveMode,		opts[PREFS_SAVE],
++				ASLFR_DoPatterns,		TRUE,
++				ASLFR_DrawersOnly,   	FALSE,
++				TAG_END)) {
+ 			strcpy(dest, fileReq->fr_Drawer);
+ 			AddPart(dest, fileReq->fr_File, 255);
+ 
+ 			doit = TRUE;
+ 		}
+ 
+-		if (doit)
+-		{
+-			if (opts[PREFS_LOAD])
+-			{
++		if (doit) {
++			if (opts[PREFS_LOAD]) {
+ 				LoadPrefs(&prefs,dest,NULL,flags);
+ //		RefreshPrefsModules(&prefs,flags);
+-			}
+-			else
++			} else
+ 				SavePrefs(&prefs,dest,flags);
+ 		}
+ 	}
+@@ -3580,12 +3569,10 @@
+ 	AddIntCmd(rxCopy,		  ICF_PAGE,  "COPY POS,UNIT/N/K");
+ 	AddIntCmd(rxCurrent,	   ICF_NONE,  "CURRENT MAP=WINDOW/K,PAGE,NEXT/S,PREV/S,SHOW/S,NUM/N/K");
+ 	AddIntCmd(rxCut,		   ICF_PAGE,  "CUT POS,TEXTONLY/S,UNIT/N/K");
+-#ifndef IGNITION_LITE_EDITION
+ 	AddIntCmd(rxDatabase,	  ICF_NONE,  "DATABASE REQ/S");
+ 	AddIntCmd(rxDbCurrent,	 ICF_PAGE,  "DBCURRENT NAME/A,NEXT/S,PREV/S,FIRST/S,LAST/S,PARENT,NUM/N/K");
+ 	AddIntCmd(rxDbNew,		 ICF_PAGE,  "DBNEW NAME,PARENT,NOREFS/S");
+ 	AddIntCmd(rxDbSearch,	  ICF_PAGE,  "DBSEARCH NAME,FILTER/K,INPUT/S,START/S,STOP/S,TOGGLE/S");
+-#endif
+ 	AddIntCmd(rxDelete,		ICF_PAGE,  "DELETE POS,TEXTONLY/S");
+ 	AddIntCmd(rxDeletePage,	ICF_PAGE,  "DELETEPAGE NAME");
+ 	AddIntCmd(rxDiagram,	   ICF_NONE,  "DIAGRAM NAME,REQ/S");
+@@ -3608,9 +3595,7 @@
+ 	AddIntCmd(rxIndex,		 ICF_NONE,  "INDEX REQ/S");
+ 	AddIntCmd(rxInsertFormula, ICF_PAGE,  "INSERTFORMULA POS,NAME,TYPE/N/K,REQ/S");
+ 	AddIntCmd(rxInsertObject,  ICF_NONE,  "INSERTOBJECT TYPE,REQ/S");
+-#ifndef IGNITION_LITE_EDITION
+ 	AddIntCmd(rxInteractive,   ICF_PAGE,  "INTERACTIVE SET/S,TOGGLE/S,NONE/S");
+-#endif
+ 	AddIntCmd(rxLastError,	 ICF_MSG,   "LASTERROR VAR");
+ 	AddIntCmd(rxLoad,		  ICF_NONE,  "LOAD NAME,REQ/S,NEW/S,TYPE/K,TYPEREQ/S,OLDPATH/S");
+ 	AddIntCmd(rxLoadPicture,   ICF_PAGE,  "LOADPICTURE NAME,REQ/S");
+@@ -3641,9 +3626,7 @@
+ 	AddIntCmd(rxRequestString, ICF_MSG,   "REQUESTSTRING PROMPT,DEFAULT/K,VAR");
+ 	AddIntCmd(rxRequestNumber, ICF_MSG,   "REQUESTNUMBER PROMPT,DEFAULT/K/N,VAR");
+ 	AddIntCmd(rxSave,		  ICF_PAGE,  "SAVE NAME,REQ/S,TYPEREQ/S");
+-#ifndef IGNITION_LITE_EDITION
+ 	AddIntCmd(rxScript,		ICF_PAGE,  "SCRIPT NAME,EXTERN/S,NEW/S,EDIT/S,DELETE/S,REQ/S");
+-#endif
+ 	AddIntCmd(rxSearch,		ICF_NONE,  "SEARCH REQ/S,NEXT/S");
+ 	AddIntCmd(rxSelect,		ICF_PAGE,  "SELECT POS,LEFT/S,RIGHT/S,ABOVE/S,BELOW/S,BLOCK/S");
+ 	AddIntCmd(rxSeparator,	 ICF_PAGE,  "SEPARATOR POS,SET/S,TOGGLE/S,NONE/S");
+@@ -3755,7 +3738,6 @@
+ ULONG
+ RunRexxScript(UBYTE type, STRPTR name)
+ {
+-#ifndef IGNITION_LITE_EDITION
+ 	struct MsgPort *hostPort;
+ 	struct RexxScript *rxs = NULL;
+ 	struct RexxPort *rxp;
+@@ -3764,34 +3746,27 @@
+ 	if (!name)
+ 		return(RC_WARN);
+ 
+-	if (type == RXS_INTERN)
+-	{
+-		if (!(rxs = (APTR)FindTag(&rxpage->pg_Mappe->mp_RexxScripts,name)))
+-		{
++	if (type == RXS_INTERN) {
++		if (!(rxs = (APTR)FindTag(&rxpage->pg_Mappe->mp_RexxScripts,name))) {
+ 			ErrorRequest(GetString(&gLocaleInfo, MSG_INTERNAL_SCRIPT_NOT_FOUND_ERR),name);
+ 			return(RC_WARN);
+ 		}
+ 	}
+-	if (!(rxp = MakeRexxPort()))
+-	{
++	if (!(rxp = MakeRexxPort())) {
+ 		ErrorRequest(GetString(&gLocaleInfo, MSG_CREATE_SCRIPT_ENVIRONMENT_ERR));
+ 		return(RC_FAIL);
+ 	}
+ 	sendmsg = rxp->rxp_Message;
+ 
+-	if (rxs)
+-	{
++	if (rxs) {
+ 		sendmsg->rm_Args[0] = CreateArgstring(rxs->rxs_Data,strlen(rxs->rxs_Data));
+ 		sendmsg->rm_Action = RXCOMM | RXFF_STRING;
+-	}
+-	else
+-	{
++	} else {
+ 		sendmsg->rm_Args[0] = CreateArgstring(name,strlen(name));
+ 		sendmsg->rm_Action = RXCOMM;
+ 	}
+ 	Forbid();
+-	if (!(hostPort = FindPort("REXX")) && !FindTask("RexxMaster"))
+-	{
++	if (!(hostPort = FindPort("REXX")) && !FindTask("RexxMaster")) {
+ 		Execute("SYS:System/RexxMast >Nil:", NULL, NULL);
+ 		hostPort = FindPort("REXX");
+ 	}
+@@ -3799,12 +3774,11 @@
+ 		PutMsg(hostPort, (struct Message *)sendmsg);
+ 	Permit();
+ 
+-	if (!hostPort)
+-	{
++	if (!hostPort) {
+ 		ErrorRequest(GetString(&gLocaleInfo, MSG_REXX_PORT_NOT_FOUND_ERR));
+ 		return RC_FAIL;
+ 	}
+-#endif
++
+ 	return RC_OK;
+ }
+ 
+@@ -3812,64 +3786,33 @@
+ long
+ handleEvent(struct Page *page,BYTE type,long col,long row)
+ {
+-#ifndef IGNITION_LITE_EDITION
+ 	struct Mappe *mp;
+-	char   /*name[256],*/button[10];
++	char /*name[256],*/button[10];
+ 
+ 	ignoreEvent = FALSE;
+ 	if (!page || !((mp = page->pg_Mappe)->mp_Flags & MPF_SCRIPTS) || !mp->mp_Events[type].ev_Command || !(mp->mp_Events[type].ev_Flags & EVF_ACTIVE))
+ 		return 0;
+ 
+-	if (type == EVT_LBUTTON || type == EVT_RBUTTON)
+-	{
++	if (type == EVT_LBUTTON || type == EVT_RBUTTON) {
+ 		if (imsg.Code & IECODE_UP_PREFIX)
+ 			strcpy(button,"up ");
+ 		else
+ 			strcpy(button,"down ");
+-	}
+-	else
++	} else
+ 		strcpy(button,"");
+ 
+ 	ProcessAppCmd(page,mp->mp_Events[type].ev_Command);
+ 							
+-#endif
+ 	return (long)ignoreEvent;
+ }
+ 
+ 		
+-#ifdef IGNITION_LITE_EDITION
+-static bool
+-AllowedLiteEditionRexxCommand(STRPTR t)
+-{
+-	const char *allowed[] = {"load", "save", "close", "new", "print", "quit", NULL};
+-	int length = cmdlen(t);
+-	int i;
+-	
+-	for (i = 0; allowed[i]; i++) {
+-		if (!strnicmp(t, allowed[i], length))
+-			return true;
+-	}
+-	
+-	return false;
+-}
+-#endif
+-
+-
+ void
+ handleRexx(struct RexxMsg *rxmsg)
+ {
+ 	D(bug("handleRexx() - %s\n  action: %lx - port: %s - ext: %s\n",rxmsg->rm_Args[0],rxmsg->rm_Action,rxmsg->rm_CommAddr,rxmsg->rm_FileExt));
+ 	D(bug("  task: %lx - replyport: %lx\n", rxmsg->rm_TaskBlock, rxmsg->rm_Node.mn_ReplyPort));
+ 
+-#ifdef IGNITION_LITE_EDITION
+-	// The lite edition does not have a full ARexx port
+-	if (strcmp(rxmsg->rm_FileExt, "guide")) {
+-		// accept some commands
+-		if (!AllowedLiteEditionRexxCommand(rxmsg->rm_Args[0]))
+-			return;
+-	}
+-#endif
+- 
+ 	rxmsg->rm_Result1 = processIntCmd(rxmsg->rm_Args[0]);
+ 
+ 	if (rxmsg->rm_Action & RXFF_RESULT && !rxmsg->rm_Result1 && !rxmsg->rm_Result2)
+
+Modified: trunk/types.h
+===================================================================
+--- trunk/types.h	2009-01-24 10:41:57 UTC (rev 44)
++++ trunk/types.h	2009-01-24 11:09:43 UTC (rev 45)
+@@ -1,6 +1,6 @@
+ /* Structures, definitions, etc.
+  *
+- * Copyright ?1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ #ifndef IGN_TYPES_H
+@@ -680,8 +680,4 @@
+ extern struct LocaleInfo gLocaleInfo;
+ extern bool   noabout;
+ 
+-#ifdef IGNITION_LITE_EDITION
+-extern char gSerial[];
+-#endif
+- 
+ #endif  /* IGN_TYPES_H */
+
+Modified: trunk/version.h
+===================================================================
+--- trunk/version.h	2009-01-24 10:41:57 UTC (rev 44)
++++ trunk/version.h	2009-01-24 11:09:43 UTC (rev 45)
+@@ -1,22 +1,18 @@
+ /* Version numbers
+  *
+- * Copyright ?2005-2008 pinc Software. All Rights Reserved.
++ * Copyright ?2005-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ #ifndef VERSION_H
+ #define VERSION_H
+ 
+ 
+-#ifndef IGNITION_LITE_EDITION
+-#	define SCREEN_TITLE "ignition  ?1996-2008 Axel D?rfler, pinc Software."
+-#else
+-#	define SCREEN_TITLE "ignition Lite Edition ?1996-2008 Axel D?rfler, pinc Software."
+-#endif
++#define SCREEN_TITLE "ignition"
+  
+ #define VERSION "1.0 beta 1"
+-#define INFODATE "25. September 2008"
+-#define IGNITION_COPYRIGHT "Copyright ?1996-2008 pinc Software."
+-#define VERSTRING "$VER: ignition " VERSION " (25.9.2008)"
++#define INFODATE "24. Januar 2009"
++#define IGNITION_COPYRIGHT "Copyright ?1996-2009 pinc Software."
++#define VERSTRING "$VER: ignition " VERSION " (24.1.2009)"
+ 
+ #endif	/* VERSION_H */
+ 
+
+Modified: trunk/windows.c
+===================================================================
+--- trunk/windows.c	2009-01-24 10:41:57 UTC (rev 44)
++++ trunk/windows.c	2009-01-24 11:09:43 UTC (rev 45)
+@@ -143,19 +143,7 @@
+ }
+ 
+ 
+-#ifdef IGNITION_DEMO
+ void
+-NotAvailableInDemo(void)
+-{
+-	DisplayBeep(NULL);
+-
+-	ErrorRequest("Diese Funktion ist in der Demo-Version leider nicht verf?gbar.\n\n"
+-		"Sorry, this function is not available in demo mode.");
+-}
+-#endif
+-
+-
+-void
+ MakeLocaleLabels(const char *labels[], ULONG id, ...)
+ {
+ 	int i = 0;
+@@ -994,15 +982,7 @@
+ 		itext.ITextFont = &ta;
+ 
+ 	itext.FrontPen = 2;  itext.BackPen = 1;
+-#ifdef IGNITION_LITE_EDITION
+-	strcpy(buffer, "Lite Edition ");
+-	sprintf(buffer + strlen(buffer), GetString(&gLocaleInfo, MSG_VERSION_INFO), VERSION);
+-#elif defined(IGNITION_DEMO)
+-	strcpy(buffer, "Demo ");
+-	sprintf(buffer + strlen(buffer), GetString(&gLocaleInfo, MSG_VERSION_INFO), VERSION);
+-#else
+ 	sprintf(buffer, GetString(&gLocaleInfo, MSG_VERSION_INFO), VERSION);
+-#endif
+ 	itext.IText = buffer;  PrintIText(win->RPort, &itext, border - 5 - lborder - IntuiTextLength(&itext), barheight + 55);
+ 	itext.IText = INFODATE;  PrintIText(win->RPort, &itext, border - 5 - lborder - IntuiTextLength(&itext), barheight + 66);
+ 	itext.FrontPen = 0;
+@@ -1012,24 +992,8 @@
+ 	itext.IText = "http://www.pinc-software.de";  PrintIText(win->RPort,&itext,16+lborder,barheight+129);
+ 	itext.IText = "eMail: info at pinc-software.de";  PrintIText(win->RPort,&itext,16+lborder,barheight+141);
+ 
+-#ifdef IGNITION_LITE_EDITION
+-	itext.IText = GetString(&gLocaleInfo, MSG_SERIAL_NUMBER_LABEL);  PrintIText(win->RPort, &itext, 6 + lborder, barheight + 186);
+-	if (gSerial[0])
+-		itext.IText = gSerial;
+-	else
+-		itext.IText = GetString(&gLocaleInfo, MSG_UNREGISTERED);
+-	PrintIText(win->RPort, &itext, 6 + lborder, barheight + 197);
+-#elif defined(IGNITION_DEMO)
+-	itext.IText = "Demo version for evaluation purposes only";  PrintIText(win->RPort, &itext, 6 + lborder, barheight + 214);
+-#else
+-	//itext.IText = "Martin \"Mason\" Merz's pers?nliche Version";  PrintIText(win->RPort, &itext, 6 + lborder, barheight + 213);
+-	//itext.IText = "Axel Knabes pers?nliche Version";  PrintIText(win->RPort, &itext, 6 + lborder, barheight + 213);
+-	itext.IText = "Vorabvorf?hrversion :-)";  PrintIText(win->RPort, &itext, 6 + lborder, barheight + 194);
+-#endif
+-	/*itext.IText = "Lizensiert f?r:";  PrintIText(win->RPort,&itext,14,fontheight+175);
+-	itext.IText = "Donald Duck";  PrintIText(win->RPort,&itext,189-IntuiTextLength(&itext),fontheight+175);
+-	itext.IText = "Schnatgang 42";  PrintIText(win->RPort,&itext,189-IntuiTextLength(&itext),fontheight+186);
+-	itext.IText = "12345 Entenhausen";  PrintIText(win->RPort,&itext,189-IntuiTextLength(&itext),fontheight+197);*/
++	itext.IText = "Open Source Version";
++	PrintIText(win->RPort, &itext, 6 + lborder, barheight + 194);
+ 
+ 	CloseFont(tf);
+ 	itext.FrontPen = 1;  itext.BackPen = 0;
+
+Modified: trunk/windows.h
+===================================================================
+--- trunk/windows.h	2009-01-24 10:41:57 UTC (rev 44)
++++ trunk/windows.h	2009-01-24 11:09:43 UTC (rev 45)
+@@ -1,5 +1,5 @@
+ /*
+- * Copyright ?1996-2009 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ #ifndef IGN_WINDOWS_H
+@@ -286,8 +286,4 @@
+ extern struct Gadget *CreatePopGadget(struct winData *wd,struct Gadget *gad,BOOL disabled);
+ extern void FreeBorderGadgets(struct Gadget *gad,struct Window *win);
+ 
+-#ifdef IGNITION_DEMO
+-extern void NotAvailableInDemo(void);
+-#endif
+- 
+ #endif  /* IGN_WINDOWS_H */
+
+
+
+From axeld at pinc-software.de  Sat Jan 24 12:09:06 2009
+From: axeld at pinc-software.de (Axel =?utf-8?q?D=C3=B6rfler?=)
+Date: Sat, 24 Jan 2009 12:09:06 +0100 CET
+Subject: [Ignition-commits] r39 - trunk
+In-Reply-To: <1232770469.9365.17.camel@bellodello>
+Message-ID: <5118244044-BeMail@zon>
+
+Matthias Rustler <mrustler at gmx.de> wrote:
+> > > Of course, it would be better if *you* fix the bugs.
+> > Why would it be better?
+> Because you know your source better than me ;-). It's easy to add 
+> checks
+> to avoid dereferencing of illegal pointers, but the question is: Is 
+> it
+> really intended that such pointers exist? See bottom of this mail.
+
+I don't know if that is really true; the most part of ignition was 
+developed between 1996 and 2002. And most parts of it are pretty ugly, 
+too, it's hard to remember that ;-)
+
+> > I'm just wondering why this didn't crash earlier for me :-)
+> Under UAE and systems with no MMU you'd just get undefined behaviour, 
+> I
+> guess.
+
+The main development machine was an A4000 with MMU.
+
+> > > Is it enough to check for (APTR)~0L?
+> > Not that I would remember, but it seems that shouldn't hurt :-)
+> Done. Now I have a similar crash in the function requester when a 
+> cell
+> contains an error. Again, adding a check is easy, but why do such
+> illegal nodes exist in the list with the used functions?
+
+I guess it's usually best to solve this kind of errors in two ways: 
+first make the crash go away, and then look into it why this is 
+happening in the first place.
+I just had a look, and it seems that trackFunctions() in edit.c was 
+responsible for the misery.
+
+Bye,
+   Axel.
+
+
+
+From mrustler at gmx.de  Sat Jan 24 12:51:50 2009
+From: mrustler at gmx.de (Matthias Rustler)
+Date: Sat, 24 Jan 2009 12:51:50 +0100
+Subject: [Ignition-commits] r39 - trunk
+In-Reply-To: <5118244044-BeMail@zon>
+References: <5118244044-BeMail@zon>
+Message-ID: <1232797910.9365.20.camel@bellodello>
+
+Am Samstag, den 24.01.2009, 12:09 +0100 schrieb Axel D?rfler:
+> Matthias Rustler <mrustler at gmx.de> wrote:
+
+> > > > Is it enough to check for (APTR)~0L?
+> > > Not that I would remember, but it seems that shouldn't hurt :-)
+> > Done. Now I have a similar crash in the function requester when a 
+> > cell
+> > contains an error. Again, adding a check is easy, but why do such
+> > illegal nodes exist in the list with the used functions?
+> 
+> I just had a look, and it seems that trackFunctions() in edit.c was 
+> responsible for the misery.
+
+Yes, it works now.
+
+Regards,
+Matthias
+
+
+
+

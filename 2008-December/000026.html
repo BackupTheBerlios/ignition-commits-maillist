@@ -1,0 +1,114 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r15 - in trunk: .	distribution	distribution/full/misc help/deutsch help/english libs
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2008-December/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r15%20-%20in%20trunk%3A%20.%0A%09distribution%09distribution/full/misc%20help/deutsch%20help/english%20libs&In-Reply-To=%3C1229299769.8400.25.camel%40bellodello%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000025.html">
+   <LINK REL="Next"  HREF="000027.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r15 - in trunk: .	distribution	distribution/full/misc help/deutsch help/english libs</H1>
+    <B>Matthias Rustler</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r15%20-%20in%20trunk%3A%20.%0A%09distribution%09distribution/full/misc%20help/deutsch%20help/english%20libs&In-Reply-To=%3C1229299769.8400.25.camel%40bellodello%3E"
+       TITLE="[Ignition-commits] r15 - in trunk: .	distribution	distribution/full/misc help/deutsch help/english libs">mrustler at gmx.de
+       </A><BR>
+    <I>Mon Dec 15 01:09:29 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000025.html">[Ignition-commits] r15 - in trunk: . distribution distribution/full/misc help/deutsch help/english libs
+</A></li>
+        <LI>Next message: <A HREF="000027.html">[Ignition-commits] r16 - in trunk: . docs
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26">[ date ]</a>
+              <a href="thread.html#26">[ thread ]</a>
+              <a href="subject.html#26">[ subject ]</a>
+              <a href="author.html#26">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Am Montag, den 15.12.2008, 00:33 +0100 schrieb Axel D&#246;rfler:
+&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/ignition-commits">marust at mail.berlios.de</A> wrote:
+</I>&gt;<i> &gt; * Renamed macros NewList, AddHead etc. to MyNewList, MyAddHead etc.
+</I>&gt;<i> &gt;   because of name collision.
+</I>&gt;<i> 
+</I>&gt;<i> Since you probably know more than I do about that: what is this about, 
+</I>&gt;<i> and why do we have those macros in the first place? :-)
+</I>
+Before my change it looked like
+#define NewList(l) NewList((struct List *)(l))
+
+So we don't need to do the type conversion in the source.
+
+On SAS/C it was possibly to overwrite a function with a macro with the
+same name.
+
+But on AROS all library functions are implemented as macros (this is
+probably generally the case with GCC on Amiga-like OSses). So I had to
+chose another name.
+
+
+BTW:
+When I wrote the commit log I was a bit tired. Other things I did:
+
+I had problems with the headers. Probably circular dependencies. I've
+solved this by moving enum WDT to its own file and by adding some
+forward declarations.
+
+Endian conversion for the preferences and the mouse pointers.
+
+Changed the argument order for all Hooks and Dispatchers to
+Hook* (a0), Object* (a2), Message*(a1)
+What I still have to do is to look at all places where such functions
+are *called*.
+
+Status
+------
+Partially working. GUI seems to be complete. Data and formulas can be
+entered in cells.
+But still a lot of segfaults. (E.g. when trying to save the file)
+
+Next milestone will be diagrams.
+
+There is code similar than
+x-&gt;link = h-&gt;h_Entry
+This is evil as this can be this special function from amiga.lib. I
+think I have to write a GETHOOKFUNC macro.
+
+
+Regards,
+Matthias
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000025.html">[Ignition-commits] r15 - in trunk: . distribution distribution/full/misc help/deutsch help/english libs
+</A></li>
+	<LI>Next message: <A HREF="000027.html">[Ignition-commits] r16 - in trunk: . docs
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26">[ date ]</a>
+              <a href="thread.html#26">[ thread ]</a>
+              <a href="subject.html#26">[ subject ]</a>
+              <a href="author.html#26">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

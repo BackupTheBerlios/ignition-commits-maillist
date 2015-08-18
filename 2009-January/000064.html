@@ -1,0 +1,100 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r42 - trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2009-January/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r42%20-%20trunk&In-Reply-To=%3C200901240247.n0O2luBT007936%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000060.html">
+   <LINK REL="Next"  HREF="000065.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r42 - trunk</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r42%20-%20trunk&In-Reply-To=%3C200901240247.n0O2luBT007936%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r42 - trunk">marust at mail.berlios.de
+       </A><BR>
+    <I>Sat Jan 24 03:47:56 CET 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000060.html">[Ignition-commits] r41 - trunk
+</A></li>
+        <LI>Next message: <A HREF="000065.html">[Ignition-commits] r43 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#64">[ date ]</a>
+              <a href="thread.html#64">[ thread ]</a>
+              <a href="subject.html#64">[ subject ]</a>
+              <a href="author.html#64">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2009-01-24 03:47:54 +0100 (Sat, 24 Jan 2009)
+New Revision: 42
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=42&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=42&amp;view=rev</A>
+
+Modified:
+   trunk/ignition.c
+Log:
+* Write nothing if ln_Name == -1.
+  This avoids a segfault while writing the session file.
+
+Modified: trunk/ignition.c
+===================================================================
+--- trunk/ignition.c	2009-01-23 19:40:30 UTC (rev 41)
++++ trunk/ignition.c	2009-01-24 02:47:54 UTC (rev 42)
+@@ -1441,14 +1441,15 @@
+         FPuts(file,&quot;[recent functions]\n&quot;);
+         count = 0;
+ 
+-        foreach(&amp;usedfuncs,ln)
+-        {
+-            FPuts(file,(char *)&amp;((struct Function *)ln-&gt;ln_Name)-&gt;f_ID);
+-            FPutC(file,'\n');
++	foreach(&amp;usedfuncs, ln) {
++		if (ln-&gt;ln_Name != (APTR)-1L) {
++			FPuts(file, (char *)&amp;((struct Function *)ln-&gt;ln_Name)-&gt;f_ID);
++			FPutC(file, '\n');
+ 
+-            if (++count &gt; MAX_RECENTFUNCS)
+-                break;
+-        }
++			if (++count &gt; MAX_RECENTFUNCS)
++				break;
++		}
++	}
+ 
+         /** write font sizes **/
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000060.html">[Ignition-commits] r41 - trunk
+</A></li>
+	<LI>Next message: <A HREF="000065.html">[Ignition-commits] r43 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#64">[ date ]</a>
+              <a href="thread.html#64">[ thread ]</a>
+              <a href="subject.html#64">[ subject ]</a>
+              <a href="author.html#64">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

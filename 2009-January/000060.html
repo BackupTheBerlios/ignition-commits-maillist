@@ -1,0 +1,148 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r41 - trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2009-January/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r41%20-%20trunk&In-Reply-To=%3C200901231940.n0NJeUWK000408%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000059.html">
+   <LINK REL="Next"  HREF="000064.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r41 - trunk</H1>
+    <B>axeld at BerliOS</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r41%20-%20trunk&In-Reply-To=%3C200901231940.n0NJeUWK000408%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r41 - trunk">axeld at mail.berlios.de
+       </A><BR>
+    <I>Fri Jan 23 20:40:30 CET 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000059.html">[Ignition-commits] r40 - trunk
+</A></li>
+        <LI>Next message: <A HREF="000064.html">[Ignition-commits] r42 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#60">[ date ]</a>
+              <a href="thread.html#60">[ thread ]</a>
+              <a href="subject.html#60">[ subject ]</a>
+              <a href="author.html#60">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: axeld
+Date: 2009-01-23 20:40:30 +0100 (Fri, 23 Jan 2009)
+New Revision: 41
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=41&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=41&amp;view=rev</A>
+
+Modified:
+   trunk/reference.c
+Log:
+* Properly fixed what r39 tried to do.
+* Minor cleanup.
+
+
+Modified: trunk/reference.c
+===================================================================
+--- trunk/reference.c	2009-01-23 18:27:55 UTC (rev 40)
++++ trunk/reference.c	2009-01-23 19:40:30 UTC (rev 41)
+@@ -1,6 +1,6 @@
+ /* References for the automatic computations
+  *
+- * Copyright &#169;1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+@@ -497,25 +497,25 @@
+ 		{
+ 			struct Function *f = t-&gt;t_Function;
+ 
+-			if (f == (APTR)~0L)
++			if (f == (APTR)~0L || f == NULL)
+ 				break;
+ 
+-			if (f &amp;&amp; f != (APTR)~0L &amp;&amp; f-&gt;f_Code)
+-			{
++			if (f-&gt;f_Code) {
+ 				struct FuncArg *fa;
+ 
+ 				foreach (&amp;t-&gt;t_Args, fa)
+ 					AddReferences(r, fa-&gt;fa_Root);
+ 			}
+-			/* Sonderbehandlung von Verweisen und jetzt()/heute() */
++			
++			/* Special treatment of references and today()/now() */
+ 
+-			switch (f-&gt;f_ID)
+-			{
+-				case MAKE_ID('t','d','y','\0'):  // heute()
+-				case MAKE_ID('n','o','w','\0'):  // jetzt()
++			switch (f-&gt;f_ID) {
++				case MAKE_ID('t','d','y','\0'):  // today()
++				case MAKE_ID('n','o','w','\0'):  // now()
+ 					if ((r-&gt;r_Type &amp; RTYPE_TIMED) == 0) {
+-						// only add the timed reference, if it hasn't been added already
+-						// (there might be more than one timed reference per object)
++						// only add the timed reference, if it hasn't been added
++						// already (there might be more than one timed reference
++						// per object)
+ 						D(bug(&quot;** time reference detected (0x%08lx)!\n&quot;, r));
+ 						AddToArrayList(&amp;gTimedRefs, r);
+ 						r-&gt;r_Type |= RTYPE_TIMED;
+@@ -524,17 +524,17 @@
+ 				case MAKE_ID('e','x','t','\0'):  // extern()
+ 					D(bug(&quot;not implemented reference: extern()\n&quot;));
+ 					break;
+-				case MAKE_ID('p','a','g','\0'):  // seite()
+-					D(bug(&quot;not implemented reference: seite()\n&quot;));
++				case MAKE_ID('p','a','g','\0'):  // page()
++					D(bug(&quot;not implemented reference: page()\n&quot;));
+ 					break;
+-				case MAKE_ID('r','e','f','\0'):  // bezug()
+-					D(bug(&quot;not implemented reference: bezug()\n&quot;));
++				case MAKE_ID('r','e','f','\0'):  // reference()
++					D(bug(&quot;not implemented reference: reference()\n&quot;));
+ 					break;
+-				case MAKE_ID('c','o','l','\0'):  // spalte()
+-					D(bug(&quot;not implemented reference: spalte()\n&quot;));
++				case MAKE_ID('c','o','l','\0'):  // column()
++					D(bug(&quot;not implemented reference: column()\n&quot;));
+ 					break;
+-				case MAKE_ID('r','o','w','\0'):  // reihe()
+-					D(bug(&quot;not implemented reference: reihe()\n&quot;));
++				case MAKE_ID('r','o','w','\0'):  // row()
++					D(bug(&quot;not implemented reference: row()\n&quot;));
+ 					break;
+ 			}
+ 			break;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000059.html">[Ignition-commits] r40 - trunk
+</A></li>
+	<LI>Next message: <A HREF="000064.html">[Ignition-commits] r42 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#60">[ date ]</a>
+              <a href="thread.html#60">[ thread ]</a>
+              <a href="subject.html#60">[ subject ]</a>
+              <a href="author.html#60">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

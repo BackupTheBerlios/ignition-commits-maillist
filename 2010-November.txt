@@ -1,0 +1,2845 @@
+From marust at mail.berlios.de  Sat Nov 20 15:11:43 2010
+From: marust at mail.berlios.de (marust at mail.berlios.de)
+Date: Sat, 20 Nov 2010 15:11:43 +0100 (CET)
+Subject: [Ignition-commits] r52 - in trunk/libs: gtdrag scroller textedit
+Message-ID: <20101120141144.28F0A480C2F@sheep.berlios.de>
+
+Author: marust
+Date: 2010-11-20 15:11:43 +0100 (Sat, 20 Nov 2010)
+New Revision: 52
+ViewCVS: http://svn.berlios.de/viewcvs/ignition?rev=52&view=rev
+
+Removed:
+   trunk/libs/gtdrag/aros/
+   trunk/libs/scroller/aros/
+   trunk/libs/textedit/aros/
+Log:
+Get rid of AROS specific code. Codesets.library on Sourceforge
+proves that it is possible to write libraries so that they
+compile on all Amiga like platforms.
+
+
+
+
+From marust at mail.berlios.de  Sat Nov 20 15:29:21 2010
+From: marust at mail.berlios.de (marust at mail.berlios.de)
+Date: Sat, 20 Nov 2010 15:29:21 +0100 (CET)
+Subject: [Ignition-commits] r53 - in trunk: . add-ons config docs
+	help/deutsch help/english lib/safeclip lib/safeclip/gcc-68k
+	lib/safeclip/generic lib/safeclip/sasc-68k libs libs/gtdrag
+	libs/gtdrag/docs libs/gtdrag/examples libs/gtdrag/fd
+	libs/gtdrag/include/clib libs/gtdrag/include/libraries
+	libs/gtdrag/include/lvo libs/gtdrag/include/pragmas
+	libs/gtdrag/include/proto libs/include libs/scroller
+	libs/scroller/include/gadgets libs/textedit libs/textedit/fd
+	libs/textedit/include/clib libs/textedit/include/gadgets
+	libs/textedit/include/pragmas libs/textedit/include/proto
+	libs/textedit/test locale misc rexx
+Message-ID: <20101120142921.A4C55480C2F@sheep.berlios.de>
+
+Author: marust
+Date: 2010-11-20 15:29:20 +0100 (Sat, 20 Nov 2010)
+New Revision: 53
+ViewCVS: http://svn.berlios.de/viewcvs/ignition?rev=53&view=rev
+
+Modified:
+   trunk/History
+   trunk/LICENSE
+   trunk/Makefile
+   trunk/README
+   trunk/SCOPTIONS
+   trunk/add-ons/Makefile
+   trunk/add-ons/SCOPTIONS
+   trunk/add-ons/area_diagram.c
+   trunk/add-ons/area_diagram.gcdescr
+   trunk/add-ons/ascii.c
+   trunk/add-ons/ascii.iodescr
+   trunk/add-ons/button.c
+   trunk/add-ons/button.gcdescr
+   trunk/add-ons/cell.h
+   trunk/add-ons/checkbox.c
+   trunk/add-ons/checkbox.gcdescr
+   trunk/add-ons/circle_diagram.c
+   trunk/add-ons/circle_diagram.gcdescr
+   trunk/add-ons/column_diagram.c
+   trunk/add-ons/column_diagram.gcdescr
+   trunk/add-ons/csv.c
+   trunk/add-ons/csv.iodescr
+   trunk/add-ons/frame.c
+   trunk/add-ons/frame.gcdescr
+   trunk/add-ons/gclass.c
+   trunk/add-ons/gclass.fd
+   trunk/add-ons/gclass.h
+   trunk/add-ons/gclass_functable.c
+   trunk/add-ons/gclass_makelib.with
+   trunk/add-ons/gclass_pragmas.h
+   trunk/add-ons/gclass_protos.h
+   trunk/add-ons/gclass_variadic.c
+   trunk/add-ons/gradient.c
+   trunk/add-ons/gradient.gcdescr
+   trunk/add-ons/iotype.c
+   trunk/add-ons/iotype.h
+   trunk/add-ons/iotype_variadic.c
+   trunk/add-ons/line.c
+   trunk/add-ons/line.gcdescr
+   trunk/add-ons/line_diagram.c
+   trunk/add-ons/line_diagram.gcdescr
+   trunk/add-ons/polygon.gcdescr
+   trunk/add-ons/rectangle.c
+   trunk/add-ons/rectangle.gcdescr
+   trunk/add-ons/text.c
+   trunk/add-ons/text.gcdescr
+   trunk/add-ons/turbocalc.c
+   trunk/add-ons/turbocalc.h
+   trunk/add-ons/turbocalc.iodescr
+   trunk/boopsi.c
+   trunk/calc.c
+   trunk/calc.h
+   trunk/cell.c
+   trunk/classes.c
+   trunk/classes.h
+   trunk/clip.c
+   trunk/cmd.c
+   trunk/color.c
+   trunk/config/deutsch.functions
+   trunk/config/english.functions
+   trunk/database.c
+   trunk/debug.c
+   trunk/debug.h
+   trunk/diagram.c
+   trunk/docs/Befehle.guide
+   trunk/docs/Grafik-System
+   trunk/docs/LiesMich.guide
+   trunk/docs/Merker
+   trunk/docs/ReadMe.html
+   trunk/docs/WDTs
+   trunk/edit.c
+   trunk/font.c
+   trunk/font.h
+   trunk/funcs.h
+   trunk/functions.c
+   trunk/gadgets.c
+   trunk/gadgets.h
+   trunk/graphic.c
+   trunk/graphic.h
+   trunk/handleprefs.c
+   trunk/handlewindows.c
+   trunk/help/deutsch/ignition.guide
+   trunk/help/deutsch/ignition.in.guide
+   trunk/help/english/ignition.guide
+   trunk/help/english/ignition.in.guide
+   trunk/hooks.c
+   trunk/ignition.c
+   trunk/images.c
+   trunk/images.h
+   trunk/initwindows.c
+   trunk/io.c
+   trunk/io.h
+   trunk/lib/safeclip/ReadMe.doc
+   trunk/lib/safeclip/gcc-68k/Makefile
+   trunk/lib/safeclip/gcc-68k/clip.s
+   trunk/lib/safeclip/gcc-68k/safeclip.c
+   trunk/lib/safeclip/gcc-68k/safeclip.h
+   trunk/lib/safeclip/generic/safeclip.c
+   trunk/lib/safeclip/generic/safeclip.h
+   trunk/lib/safeclip/safeclip.guide
+   trunk/lib/safeclip/sasc-68k/clip.s
+   trunk/lib/safeclip/sasc-68k/safeclip.c
+   trunk/lib/safeclip/sasc-68k/safeclip.h
+   trunk/lib/safeclip/sasc-68k/smakefile
+   trunk/libs/compatibility.c
+   trunk/libs/gtdrag/GTD_Apps.c
+   trunk/libs/gtdrag/GTD_Boopsi.c
+   trunk/libs/gtdrag/GTD_Drag.c
+   trunk/libs/gtdrag/GTD_DragObj.c
+   trunk/libs/gtdrag/GTD_DropMsgs.c
+   trunk/libs/gtdrag/GTD_Gadgets.c
+   trunk/libs/gtdrag/GTD_Highlight.c
+   trunk/libs/gtdrag/GTD_Hook.c
+   trunk/libs/gtdrag/GTD_IFFHook.c
+   trunk/libs/gtdrag/GTD_IMsgs.c
+   trunk/libs/gtdrag/GTD_ImageHook.c
+   trunk/libs/gtdrag/GTD_Tree.c
+   trunk/libs/gtdrag/GTD_TreeHook.c
+   trunk/libs/gtdrag/GTD_Windows.c
+   trunk/libs/gtdrag/SMakefile
+   trunk/libs/gtdrag/docs/gtdrag.doc
+   trunk/libs/gtdrag/docs/gtdrag.guide
+   trunk/libs/gtdrag/docs/gtdrag.readme
+   trunk/libs/gtdrag/examples/boopsi.c
+   trunk/libs/gtdrag/examples/dragtest.c
+   trunk/libs/gtdrag/examples/dragtest.info
+   trunk/libs/gtdrag/examples/mmakefile.src
+   trunk/libs/gtdrag/fd/gtdrag_lib.fd
+   trunk/libs/gtdrag/gtdrag.c
+   trunk/libs/gtdrag/gtdrag.conf
+   trunk/libs/gtdrag/gtdrag_includes.h
+   trunk/libs/gtdrag/gtdrag_lib.c
+   trunk/libs/gtdrag/gtdrag_lib_aros.c
+   trunk/libs/gtdrag/gtdrag_rev.i
+   trunk/libs/gtdrag/gtdrag_romtag.asm
+   trunk/libs/gtdrag/include/clib/gtdrag_protos.h
+   trunk/libs/gtdrag/include/libraries/gtdrag.h
+   trunk/libs/gtdrag/include/libraries/gtdrag.i
+   trunk/libs/gtdrag/include/lvo/gtdrag_lib.i
+   trunk/libs/gtdrag/include/pragmas/gtdrag_pragmas.h
+   trunk/libs/gtdrag/include/proto/gtdrag.h
+   trunk/libs/gtdrag/makelib.with
+   trunk/libs/gtdrag/mmakefile.src
+   trunk/libs/include/SDI_compiler.h
+   trunk/libs/include/SDI_endian.h
+   trunk/libs/include/compatibility.h
+   trunk/libs/scroller/Scroller.c
+   trunk/libs/scroller/Scroller_includes.h
+   trunk/libs/scroller/Scroller_lib.c
+   trunk/libs/scroller/Scroller_lib_aros.c
+   trunk/libs/scroller/Scroller_rev.i
+   trunk/libs/scroller/Scroller_romtag.asm
+   trunk/libs/scroller/include/gadgets/Scroller.h
+   trunk/libs/scroller/mmakefile.src
+   trunk/libs/scroller/pScroller.conf
+   trunk/libs/textedit/SMakefile
+   trunk/libs/textedit/TE_clip.c
+   trunk/libs/textedit/TE_dispatch.c
+   trunk/libs/textedit/TE_draw.c
+   trunk/libs/textedit/TextEdit.c
+   trunk/libs/textedit/TextEdit_includes.h
+   trunk/libs/textedit/TextEdit_lib.c
+   trunk/libs/textedit/TextEdit_lib_aros.c
+   trunk/libs/textedit/TextEdit_private.h
+   trunk/libs/textedit/TextEdit_rev.i
+   trunk/libs/textedit/TextEdit_romtag.asm
+   trunk/libs/textedit/fd/TextEdit_lib.fd
+   trunk/libs/textedit/include/clib/TextEdit_protos.h
+   trunk/libs/textedit/include/gadgets/TextEdit.h
+   trunk/libs/textedit/include/pragmas/TextEdit_pragmas.h
+   trunk/libs/textedit/include/proto/TextEdit.h
+   trunk/libs/textedit/mmakefile.src
+   trunk/libs/textedit/pTextEdit.conf
+   trunk/libs/textedit/test/mmakefile.src
+   trunk/libs/textedit/test/tedit.c
+   trunk/locale.c
+   trunk/locale/C_h_orig.sd
+   trunk/locale/ignition.cd
+   trunk/locale/ignition_english.ct
+   trunk/lock.c
+   trunk/menu.c
+   trunk/misc/ignition-DeInstall
+   trunk/misc/ignition-Installation
+   trunk/objects.c
+   trunk/pointer.c
+   trunk/popper.c
+   trunk/prefs.c
+   trunk/prefs.h
+   trunk/prefsgadgets.c
+   trunk/prefsio.c
+   trunk/printer.c
+   trunk/project.c
+   trunk/reference.c
+   trunk/rexx.c
+   trunk/rexx/context.ign
+   trunk/rexx/coords.ign
+   trunk/rexx/getsetcell.ign
+   trunk/rexx/request.ign
+   trunk/rexx/test.rexx
+   trunk/screen.c
+   trunk/search.c
+   trunk/support.c
+   trunk/table.c
+   trunk/table.h
+   trunk/types.h
+   trunk/undo.c
+   trunk/version.h
+   trunk/wdt.h
+   trunk/windefs.h
+   trunk/windows.c
+   trunk/windows.h
+Log:
+Changed line ending to LF.
+
+Some time ago I changed it to "native". At that time AROS did
+it the same way to ensure that files can be edited on W*ndows
+and M*cOS. But in the meantime it was changed in AROS to LF.
+I'm assuming that AROS is right ;-).
+
+
+
+Property changes on: trunk/History
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/LICENSE
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/Makefile
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/README
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/SCOPTIONS
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/add-ons/Makefile
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/SCOPTIONS
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/area_diagram.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/area_diagram.gcdescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/ascii.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/ascii.iodescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/button.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/button.gcdescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/cell.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/checkbox.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/checkbox.gcdescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/circle_diagram.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/circle_diagram.gcdescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/column_diagram.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/column_diagram.gcdescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/csv.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/csv.iodescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/frame.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/frame.gcdescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/gclass.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/gclass.fd
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/gclass.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/gclass_functable.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/gclass_makelib.with
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/gclass_pragmas.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/gclass_protos.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/gclass_variadic.c
+___________________________________________________________________
+Modified: svn:keywords
+   - Id Date Revision Author
+   + Author Date Id Revision
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/add-ons/gradient.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/gradient.gcdescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/iotype.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/iotype.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/iotype_variadic.c
+___________________________________________________________________
+Modified: svn:keywords
+   - Id Date Revision Author
+   + Author Date Id Revision
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/add-ons/line.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/line.gcdescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/line_diagram.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/line_diagram.gcdescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/polygon.gcdescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/rectangle.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/rectangle.gcdescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/text.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/text.gcdescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/turbocalc.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/turbocalc.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/turbocalc.iodescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/boopsi.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/calc.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/calc.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/cell.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/classes.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/classes.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/clip.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/cmd.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/color.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/config/deutsch.functions
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + LF
+
+
+Property changes on: trunk/config/english.functions
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + LF
+
+
+Property changes on: trunk/database.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/debug.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/debug.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/diagram.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/docs/Befehle.guide
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/docs/Grafik-System
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/docs/LiesMich.guide
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/docs/Merker
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/docs/ReadMe.html
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/docs/WDTs
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/edit.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/font.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/font.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/funcs.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/functions.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/gadgets.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/gadgets.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/graphic.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/graphic.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/handleprefs.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/handlewindows.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/help/deutsch/ignition.guide
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/help/deutsch/ignition.in.guide
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/help/english/ignition.guide
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/help/english/ignition.in.guide
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/hooks.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/ignition.c
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + LF
+
+
+Property changes on: trunk/images.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/images.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/initwindows.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/io.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/io.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/lib/safeclip/ReadMe.doc
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + LF
+
+
+Property changes on: trunk/lib/safeclip/gcc-68k/Makefile
+___________________________________________________________________
+Modified: svn:keywords
+   - Id Date Revision Author
+   + Author Date Id Revision
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/lib/safeclip/gcc-68k/clip.s
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + LF
+
+
+Property changes on: trunk/lib/safeclip/gcc-68k/safeclip.c
+___________________________________________________________________
+Modified: svn:keywords
+   - Id Date Revision Author
+   + Author Date Id Revision
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/lib/safeclip/gcc-68k/safeclip.h
+___________________________________________________________________
+Modified: svn:keywords
+   - Id Date Revision Author
+   + Author Date Id Revision
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/lib/safeclip/generic/safeclip.c
+___________________________________________________________________
+Modified: svn:keywords
+   - Id Date Revision Author
+   + Author Date Id Revision
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/lib/safeclip/generic/safeclip.h
+___________________________________________________________________
+Modified: svn:keywords
+   - Id Date Revision Author
+   + Author Date Id Revision
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/lib/safeclip/safeclip.guide
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + LF
+
+
+Property changes on: trunk/lib/safeclip/sasc-68k/clip.s
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + LF
+
+
+Property changes on: trunk/lib/safeclip/sasc-68k/safeclip.c
+___________________________________________________________________
+Modified: svn:keywords
+   - Id Date Revision Author
+   + Author Date Id Revision
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/lib/safeclip/sasc-68k/safeclip.h
+___________________________________________________________________
+Modified: svn:keywords
+   - Id Date Revision Author
+   + Author Date Id Revision
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/lib/safeclip/sasc-68k/smakefile
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + LF
+
+
+Property changes on: trunk/libs/compatibility.c
+___________________________________________________________________
+Modified: svn:keywords
+   - Id Date Revision Author
+   + Author Date Id Revision
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_Apps.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_Boopsi.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_Drag.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_DragObj.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_DropMsgs.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_Gadgets.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_Highlight.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_Hook.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_IFFHook.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_IMsgs.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_ImageHook.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_Tree.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_TreeHook.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_Windows.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/SMakefile
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/docs/gtdrag.doc
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/docs/gtdrag.guide
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/docs/gtdrag.readme
+___________________________________________________________________
+Modified: svn:eol-style
+
+[... truncated: 667 lines follow ...]
+
+
+From marust at mail.berlios.de  Sat Nov 20 15:37:56 2010
+From: marust at mail.berlios.de (marust at mail.berlios.de)
+Date: Sat, 20 Nov 2010 15:37:56 +0100 (CET)
+Subject: [Ignition-commits] r54 - in trunk: . libs
+Message-ID: <20101120143756.4D752480C2F@sheep.berlios.de>
+
+Author: marust
+Date: 2010-11-20 15:37:55 +0100 (Sat, 20 Nov 2010)
+New Revision: 54
+ViewCVS: http://svn.berlios.de/viewcvs/ignition?rev=54&view=rev
+
+Added:
+   trunk/compatibility.c
+   trunk/include/
+Removed:
+   trunk/libs/compatibility.c
+   trunk/libs/include/
+Log:
+Cleanup: moved libs/includes and compatibility.c to
+root directory. Those files aren't for the libs only.
+
+
+Copied: trunk/compatibility.c (from rev 53, trunk/libs/compatibility.c)
+===================================================================
+--- trunk/compatibility.c	                        (rev 0)
++++ trunk/compatibility.c	2010-11-20 14:37:55 UTC (rev 54)
+@@ -0,0 +1,72 @@
++/* Implementations of missing functions
++ *
++ * FIXME: license
++ */
++
++#include "include/compatibility.h"
++#include "SDI_compiler.h"
++
++#include <strings.h>
++#include <stdlib.h>
++
++#include <exec/types.h>
++
++#if !defined(__SASC)
++
++void swmem(char *dest, char *src, int s)
++{
++	int i;
++	char c;
++
++	for(i=0; i<s; i++) {
++		c = dest[i];
++		dest[i] = src[i];
++		src[i] = c;
++	}
++}
++
++
++void strins(char *to, const char *from)
++{
++	unsigned int toLength;
++	unsigned int fromLength;
++	char *newTo;
++	char *oldTo;
++
++	if (!to || !from)
++		return;
++
++	toLength = strlen(to);
++	fromLength = strlen(from);
++
++	newTo = to + fromLength + toLength;
++	oldTo = to + toLength;
++	toLength++;
++	
++	while(toLength--) {
++		*newTo-- = *oldTo--;
++	}
++
++	while(fromLength--) {
++		*to++ = *from++;
++	}
++}
++
++
++static int dcomp(double *a, double *b)
++{
++	if(*a>*b)
++		return 1;
++	else if(*a==*b)
++		return 0;
++	else
++		return -1;
++}
++
++
++void dqsort(double *x, int n)
++{
++	qsort(x,n,sizeof(double),(void *)(*dcomp));
++}
++
++#endif
+
+
+
+From marust at mail.berlios.de  Sat Nov 20 15:45:16 2010
+From: marust at mail.berlios.de (marust at mail.berlios.de)
+Date: Sat, 20 Nov 2010 15:45:16 +0100 (CET)
+Subject: [Ignition-commits] r55 - trunk/include
+Message-ID: <20101120144516.7B2B8480C2F@sheep.berlios.de>
+
+Author: marust
+Date: 2010-11-20 15:45:16 +0100 (Sat, 20 Nov 2010)
+New Revision: 55
+ViewCVS: http://svn.berlios.de/viewcvs/ignition?rev=55&view=rev
+
+Added:
+   trunk/include/SDI_compiler-old.h
+   trunk/include/SDI_hook.h
+   trunk/include/SDI_interrupt.h
+   trunk/include/SDI_lib.h
+   trunk/include/SDI_misc.h
+   trunk/include/SDI_stdarg.h
+Modified:
+   trunk/include/SDI_compiler.h
+Log:
+Updated SDI headers from its CVS repository. The SDI headers
+are a macro package for compatibility between different Amiga OS.
+Copied old SDI_compiler.h to SDI_compiler-old.h. It contains
+some Ignition specific definitions which we have to move to
+compatibility.c in another step.
+
+
+Copied: trunk/include/SDI_compiler-old.h (from rev 54, trunk/include/SDI_compiler.h)
+===================================================================
+--- trunk/include/SDI_compiler-old.h	                        (rev 0)
++++ trunk/include/SDI_compiler-old.h	2010-11-20 14:45:16 UTC (rev 55)
+@@ -0,0 +1,292 @@
++#ifndef SDI_COMPILER_H
++#define SDI_COMPILER_H
++
++/* Includeheader
++
++        Name:           SDI_compiler.h
++        Versionstring:  $VER: SDI_compiler.h 1.26 (14.10.2007)
++        Author:         Dirk St?cker & Jens Langner
++        Distribution:   PD
++        Project page:   http://www.sf.net/projects/sditools/
++        Description:    defines to hide compiler stuff
++
++ 1.1   25.06.98 : created from data made by Gunter Nikl
++ 1.2   17.11.99 : added VBCC
++ 1.3   29.02.00 : fixed VBCC REG define
++ 1.4   30.03.00 : fixed SAVEDS for VBCC
++ 1.5   29.07.00 : added #undef statements (needed e.g. for AmiTCP together
++                  with vbcc)
++ 1.6   19.05.01 : added STACKEXT and Dice stuff
++ 1.7   16.06.01 : added MorphOS specials and VARARGS68K
++ 1.8   21.09.02 : added MorphOS register stuff
++ 1.9   26.09.02 : added OFFSET macro. Thanks Frank Wille for suggestion
++ 1.10  18.10.02 : reverted to old MorphOS-method for GCC
++ 1.11  09.11.02 : added REGARGS define to MorphOS section
++ 1.12  18.01.04 : some adaptions for AmigaOS4 compatibility
++ 1.13  17.02.04 : changed ASM macros to be a simple define and added
++                  INTERRUPT, CHIP and FAR
++ 1.14  02.03.04 : added UNUSED which can be used to specify a function parameter
++                  or variable as "unused" which will not cause any compiler warning.
++ 1.15  02.03.04 : added special INLINE define for gcc > 3.0 version
++ 1.17  07.03.04 : changed INLINE definition of gcc <= 2.95.3 to be static aswell.
++ 1.18  21.06.04 : added USED and USED_VAR attribute to allow placing a
++                  __attribute__((used)) to a function and a variable, taking care of
++                  different compiler versions.
++ 1.19  04.07.04 : register specification for variables is not supported on MorphOS,
++                  so we modified the REG() macro accordingly.
++ 1.20  28.02.05 : correct INLINE for VBCC.
++ 1.21  28.02.05 : cleanup __GCC__ case.
++ 1.22  16.05.05 : changed the vbcc/REG() macro.
++                  added missing vbcc/VARARGS68K define.
++                  moved morphos SDI_EmulLib Stuff into compilers.h. I know it's not
++                  compiler specific,  (Guido Mersmann)
++ 1.23  30.04.06 : modified to get it compatible to AROS. (Guido Mersmann)
++ 1.24  06.05.06 : __linearvarargs is only valid for vbcc and PPC, so I moved VARARGS68K
++                  to prevent problems with 68K and i86 targets. (Guido Mersmann)
++ 1.25  21.06.07 : added NEAR to be usable for __near specification for SAS/C
++ 1.26  14.10.07 : added DEPRECATED macro which defaults to __attribute__((deprecated))
++                  for GCC compiles.
++       29.11.08   Added some defines for Ignition and support modules (Mazze)
++*/
++
++/*
++** This is PD (Public Domain). This means you can do with it whatever you want
++** without any restrictions. I only ask you to tell me improvements, so I may
++** fix the main line of this files as well.
++**
++** To keep confusion level low: When changing this file, please note it in
++** above history list and indicate that the change was not made by myself
++** (e.g.?add your name or nick name).
++**
++** Find the latest version of this file at:
++** http://cvs.sourceforge.net/viewcvs.py/sditools/sditools/headers/
++**
++** Jens Langner <Jens.Langner at light-speed.de> and
++** Dirk St?cker <soft at dstoecker.de>
++*/
++
++/* Some SDI internal header */
++
++#undef ASM
++#undef REG
++#undef LREG
++#undef CONST
++#undef SAVEDS
++#undef INLINE
++#undef REGARGS
++#undef STDARGS
++#undef OFFSET
++#undef INTERRUPT
++#undef CHIP
++#undef FAR
++#undef NEAR
++#undef UNUSED
++#undef USED
++#undef USED_VAR
++#undef DEPRECATED
++
++/* first "exceptions" */
++
++#if defined(__MAXON__)
++  #define STDARGS
++  #define STACKEXT
++  #define REGARGS
++  #define SAVEDS
++  #define INLINE inline
++/*************************************************************************/
++#elif defined(__VBCC__)
++  #define STDARGS
++  #define STACKEXT
++  #define REGARGS
++  #define INLINE static
++  #define OFFSET(p,m) __offsetof(struct p,m)
++
++  #if defined(__PPC__)
++    #define VARARGS68K __linearvarargs
++    #define REG(reg,arg) arg
++  #else
++    #define REG(reg,arg) __reg(#reg) arg
++  #endif
++/*************************************************************************/
++#elif defined(__STORM__)
++  #define STDARGS
++  #define STACKEXT
++  #define REGARGS
++  #define INLINE inline
++/*************************************************************************/
++#elif defined(__SASC)
++  #define ASM __asm
++/*************************************************************************/
++#elif defined(__GNUC__)
++  #define UNUSED __attribute__((unused)) /* for functions, variables and types */
++  #define USED   __attribute__((used))   /* for functions only! */
++  #define DEPRECATED __attribute__((deprecated))
++  #if __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ > 0)
++    #define USED_VAR USED /* for variables only! */
++    #define INLINE static __inline __attribute__((always_inline))
++  #endif
++  /* we have to distinguish between AmigaOS4 and MorphOS */
++  #if defined(__PPC__)
++    #define REG(reg,arg) arg
++    #define SAVEDS
++    #define STDARGS
++    #define REGARGS
++    #define STACKEXT
++    #if defined(__MORPHOS__)
++      #define VARARGS68K  __attribute__((varargs68k))
++    #endif
++    #define INTERRUPT
++    #define CHIP
++  #else
++    #define REG(reg,arg) arg __asm(#reg)
++    #define LREG(reg,arg) register REG(reg,arg)
++  #endif
++  #define FAR
++  #define NEAR
++#elif defined(_DCC)
++  #define REG(reg,arg) __##reg arg
++  #define STACKEXT __stkcheck
++  #define STDARGS __stkargs
++  #define INLINE static
++#endif
++
++/* then "common" ones */
++
++#if !defined(ASM)
++  #define ASM
++#endif
++#if !defined(REG)
++  #define REG(reg,arg) register __##reg arg
++#endif
++#if !defined(LREG)
++  #define LREG(reg,arg) register arg
++#endif
++#if !defined(CONST)
++  #define CONST const
++#endif
++#if !defined(SAVEDS)
++  #define SAVEDS __saveds
++#endif
++#if !defined(INLINE)
++  #define INLINE static __inline
++#endif
++#if !defined(REGARGS)
++  #define REGARGS __regargs
++#endif
++#if !defined(STDARGS)
++  #define STDARGS __stdargs
++#endif
++#if !defined(STACKEXT)
++  #define STACKEXT __stackext
++#endif
++#if !defined(VARARGS68K)
++  #define VARARGS68K
++#endif
++#if !defined(OFFSET)
++  #define OFFSET(structName, structEntry) \
++    ((char *)(&(((struct structName *)0)->structEntry))-(char *)0)
++#endif
++#if !defined(INTERRUPT)
++  #define INTERRUPT __interrupt
++#endif
++#if !defined(CHIP)
++  #define CHIP __chip
++#endif
++#if !defined(FAR)
++  #define FAR __far
++#endif
++#if !defined(NEAR)
++  #define NEAR __near
++#endif
++#if !defined(UNUSED)
++  #define UNUSED
++#endif
++#if !defined(USED)
++  #define USED
++#endif
++#if !defined(USED_VAR)
++  #define USED_VAR
++#endif
++#if !defined(DEPRECATED)
++  #define DEPRECATED
++#endif
++
++/*************************************************************************/
++
++#ifdef __AROS__
++  #undef REG
++  #define REG(reg, arg) arg
++
++  #undef SAVEDS
++  #define SAVEDS
++
++  #undef ASM
++  #define ASM
++
++  #undef REGARGS
++  #define REGARGS
++
++  #undef VARARGS68K
++  #define VARARGS68K __stackparm
++#else
++  #ifndef CONST_STRPTR
++	#define CONST_STRPTR UBYTE const *
++  #endif
++#endif /* __AROS__ */
++ 
++/*************************************************************************/
++
++/* Ignition support */
++
++#define PUBLIC ASM SAVEDS
++#define PRIVATE REGARGS
++
++/* IPTR is an integer type which is large enough to store an address.*/
++#if !defined(__AROS__) && !defined(__MORPHOS__)
++  typedef ULONG IPTR;
++#endif
++
++#if defined(__AROS__)
++#  define LIBFUNC_INIT AROS_LIBFUNC_INIT
++#  define LIBFUNC_EXIT AROS_LIBFUNC_EXIT
++#  define LIB_LH0 AROS_LH0
++#  define LIB_LH1 AROS_LH1
++#  define LIB_LH2 AROS_LH2
++#  define LIB_LH3 AROS_LH3
++#  define LIB_LH4 AROS_LH4
++#  define LIB_LH5 AROS_LH5
++#  define LIB_LHA AROS_LHA
++#  define min(a,b) ((a)<(b)?(a):(b))
++#  define max(a,b) ((a)>(b)?(a):(b))
++#  define PI (M_PI)
++
++#  undef CHIP
++#  define CHIP
++
++#  define ALIGNED __attribute__ ((aligned (4)))
++#else
++   // TODO write LIB_... macros
++#  define LIBFUNC_INIT
++#  define LIBFUNC_EXIT
++
++#  if !defined(ALIGNED)
++#    define ALIGNED
++#  endif
++
++#endif
++
++#if defined(__AROS__)
++   /* Platforms which need HookEntry from amiga.lib */
++   //#  define SETHOOK(hookname, funcname) hookname.h_Entry = HookEntry; hookname.h_SubEntry = (HOOKFUNC)funcname
++   // FIXME for now we set funcname to h_Entry. This must later be changed to h_SubEntry (uncomment
++   // the line above)
++#  define SETHOOK(hookname, funcname) hookname.h_Entry = (HOOKFUNC)funcname;
++
++#  define SETDISPATCHER(classname, funcname) classname->cl_Dispatcher.h_Entry = HookEntry; \
++   classname->cl_Dispatcher.h_SubEntry = (HOOKFUNC)funcname
++#else
++#  define SETHOOK(hookname, funcname) hookname.h_Entry = (HOOKFUNC)funcname
++#  define SETDISPATCHER(classname, funcname) classname->cl_Dispatcher.h_Entry = (HOOKFUNC)funcname
++#endif
++
++#endif /* SDI_COMPILER_H */
+
+Modified: trunk/include/SDI_compiler.h
+===================================================================
+--- trunk/include/SDI_compiler.h	2010-11-20 14:37:55 UTC (rev 54)
++++ trunk/include/SDI_compiler.h	2010-11-20 14:45:16 UTC (rev 55)
+@@ -4,8 +4,8 @@
+ /* Includeheader
+ 
+         Name:           SDI_compiler.h
+-        Versionstring:  $VER: SDI_compiler.h 1.26 (14.10.2007)
+-        Author:         Dirk St?cker & Jens Langner
++        Versionstring:  $VER: SDI_compiler.h 1.34 (26.07.2010)
++        Author:         Dirk Stoecker & Jens Langner
+         Distribution:   PD
+         Project page:   http://www.sf.net/projects/sditools/
+         Description:    defines to hide compiler stuff
+@@ -46,7 +46,19 @@
+  1.25  21.06.07 : added NEAR to be usable for __near specification for SAS/C
+  1.26  14.10.07 : added DEPRECATED macro which defaults to __attribute__((deprecated))
+                   for GCC compiles.
+-       29.11.08   Added some defines for Ignition and support modules (Mazze)
++ 1.27  20.03.09 : applied some changes and fixes to get the header more usable
++                  for an AROS compilation. (Pavel Fedin)
++ 1.28  25.03.09 : added missing IPTR definition to make SDI_compiler.h more compatible
++                  to AROS. (Pavel Fedin)
++ 1.29  25.03.09 : fixed the IPTR definition and also the use of the __M68000__ define.
++ 1.30  26.03.09 : fixed the IPTR definition by only defining it for non AROS targets.
++ 1.31  29.03.09 : added VARARGS68K definition for AROS.
++ 1.32  28.05.09 : added STACKED definition for non-AROS targets.
++ 1.33  03.06.10 : added missing SIPTR definition to make SDI_compiler.h more compatible
++                  to AROS.
++ 1.34  26.07.10 : adapted IPTR and SIPTR definitions as the latest MorphOS SDK already
++                  contains them. (tboeckel)
++
+ */
+ 
+ /*
+@@ -62,7 +74,7 @@
+ ** http://cvs.sourceforge.net/viewcvs.py/sditools/sditools/headers/
+ **
+ ** Jens Langner <Jens.Langner at light-speed.de> and
+-** Dirk St?cker <soft at dstoecker.de>
++** Dirk Stoecker <soft at dstoecker.de>
+ */
+ 
+ /* Some SDI internal header */
+@@ -126,20 +138,23 @@
+     #define INLINE static __inline __attribute__((always_inline))
+   #endif
+   /* we have to distinguish between AmigaOS4 and MorphOS */
+-  #if defined(__PPC__)
++  #if defined(_M68000) || defined(__M68000) || defined(__mc68000)
++    #define REG(reg,arg) arg __asm(#reg)
++    #define LREG(reg,arg) register REG(reg,arg)
++  #else
+     #define REG(reg,arg) arg
+     #define SAVEDS
+     #define STDARGS
+     #define REGARGS
+     #define STACKEXT
+     #if defined(__MORPHOS__)
+-      #define VARARGS68K  __attribute__((varargs68k))
++      #define VARARGS68K __attribute__((varargs68k))
+     #endif
++    #if defined(__AROS__)
++      #define VARARGS68K __stackparm
++    #endif
+     #define INTERRUPT
+     #define CHIP
+-  #else
+-    #define REG(reg,arg) arg __asm(#reg)
+-    #define LREG(reg,arg) register REG(reg,arg)
+   #endif
+   #define FAR
+   #define NEAR
+@@ -210,83 +225,16 @@
+ #if !defined(DEPRECATED)
+   #define DEPRECATED
+ #endif
+-
+-/*************************************************************************/
+-
+-#ifdef __AROS__
+-  #undef REG
+-  #define REG(reg, arg) arg
+-
+-  #undef SAVEDS
+-  #define SAVEDS
+-
+-  #undef ASM
+-  #define ASM
+-
+-  #undef REGARGS
+-  #define REGARGS
+-
+-  #undef VARARGS68K
+-  #define VARARGS68K __stackparm
+-#else
+-  #ifndef CONST_STRPTR
+-	#define CONST_STRPTR UBYTE const *
+-  #endif
+-#endif /* __AROS__ */
+- 
+-/*************************************************************************/
+-
+-/* Ignition support */
+-
+-#define PUBLIC ASM SAVEDS
+-#define PRIVATE REGARGS
+-
+-/* IPTR is an integer type which is large enough to store an address.*/
+-#if !defined(__AROS__) && !defined(__MORPHOS__)
+-  typedef ULONG IPTR;
++#if !defined(__AROS__) && !defined(__MORPHOS__) && !defined(IPTR)
++  #define IPTR ULONG
+ #endif
+-
+-#if defined(__AROS__)
+-#  define LIBFUNC_INIT AROS_LIBFUNC_INIT
+-#  define LIBFUNC_EXIT AROS_LIBFUNC_EXIT
+-#  define LIB_LH0 AROS_LH0
+-#  define LIB_LH1 AROS_LH1
+-#  define LIB_LH2 AROS_LH2
+-#  define LIB_LH3 AROS_LH3
+-#  define LIB_LH4 AROS_LH4
+-#  define LIB_LH5 AROS_LH5
+-#  define LIB_LHA AROS_LHA
+-#  define min(a,b) ((a)<(b)?(a):(b))
+-#  define max(a,b) ((a)>(b)?(a):(b))
+-#  define PI (M_PI)
+-
+-#  undef CHIP
+-#  define CHIP
+-
+-#  define ALIGNED __attribute__ ((aligned (4)))
+-#else
+-   // TODO write LIB_... macros
+-#  define LIBFUNC_INIT
+-#  define LIBFUNC_EXIT
+-
+-#  if !defined(ALIGNED)
+-#    define ALIGNED
+-#  endif
+-
++#if !defined(__AROS__) && !defined(__MORPHOS__) && !defined(SIPTR)
++  #define SIPTR LONG
+ #endif
+-
+-#if defined(__AROS__)
+-   /* Platforms which need HookEntry from amiga.lib */
+-   //#  define SETHOOK(hookname, funcname) hookname.h_Entry = HookEntry; hookname.h_SubEntry = (HOOKFUNC)funcname
+-   // FIXME for now we set funcname to h_Entry. This must later be changed to h_SubEntry (uncomment
+-   // the line above)
+-#  define SETHOOK(hookname, funcname) hookname.h_Entry = (HOOKFUNC)funcname;
+-
+-#  define SETDISPATCHER(classname, funcname) classname->cl_Dispatcher.h_Entry = HookEntry; \
+-   classname->cl_Dispatcher.h_SubEntry = (HOOKFUNC)funcname
+-#else
+-#  define SETHOOK(hookname, funcname) hookname.h_Entry = (HOOKFUNC)funcname
+-#  define SETDISPATCHER(classname, funcname) classname->cl_Dispatcher.h_Entry = (HOOKFUNC)funcname
++#if !defined(__AROS__) && !defined(STACKED)
++  #define STACKED
+ #endif
+ 
++/*************************************************************************/
++
+ #endif /* SDI_COMPILER_H */
+
+Added: trunk/include/SDI_hook.h
+===================================================================
+--- trunk/include/SDI_hook.h	                        (rev 0)
++++ trunk/include/SDI_hook.h	2010-11-20 14:45:16 UTC (rev 55)
+@@ -0,0 +1,229 @@
++#ifndef SDI_HOOK_H
++#define SDI_HOOK_H
++
++/* Includeheader
++
++        Name:           SDI_hook.h
++        Versionstring:  $VER: SDI_hook.h 1.23 (12.08.2010)
++        Author:         SDI & Jens Langner
++        Distribution:   PD
++        Project page:   http://www.sf.net/projects/sditools/
++        Description:    defines to hide compiler specific hook stuff
++
++ 1.0   21.06.02 : based on the work made for freeciv and YAM with
++                  additional texts partly taken from YAM_hook.h changes made
++                  by Jens Langner, largely reworked the mechanism
++ 1.1   07.10.02 : added HOOKPROTONP and HOOKPROTONONP requested by Jens
++ 1.2   18.10.02 : reverted to old MorphOS-method for GCC
++ 1.3   08.02.04 : modified to get it compatible to AmigaOS4
++ 1.4   17.02.04 : modified to get compatible to latest SDI_compiler.h changes
++ 1.5   02.03.04 : added UNUSED define to OS4 hook specification so that the
++                  compiler can ignore some warnings.
++ 1.6   02.03.04 : added (APTR) casts to MorphOS prototype definition to
++                  reduce compiler warnings.
++ 1.7   04.07.04 : removed static from all DISPATCHERPROTO definitions as there
++                  may be dispatchers that are of course non static.
++ 1.8   07.04.05 : added MakeHookWithData (Sebastian Bauer)
++ 1.9   08.04.05 : changed MorphOS hooks to use HookEntry (Ilkka Lehtoranta)
++ 1.10  16.05.05 : simplified and fixed for vbcc/MorphOS (Frank Wille)
++ 1.11  17.05.05 : changed cast in DISPATCHERPROTO from (void(*)()) to APTR
++                  cause SDI version of the EmulLibEntry uses APTR for easy
++                  usage.
++                  Added #ifndef SDI_TRAP_LIB to avoid double defines when
++                  combining with SDI_interrupt.h or SDI_misc.h (Guido
++                  Mersmann)
++ 1.12  18.05.05 : DISPATCHERPROTO wasn't working, because of the missing REG_Ax
++                  definitions. Added include <emul/emulregs.h> (Guido Mersmann)
++ 1.13  11.12.05 : fixed a minor typo in the PPC HOOKPROTONP macro.
++                  (Jens Langner)
++ 1.14  20.04.06 : unified static of MorphOs with non-MorphOS vesion
++ 1.15  30.04.06 : modified to get it compatible to AROS. (Guido Mersmann)
++ 1.16  06.10.06 : added new DISPATCHER() macro and separated it from the
++                  DISPATCHERPROTO() definition. Now the DISPATCHERPROTO() should
++                  only be used to get the correct prototype and the plain
++                  DISPATCHER() for defining the dispatcher itself.
++ 1.17  14.07.08 : added "_" to all UNUSED variable specifications to make sure
++                  a user does not use those definition on accident.
++ 1.18  20.03.09 : modified macros to be somewhat more compatible for an AROS
++                  usage (Pavel Fedin)
++ 1.19  25.03.09 : fixed the DISPATCHERPROTO() macros for x86_64 AROS.
++ 1.20  26.03.09 : fixed m68k define checks.
++ 1.21  19.05.09 : added SDISPATCHER() to generate a static dispatcher.
++ 1.22  24.06.10 : fixed AROS macros (Matthias Rustler).
++ 1.23  12.08.10 : added missing proto/alib.h include for AROS
++
++*/
++
++/*
++** This is PD (Public Domain). This means you can do with it whatever you want
++** without any restrictions. I only ask you to tell me improvements, so I may
++** fix the main line of this files as well.
++**
++** To keep confusion level low: When changing this file, please note it in
++** above history list and indicate that the change was not made by myself
++** (e.g. add your name or nick name).
++**
++** Find the latest version of this file at:
++** http://cvs.sourceforge.net/viewcvs.py/sditools/sditools/headers/
++**
++** Jens Langner <Jens.Langner at light-speed.de> and
++** Dirk Stoecker <soft at dstoecker.de>
++*/
++
++#include "SDI_compiler.h"
++
++/*
++** Hook macros to handle the creation of Hooks/Dispatchers for different
++** Operating System versions.
++** Currently AmigaOS and MorphOS is supported.
++**
++** For more information about hooks see include file <utility/hooks.h> or
++** the relevant descriptions in utility.library autodocs.
++**
++** Example:
++**
++** Creates a hook with the name "TestHook" that calls a corresponding
++** function "TestFunc" that will be called with a pointer "text"
++** (in register A1) and returns a long.
++**
++** HOOKPROTONHNO(TestFunc, LONG, STRPTR text)
++** {
++**   Printf(text);
++**   return 0;
++** }
++** MakeHook(TestHook, TestFunc);
++**
++** Every function that is created with HOOKPROTO* must have a MakeHook() or
++** MakeStaticHook() to create the corresponding hook. Best is to call this
++** directly after the hook function. This is required by the GCC macros.
++**
++** The naming convention for the Hook Prototype macros is as followed:
++**
++** HOOKPROTO[NH][NO][NP]
++**           ^^  ^^  ^^
++**      NoHook   |    NoParameter
++**            NoObject
++**
++** So a plain HOOKPROTO() creates you a Hook function that requires
++** 4 parameters, the "name" of the hookfunction, the "obj" in REG_A2,
++** the "param" in REG_A1 and a "hook" in REG_A0. Usually you will always
++** use NH, as the hook structure itself is nearly never required.
++**
++** The DISPATCHERPROTO macro is for MUI dispatcher functions. It gets the
++** functionname as argument. To supply this function for use by MUI, use
++** The ENTRY macro, which also gets the function name as argument.
++*/
++
++#if defined(_M68000) || defined(__M68000) || defined(__mc68000)
++  #define HOOKPROTO(name, ret, obj, param) static SAVEDS ASM ret             \
++    name(REG(a0, struct Hook *hook), REG(a2, obj), REG(a1, param))
++  #define HOOKPROTONO(name, ret, param) static SAVEDS ASM ret                \
++    name(REG(a0, struct Hook *hook), REG(a1, param))
++  #define HOOKPROTONP(name, ret, obj) static SAVEDS ASM ret                  \
++    name(REG(a0, struct Hook *hook), REG(a2, obj))
++  #define HOOKPROTONONP(name, ret) static SAVEDS ASM ret                     \
++    name(REG(a0, struct Hook *hook))
++  #define HOOKPROTONH(name, ret, obj, param) static SAVEDS ASM ret           \
++    name(REG(a2, obj), REG(a1, param))
++  #define HOOKPROTONHNO(name, ret, param) static SAVEDS ASM ret              \
++    name(REG(a1, param))
++  #define HOOKPROTONHNP(name, ret, obj) static SAVEDS ASM ret                \
++    name(REG(a2, obj))
++  #define HOOKPROTONHNONP(name, ret) static SAVEDS ret name(void)
++#else
++  #define HOOKPROTO(name, ret, obj, param) static SAVEDS ret                 \
++    name(struct Hook *hook, obj, param)
++  #define HOOKPROTONO(name, ret, param) static SAVEDS ret                    \
++    name(struct Hook *hook, UNUSED APTR _obj, param)
++  #define HOOKPROTONP(name, ret, obj) static SAVEDS ret                      \
++    name(struct Hook *hook, obj, UNUSED APTR _param)
++  #define HOOKPROTONONP(name, ret) static SAVEDS ret                         \
++    name(struct Hook *hook, UNUSED APTR _obj, UNUSED APTR _param)
++  #define HOOKPROTONH(name, ret, obj, param) static SAVEDS ret               \
++    name(UNUSED struct Hook *_hook, obj, param)
++  #define HOOKPROTONHNO(name, ret, param) static SAVEDS ret                  \
++    name(UNUSED struct Hook *_hook, UNUSED APTR _obj, param)
++  #define HOOKPROTONHNP(name, ret, obj) static SAVEDS ret                    \
++    name(UNUSED struct Hook *_hook, obj, UNUSED APTR _param) 
++  #define HOOKPROTONHNONP(name, ret) static SAVEDS ret name(void)
++#endif
++
++#ifdef __MORPHOS__
++
++  #ifndef SDI_TRAP_LIB /* avoid defining this twice */
++    #include <proto/alib.h>
++    #include <emul/emulregs.h>
++
++    #define SDI_TRAP_LIB 0xFF00 /* SDI prefix to reduce conflicts */
++
++    struct SDI_EmulLibEntry
++    {
++      UWORD Trap;
++      UWORD pad;
++      APTR  Func;
++    };
++  #endif
++
++  #define MakeHook(hookname, funcname) struct Hook hookname = {{NULL, NULL}, \
++    (HOOKFUNC)HookEntry, (HOOKFUNC)funcname, NULL}
++  #define MakeHookWithData(hookname, funcname, data) struct Hook hookname =  \
++    {{NULL, NULL}, (HOOKFUNC)HookEntry, (HOOKFUNC)funcname, (APTR)data}
++  #define MakeStaticHook(hookname, funcname) static struct Hook hookname =   \
++    {{NULL, NULL}, (HOOKFUNC)HookEntry, (HOOKFUNC)funcname, NULL}
++  #define DISPATCHERPROTO(name) ULONG name(struct IClass * cl, Object * obj, \
++    Msg msg);                                                                \
++    extern const struct SDI_EmulLibEntry Gate_##name
++  #define DISPATCHER(name)                                                   \
++    struct IClass;                                                           \
++    ULONG name(struct IClass * cl, Object * obj, Msg msg);                   \
++    static ULONG Trampoline_##name(void) {return name((struct IClass *)      \
++    REG_A0, (Object *) REG_A2, (Msg) REG_A1);}                               \
++    const struct SDI_EmulLibEntry Gate_##name = {SDI_TRAP_LIB, 0,            \
++    (APTR) Trampoline_##name};                                               \
++    ULONG name(struct IClass * cl, Object * obj, Msg msg)
++  #define SDISPATCHER(name)                                                  \
++    struct IClass;                                                           \
++    static ULONG name(struct IClass * cl, Object * obj, Msg msg);            \
++    static ULONG Trampoline_##name(void) {return name((struct IClass *)      \
++    REG_A0, (Object *) REG_A2, (Msg) REG_A1);}                               \
++    static const struct SDI_EmulLibEntry Gate_##name = {SDI_TRAP_LIB, 0,     \
++    (APTR) Trampoline_##name};                                               \
++    static ULONG name(struct IClass * cl, Object * obj, Msg msg)
++  #define ENTRY(func) (APTR)&Gate_##func
++
++#elif __AROS__
++
++  #include <proto/alib.h>
++
++  #define MakeHook(hookname, funcname) struct Hook hookname = {{NULL, NULL}, \
++    (HOOKFUNC)HookEntry, (HOOKFUNC)funcname, NULL}
++  #define MakeHookWithData(hookname, funcname, data) struct Hook hookname =  \
++    {{NULL, NULL}, (HOOKFUNC)HookEntry, (HOOKFUNC)funcname, (APTR)data}
++  #define MakeStaticHook(hookname, funcname) static struct Hook hookname =   \
++    {{NULL, NULL}, (HOOKFUNC)HookEntry, (HOOKFUNC)funcname, NULL}
++  #define ENTRY(func) (APTR)func
++  #define DISPATCHERPROTO(name) SAVEDS ASM IPTR name(REG(a0,                 \
++    struct IClass * cl), REG(a2, Object * obj), REG(a1, Msg msg))
++  #define DISPATCHER(name) DISPATCHERPROTO(name)
++  #define SDISPATCHER(name) static DISPATCHERPROTO(name)
++
++#else /* !__MORPHOS__ && !__AROS__*/
++
++  #define MakeHook(hookname, funcname) struct Hook hookname = {{NULL, NULL}, \
++    (HOOKFUNC)funcname, NULL, NULL}
++  #define MakeHookWithData(hookname, funcname, data) struct Hook hookname =  \
++    {{NULL, NULL}, (HOOKFUNC)funcname, NULL, (APTR)data}
++  #define MakeStaticHook(hookname, funcname) static struct Hook hookname =   \
++    {{NULL, NULL}, (HOOKFUNC)funcname, NULL, NULL}
++  #define ENTRY(func) (APTR)func
++  #define DISPATCHERPROTO(name) SAVEDS ASM IPTR name(REG(a0,                 \
++    struct IClass * cl), REG(a2, Object * obj), REG(a1, Msg msg))
++  #define DISPATCHER(name) DISPATCHERPROTO(name)
++  #define SDISPATCHER(name) static DISPATCHERPROTO(name)
++
++#endif
++
++#define InitHook(hook, orighook, data) ((hook)->h_Entry = (orighook).h_Entry,\
++  (hook)->h_SubEntry = (orighook).h_SubEntry,(hook)->h_Data = (APTR)(data))
++
++#endif /* SDI_HOOK_H */
+
+
+Property changes on: trunk/include/SDI_hook.h
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + LF
+
+Added: trunk/include/SDI_interrupt.h
+===================================================================
+--- trunk/include/SDI_interrupt.h	                        (rev 0)
++++ trunk/include/SDI_interrupt.h	2010-11-20 14:45:16 UTC (rev 55)
+@@ -0,0 +1,154 @@
++#ifndef SDI_INTERRUPT_H
++#define SDI_INTERRUPT_H
++
++/* Includeheader
++
++        Name:           SDI_interrupt.h
++        Versionstring:  $VER: SDI_interrupt.h 1.1 (25.04.2006)
++        Author:         Guido Mersmann
++        Distribution:   PD
++        Project page:   http://www.sf.net/projects/sditools/
++        Description:    defines to hide compiler specific interrupt and
++                        handler stuff
++
++ 1.0   17.05.05 : inspired by the SDI_#?.h files made by Jens Langner
++                  and Dirk St?cker I created files to handle interrupt
++                  and handler functions in an API compatible way.
++ 1.1   25.04.06 : fixed MakeInterrupt() and MakeHandler() macro. (geit)
++
++*/
++
++/*
++** This is PD (Public Domain). This means you can do with it whatever you want
++** without any restrictions. I only ask you to tell me improvements, so I may
++** fix the main line of this files as well.
++**
++** To keep confusion level low: When changing this file, please note it in
++** above history list and indicate that the change was not made by myself
++** (e.g. add your name or nick name).
++**
++** Find the latest version of this file at:
++** http://cvs.sourceforge.net/viewcvs.py/sditools/sditools/headers/
++**
++** Guido Mersmann <geit at gmx.de>
++**
++*/
++
++#include "SDI_compiler.h"
++
++/*
++** The INTERRUPTPROTO macro is for creating interrupts functions and the
++** HANDLERPROTO macro is for handler type setup like used by the
++** input.device.
++**
++** The usage is simular to the DISPATCHERPROTO macro provided by SDI_hook.h.
++**
++** It gets the function name as argument. To supply this function for use by
++** an interrupt structure or handler argument, use the ENTRY macro, which also
++** gets the function name as argument. There is also a MakeInterrupt and a
++** MakeHandler macro for easy structure setup.
++**
++** Example:
++**
++** We create a handler function for the input.device.
++**
++** HANDLERPROTO( handlerfunc, ULONG, struct InputEvent *inputevent, APTR userdata)
++** {
++** ... Modify/parse input stream here
++** ...
++** return( (ULONG) inputevent );
++** }
++** MakeHandler( handlerstruct, handlerfunc, "TestHandler", &our_user_data);
++**
++** As you can see usage is as simple as using SDI hooks. To create interrupt
++** use INTERRUPTPROTO and MakeInterrupt. Internally both macros are identically.
++**
++** There are also functions to create more specific interrupt and handler
++** structures. By default type is NT_INTERRUPT and priority is 0.
++**
++** MakeHandlerType     - additional argument for type
++** MakeHandlerPri      - additional argument for pri
++** MakeHandlerTypePri  - additional arguments for type and pri
++**
++**
++** Notes: Since the interrupt structure is used for handlers and also foreign
++**        handlers are using this structure I keeped the arguments definition
++**        on the user side.
++**
++*/
++
++#ifdef __MORPHOS__
++
++#ifndef SDI_TRAP_LIB /* avoid defining this twice */
++
++  #include <proto/alib.h>
++  #include <emul/emulregs.h>
++
++  #define SDI_TRAP_LIB 0xFF00 /* SDI prefix to reduce conflicts */
++
++  struct SDI_EmulLibEntry
++  {
++    UWORD Trap;
++    UWORD pad;
++    APTR  Func;
++  };
++#endif
++
++  #define INTERRUPTPROTO(name, ret, obj, data)                               \
++    SAVEDS ASM ret name( obj, data);                                         \
++    static ret Trampoline_##name(void) {return name(( obj) REG_A0,           \
++    (data) REG_A1);}                                                         \
++    static const struct SDI_EmulLibEntry Gate_##name = {SDI_TRAP_LIB, 0,     \
++    (APTR) Trampoline_##name};                                               \
++    SAVEDS ASM ret name( obj, data)
++
++  #define HANDLERPROTO(name, ret, obj, data)                                 \
++    SAVEDS ASM ret name( obj, data);                                         \
++    static ret Trampoline_##name(void) {return name(( obj) REG_A0,           \
++    (data) REG_A1);}                                                         \
++    static const struct SDI_EmulLibEntry Gate_##name = {SDI_TRAP_LIB, 0,     \
++    (APTR) Trampoline_##name};                                               \
++    SAVEDS ASM ret name( obj, data)
++
++  #define ENTRY(func) (APTR)&Gate_##func
++
++#else
++
++  #define INTERRUPTPROTO(name, ret, obj, data)                               \
++    SAVEDS ASM ret name(REG(a0, obj), REG(a1, data))
++  #define HANDLERPROTO(name, ret, obj, data)                                 \
++    SAVEDS ASM ret name(REG(a0, obj), REG(a1, data))
++
++  #define ENTRY(func) (APTR)func
++
++#endif /* __MORPHOS__ */
++
++/* some structure creating macros for easy and more specific usage */
++
++#define MakeInterrupt( name, func, title, isdata ) \
++  static struct Interrupt name = {{ NULL, NULL, NT_INTERRUPT, 0, (STRPTR) title}, (APTR) isdata, (void (*)()) ENTRY(func) }
++
++#define MakeInterruptPri( name, func, title, isdata, pri ) \
++  static struct Interrupt name = {{ NULL, NULL, NT_INTERRUPT, pri, (STRPTR) title}, (APTR) isdata, (void (*)()) ENTRY(func) }
++
++#define MakeInterruptType( name, func, title, isdata, type ) \
++  static struct Interrupt name = {{ NULL, NULL, type, 0, (STRPTR) title}, (APTR) isdata, (void (*)()) ENTRY(func) }
++
++#define MakeInterruptTypePri( name, func, title, isdata, type, pri ) \
++  static struct Interrupt name = {{ NULL, NULL, type, pri, (STRPTR) title}, (APTR) isdata, (void (*)()) ENTRY(func) }
++
++#define MakeHandler( name, func, title, isdata ) \
++  static struct Interrupt name = {{ NULL, NULL, NT_INTERRUPT, 0, (STRPTR) title}, (APTR) isdata, (void (*)()) ENTRY(func) }
++
++#define MakeHandlerPri( name, func, title, isdata, pri ) \
++  static struct Interrupt name = {{ NULL, NULL, NT_INTERRUPT, pri, (STRPTR) title}, (APTR) isdata, (void (*)()) ENTRY(func) }
++
++#define MakeHandlerType( name, func, title, isdata, type ) \
++  static struct Interrupt name = {{ NULL, NULL, type, 0, (STRPTR) title}, (APTR) isdata, (void (*)()) ENTRY(func) }
++
++#define MakeHandlerTypePri( name, func, title, isdata, type, pri ) \
++  static struct Interrupt name = {{ NULL, NULL, type, pri, (STRPTR) title}, (APTR) isdata, (void (*)()) ENTRY(func) }
++
++
++#endif /* SDI_INTERRUPT_H */
++
+
+
+Property changes on: trunk/include/SDI_interrupt.h
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + LF
+
+Added: trunk/include/SDI_lib.h
+===================================================================
+--- trunk/include/SDI_lib.h	                        (rev 0)
++++ trunk/include/SDI_lib.h	2010-11-20 14:45:16 UTC (rev 55)
+@@ -0,0 +1,205 @@
++#ifndef SDI_LIB_H
++#define SDI_LIB_H
++
++/* Includeheader
++
++        Name:           SDI_lib.h
++        Versionstring:  $VER: SDI_lib.h 1.9 (15.03.2009)
++        Author:         Jens Langner
++        Distribution:   PD
++        Project page:   http://www.sf.net/projects/sditools/
++        Description:    defines to hide OS specific library function definitions
++
++ 1.0   09.05.04 : initial version which allows to hide OS specific shared
++                  library function definition like it has been introduced with
++                  the new interface based library system in AmigaOS4.
++ 1.1   13.05.04 : replaced the LIBENTRY() macro with some more sophisticated
++                  LFUNC_ macros which allow to maintain varargs library functions
++                  in a much easier manner.
++ 1.2   22.05.04 : removed the anyway not required SAVEDS and ASM statements
++                  from the LIBFUNC macro for OS4. Also removed the LIBFUNC
++                  statement in the 68k LIBPROTOVA() macro so that no registers
++                  can be used in there (which should be the default).
++ 1.3   04.07.04 : added empty LIBFUNC define for MorphOS which was missing.
++ 1.4   05.10.04 : added missing LIBFUNC call to OS3/MOS interface
++ 1.5   19.05.05 : fixed some documentation glitches (Guido Mersmann)
++ 1.6   08.06.05 : swapped LIBFUNC and ret within the prototype, because
++                  c standard says attributes first and vbcc want them like
++                  this. (Guido Mersmann)
++                  changed the documentation to explain that LIBFUNC must be
++                  set first. (Guido Mersmann)
++ 1.7   11.12.05 : adapted all macros to be somewhat more compatible to also
++                  OS3 and MorphOS. Now in the real use case (codesets.library)
++                  it required a fundamental rework of the macros. (Jens Langner)
++ 1.8   28.02.06 : removed "##" in front of the OS3 __VARARGS__ usage as they
++                  causing errors on GCC >= 3.x.
++ 1.9   15.03.09 : fixed some missing function prototype in LIBPROTOVA()
++ 1.10  30.04.09 : added approriate LIBPROTOVA() definition for OS3 and MorphOS
++                  to at least make the functions known. The same pattern as for
++                  LIBSTUBVA() will be used now (Thore B?ckelmann)
++ 1.11  04.05.09 : reverted the faulty LIBPROTOVA() definition to its previous
++                  version (Thore B?ckelmann)
++
++*/
++
++/*
++** This is PD (Public Domain). This means you can do with it whatever you want
++** without any restrictions. I only ask you to tell me improvements, so I may
++** fix the main line of this files as well.
++**
++** To keep confusion level low: When changing this file, please note it in
++** above history list and indicate that the change was not made by myself
++** (e.g. add your name or nick name).
++**
++** Find the latest version of this file at:
++** http://cvs.sourceforge.net/viewcvs.py/sditools/sditools/headers/
++**
++** Jens Langner <Jens.Langner at light-speed.de> and
++** Dirk St?cker <soft at dstoecker.de>
++*/
++
++#include "SDI_compiler.h"
++
++/*
++** Library function macros to handle the definition/usage for different
++** Operating System versions.
++** Currently special library function handling for AmigaOS version 4 is
++** supported
++**
++** Example:
++**
++** Defines a library jump function "TestFunc" with a ULONG return value and
++** which is called by the corresponding library vector of a shared library.
++**
++** LIBFUNC ULONG TestFunc(REG(d0, text))
++** {
++**   Printf(text);
++**   return 0;
++** }
++**
++** Please note the use of the LIBFUNC macro which defines this function
++** automatically as a function which is directly called from within a shared
++** library. Since this macro contains compiler attributes it must be
++** called first, even if some compiler allow attributes and result type
++** mixed, other do not and we want to keep the stuff compiler independent.
++**
++** If you now require to have some OS/compiler independent prototype
++** definition please use the following statement:
++**
++** LIBPROTO(TestFunc, ULONG, REG(d0, text));
++**
++** This will ensure that you get a proper prototype for the same function
++** where this macro will automatically take care that a libstub_* stub
++** will also automatically defines as required if you are generating a
++** OS4 shared library which should also be backward compatible to OS3.
++**
++** So if you then want to add this function to a library interface please
++** use the LFUNC_* macros to generate your library function vector
++** like this example one:
++**
++** #define libvector LFUNC_FAS(SomeFunc)    \
++**                   LFUNC_FA_(TestFunc)    \
++**                   LFUNC_VA_(VarargsFunc)
++**
++** This way you can then easily put the "libvector" define in your real
++** library function vector of your shared library instead of having to
++** specify each function with surrounded "#ifdef" defines. These macros
++** will then also take automatically care that the varargs functions
++** will only be specified on OS versions where these functions are now
++** real functions (like with OS4)
++**
++** Such stub functions can then also be easily specified as followed
++** (in analogy to the above example)
++**
++** LIBPROTO(TestFunc, ULONG, REG(d0, text))
++** {
++**   return TestFunc(text);
++** }
++**
++** On AmigaOS4 using this mechanism for the definition of the library functions
+
+[... truncated: 348 lines follow ...]
+
+
+From marust at mail.berlios.de  Sun Nov 21 19:20:00 2010
+From: marust at mail.berlios.de (marust at mail.berlios.de)
+Date: Sun, 21 Nov 2010 19:20:00 +0100 (CET)
+Subject: [Ignition-commits] r56 - trunk/libs/scroller
+Message-ID: <20101121182000.B6696480C8F@sheep.berlios.de>
+
+Author: marust
+Date: 2010-11-21 19:20:00 +0100 (Sun, 21 Nov 2010)
+New Revision: 56
+ViewCVS: http://svn.berlios.de/viewcvs/ignition?rev=56&view=rev
+
+Removed:
+   trunk/libs/scroller/SMakefile
+   trunk/libs/scroller/Scroller_lib_aros.c
+   trunk/libs/scroller/Scroller_rev.i
+   trunk/libs/scroller/Scroller_romtag.asm
+   trunk/libs/scroller/mmakefile.src
+   trunk/libs/scroller/pScroller.conf
+Modified:
+   trunk/libs/scroller/Scroller_includes.h
+   trunk/libs/scroller/Scroller_lib.c
+Log:
+Attempt to build pScroller.gadget with a normal Makefile.
+
+
+Modified: trunk/libs/scroller/Scroller_includes.h
+===================================================================
+--- trunk/libs/scroller/Scroller_includes.h	2010-11-20 14:45:16 UTC (rev 55)
++++ trunk/libs/scroller/Scroller_includes.h	2010-11-21 18:20:00 UTC (rev 56)
+@@ -18,6 +18,7 @@
+ #endif
+ 
+ #include "SDI_compiler.h"
++#include "compatibility.h"
+ 
+ #include <exec/execbase.h>
+ #include <exec/libraries.h>
+@@ -25,6 +26,7 @@
+ #include <exec/lists.h>
+ #include <exec/ports.h>
+ #include <exec/memory.h>
++#include <exec/resident.h>
+ #include <devices/input.h>
+ #include <intuition/intuition.h>
+ #include <intuition/gadgetclass.h>
+
+Modified: trunk/libs/scroller/Scroller_lib.c
+===================================================================
+--- trunk/libs/scroller/Scroller_lib.c	2010-11-20 14:45:16 UTC (rev 55)
++++ trunk/libs/scroller/Scroller_lib.c	2010-11-21 18:20:00 UTC (rev 56)
+@@ -8,14 +8,65 @@
+ 
+ #include "Scroller_includes.h"
+ 
++#define VERSION (0)
++#define REVISION (1)
++#define LIBNAME "pScroller.gadget"
++#define VSTRING "pScroller.gadget 0.2 (23.9.2000)"
++#define VERSTAG "$VER: pScroller.gadget 0.2 (23.9.2000)"
+ 
+-struct Library * PUBLIC LibInit(REG(a0, BPTR Segment),REG(d0, struct ClassBase *cb),REG(a6, struct ExecBase *ExecBase);
++
++struct Library * PUBLIC LibInit(REG(a0, BPTR Segment),REG(d0, struct ClassBase *cb),REG(a6, struct ExecBase *ExecBase));
+ struct Library * PUBLIC LibOpen(REG(a6, struct ClassBase *cb));
+ BPTR PUBLIC LibExpunge(REG(a6, struct ClassBase *cb));
+ BPTR PUBLIC LibClose(REG(a6, struct ClassBase *cb));
+ LONG PUBLIC LibNull(REG(a6, struct ClassBase *cb));
+ 
+ 
++static APTR LibVectors[] =
++{
++	LibOpen,
++	LibClose,
++	LibExpunge,
++	LibNull,
++
++	GetClass,
++
++	(APTR)-1
++};
++
++
++static struct
++{
++	ULONG DataSize;
++	APTR Table;
++	APTR Data;
++	struct Library * (*Init)();
++} LibInitTab =
++{
++	sizeof(struct ClassBase),
++	LibVectors,
++	NULL,
++	LibInit
++};
++
++
++static const USED_VAR struct Resident ROMTag =
++{
++	RTC_MATCHWORD,
++	(struct Resident *)&ROMTag,
++	(struct Resident *)(&ROMTag + 1),
++	RTF_AUTOINIT|RTF_EXTENDED,
++	VERSION,
++	NT_LIBRARY,
++	0,
++	(char *)LIBNAME,
++	(char *)VSTRING,
++	&LibInitTab,
++	REVISION,
++	0
++};
++
++
+ void PRIVATE SC_Exit(struct ClassBase *cb)
+ {
+   if (FreeClass(cb->cb_ScrollerClass))
+@@ -31,15 +82,15 @@
+ 
+ int PRIVATE SC_Init(struct ClassBase *cb)
+ {
+-  if (cb->cb_IntuitionBase = OpenLibrary("intuition.library",37))
++  if ((cb->cb_IntuitionBase = OpenLibrary("intuition.library",37)) != NULL)
+   {
+-    if (cb->cb_GfxBase = (APTR)OpenLibrary("graphics.library",37))
++    if ((cb->cb_GfxBase = (APTR)OpenLibrary("graphics.library",37)) != NULL)
+     {
+-      if (cb->cb_UtilityBase = OpenLibrary("utility.library",37))
++      if ((cb->cb_UtilityBase = OpenLibrary("utility.library",37)) != NULL)
+       {
+         Class *cl;
+ 
+-        if (cl = MakeClass("pinc-scrollergadget","propgclass",NULL,sizeof(struct ScrollerGData),0))
++        if ((cl = MakeClass("pinc-scrollergadget","propgclass",NULL,sizeof(struct ScrollerGData),0)) != NULL)
+         {
+           cl->cl_Dispatcher.h_Entry = (APTR)DispatchScrollerGadget;
+           cl->cl_Dispatcher.h_Data = cb;
+@@ -48,7 +99,7 @@
+ 
+           cb->cb_ScrollerClass = cl;
+ 
+-          if (cl = MakeClass("pinc-arrowimage","imageclass",NULL,sizeof(struct ArrowIData),0))
++          if ((cl = MakeClass("pinc-arrowimage","imageclass",NULL,sizeof(struct ArrowIData),0)) != NULL)
+           {
+             cl->cl_Dispatcher.h_Entry = (APTR)DispatchArrowImage;
+             cl->cl_Dispatcher.h_Data = cb;
+@@ -76,41 +127,17 @@
+ }
+ 
+ 
+-STATIC APTR LibVectors[] =
+-{
+-  LibOpen,
+-  LibClose,
+-  LibExpunge,
+-  LibNull,
+-
+-  GetClass,
+-
+-  (APTR)-1
+-};
+-
+-extern UBYTE __far LibName[], LibID[];
+-extern LONG __far LibVersion, LibRevision;
+-
+-struct { ULONG DataSize; APTR Table; APTR Data; struct Library * (*Init)(); } __aligned LibInitTab =
+-{
+-  sizeof(struct ClassBase),
+-  LibVectors,
+-  NULL,
+-  LibInit
+-};
+-
+-
+ struct Library * PUBLIC LibInit(REG(a0, BPTR segment),REG(d0, struct ClassBase *cb),REG(a6, struct ExecBase *ExecBase))
+ {
+   if(ExecBase->LibNode.lib_Version < 37)
+     return(NULL);
+ 
+   cb->cb_LibNode.lib_Node.ln_Type = NT_LIBRARY;
+-  cb->cb_LibNode.lib_Node.ln_Name = LibName;
++  cb->cb_LibNode.lib_Node.ln_Name = LIBNAME;
+   cb->cb_LibNode.lib_Flags        = LIBF_CHANGED | LIBF_SUMUSED;
+-  cb->cb_LibNode.lib_Version      = LibVersion;
+-  cb->cb_LibNode.lib_Revision     = LibRevision;
+-  cb->cb_LibNode.lib_IdString     = (APTR)LibID;
++  cb->cb_LibNode.lib_Version      = VERSION;
++  cb->cb_LibNode.lib_Revision     = REVISION;
++  cb->cb_LibNode.lib_IdString     = VSTRING;
+   cb->cb_LibSegment = segment;
+   cb->cb_SysBase = ExecBase;
+ 
+@@ -181,5 +208,5 @@
+ 
+ LONG PUBLIC LibNull(REG(a6, struct ClassBase *cb))
+ {
+-  return(NULL);
++	return 0;
+ }
+
+
+
+From marust at mail.berlios.de  Sun Nov 21 19:27:36 2010
+From: marust at mail.berlios.de (marust at mail.berlios.de)
+Date: Sun, 21 Nov 2010 19:27:36 +0100 (CET)
+Subject: [Ignition-commits] r57 - trunk/libs/scroller
+Message-ID: <20101121182737.1CB2F480EC6@sheep.berlios.de>
+
+Author: marust
+Date: 2010-11-21 19:27:36 +0100 (Sun, 21 Nov 2010)
+New Revision: 57
+ViewCVS: http://svn.berlios.de/viewcvs/ignition?rev=57&view=rev
+
+Added:
+   trunk/libs/scroller/Makefile
+Log:
+Forgot to commit the Makefile
+
+
+Added: trunk/libs/scroller/Makefile
+===================================================================
+--- trunk/libs/scroller/Makefile	                        (rev 0)
++++ trunk/libs/scroller/Makefile	2010-11-21 18:27:36 UTC (rev 57)
+@@ -0,0 +1,27 @@
++CC=i386-aros-gcc
++CFLAGS=-Wall -Wno-pointer-sign -I../../include -Iinclude
++LDFLAGS=-lgraphics -lintuition -lutility -lrom -nostartfiles -auto
++
++EXE = ../pScroller.gadget
++
++OBJS = Scroller_lib.o Scroller.o
++
++.PHONY: all
++all : $(EXE)
++
++$(EXE) : $(OBJS)
++	$(CC) -o $@ $(OBJS) $(LDFLAGS)
++
++.PHONY: clean
++clean :
++	rm -f $(OBJS) $(EXE)
++
++.PHONY: distclean
++distclean : clean
++
++
++Scroller_lib.o: Scroller_lib.c Scroller_includes.h \
++  ../../include/SDI_compiler.h ../../include/compatibility.h \
++  include/gadgets/Scroller.h
++Scroller.o: Scroller.c Scroller_includes.h ../../include/SDI_compiler.h \
++  ../../include/compatibility.h include/gadgets/Scroller.h
+
+
+Property changes on: trunk/libs/scroller/Makefile
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + LF
+
+
+
+From marust at mail.berlios.de  Sun Nov 21 19:34:25 2010
+From: marust at mail.berlios.de (marust at mail.berlios.de)
+Date: Sun, 21 Nov 2010 19:34:25 +0100 (CET)
+Subject: [Ignition-commits] r58 - trunk/libs/scroller
+Message-ID: <20101121183425.D5A4F480EC6@sheep.berlios.de>
+
+Author: marust
+Date: 2010-11-21 19:34:25 +0100 (Sun, 21 Nov 2010)
+New Revision: 58
+ViewCVS: http://svn.berlios.de/viewcvs/ignition?rev=58&view=rev
+
+Modified:
+   trunk/libs/scroller/Makefile
+Log:
+Removed useless flag.
+
+
+Modified: trunk/libs/scroller/Makefile
+===================================================================
+--- trunk/libs/scroller/Makefile	2010-11-21 18:27:36 UTC (rev 57)
++++ trunk/libs/scroller/Makefile	2010-11-21 18:34:25 UTC (rev 58)
+@@ -1,6 +1,6 @@
+ CC=i386-aros-gcc
+ CFLAGS=-Wall -Wno-pointer-sign -I../../include -Iinclude
+-LDFLAGS=-lgraphics -lintuition -lutility -lrom -nostartfiles -auto
++LDFLAGS=-lgraphics -lintuition -lutility -lrom -nostartfiles
+ 
+ EXE = ../pScroller.gadget
+ 
+
+
+
+From marust at mail.berlios.de  Sun Nov 21 23:07:06 2010
+From: marust at mail.berlios.de (marust at mail.berlios.de)
+Date: Sun, 21 Nov 2010 23:07:06 +0100 (CET)
+Subject: [Ignition-commits] r59 - trunk/libs/scroller
+Message-ID: <20101121220706.8D788480F2F@sheep.berlios.de>
+
+Author: marust
+Date: 2010-11-21 23:07:06 +0100 (Sun, 21 Nov 2010)
+New Revision: 59
+ViewCVS: http://svn.berlios.de/viewcvs/ignition?rev=59&view=rev
+
+Modified:
+   trunk/libs/scroller/Makefile
+   trunk/libs/scroller/Scroller.c
+   trunk/libs/scroller/Scroller_includes.h
+   trunk/libs/scroller/Scroller_lib.c
+Log:
+Finally made it linking.
+
+
+Modified: trunk/libs/scroller/Makefile
+===================================================================
+--- trunk/libs/scroller/Makefile	2010-11-21 18:34:25 UTC (rev 58)
++++ trunk/libs/scroller/Makefile	2010-11-21 22:07:06 UTC (rev 59)
+@@ -1,7 +1,11 @@
+-CC=i386-aros-gcc
+-CFLAGS=-Wall -Wno-pointer-sign -I../../include -Iinclude
+-LDFLAGS=-lgraphics -lintuition -lutility -lrom -nostartfiles
++# Copyright ?1999-2010 pinc Software. All Rights Reserved.
++# Licensed under the terms of the MIT License.
+ 
++CC = i386-aros-gcc
++CFLAGS = -Wall -Wno-pointer-sign -I../../include -Iinclude \
++	-D__GRAPHICS_NOLIBBASE__ -D__INTUITION_NOLIBBASE__ -D__UTILITY_NOLIBBASE__
++LDFLAGS = -lrom -nostartfiles
++
+ EXE = ../pScroller.gadget
+ 
+ OBJS = Scroller_lib.o Scroller.o
+
+Modified: trunk/libs/scroller/Scroller.c
+===================================================================
+--- trunk/libs/scroller/Scroller.c	2010-11-21 18:34:25 UTC (rev 58)
++++ trunk/libs/scroller/Scroller.c	2010-11-21 22:07:06 UTC (rev 59)
+@@ -1,5 +1,5 @@
+ /*
+- * Copyright ?1999-2008 pinc Software. All Rights Reserved.
++ * Copyright ?1999-2010 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the MIT License.
+  */
+ 
+
+Modified: trunk/libs/scroller/Scroller_includes.h
+===================================================================
+--- trunk/libs/scroller/Scroller_includes.h	2010-11-21 18:34:25 UTC (rev 58)
++++ trunk/libs/scroller/Scroller_includes.h	2010-11-21 22:07:06 UTC (rev 59)
+@@ -1,5 +1,5 @@
+ /*
+- * Copyright ?1999-2008 pinc Software. All Rights Reserved.
++ * Copyright ?1999-2010 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the MIT License.
+  */
+ #ifndef SCROLLER_INCLUDES_H
+@@ -8,15 +8,6 @@
+ 
+ #define INTUI_V36_NAMES_ONLY
+ 
+-#if defined(__SASC)
+-#	define __USE_SYSBASE
+-
+-#	define SysBase cb->cb_SysBase
+-#	define IntuitionBase cb->cb_IntuitionBase
+-#	define GfxBase cb->cb_GfxBase
+-#	define UtilityBase cb->cb_UtilityBase
+-#endif
+-
+ #include "SDI_compiler.h"
+ #include "compatibility.h"
+ 
+@@ -42,18 +33,19 @@
+ #include <proto/graphics.h>
+ #include <proto/utility.h>
+ 
+-#if defined(__SASC)
+-#	include <pragmas/exec_pragmas.h>
+-#	include <pragmas/intuition_pragmas.h>
+-#	include <pragmas/graphics_pragmas.h>
+-#	include <pragmas/utility_pragmas.h>
+-#endif
+-
+ #include <stdlib.h>
+ #include <ctype.h>
+ #include <string.h>
+ #include <math.h>
+ 
++#if !defined(__AROS__)
++// AROS gets SysBase from the linker.
++#define SysBase cb->cb_SysBase
++#endif
++#define IntuitionBase cb->cb_IntuitionBase
++#define GfxBase cb->cb_GfxBase
++#define UtilityBase cb->cb_UtilityBase
++
+ #define ID_FTXT  MAKE_ID('F','T','X','T')
+ #define ID_CHRS  MAKE_ID('C','H','R','S')
+ 
+
+Modified: trunk/libs/scroller/Scroller_lib.c
+===================================================================
+--- trunk/libs/scroller/Scroller_lib.c	2010-11-21 18:34:25 UTC (rev 58)
++++ trunk/libs/scroller/Scroller_lib.c	2010-11-21 22:07:06 UTC (rev 59)
+@@ -1,5 +1,5 @@
+ /*
+- * Copyright ?1999-2008 pinc Software. All Rights Reserved.
++ * Copyright ?1999-2010 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the MIT License.
+  */
+ 
+@@ -9,7 +9,7 @@
+ #include "Scroller_includes.h"
+ 
+ #define VERSION (0)
+-#define REVISION (1)
++#define REVISION (2)
+ #define LIBNAME "pScroller.gadget"
+ #define VSTRING "pScroller.gadget 0.2 (23.9.2000)"
+ #define VERSTAG "$VER: pScroller.gadget 0.2 (23.9.2000)"
+
+
+
+From axeld at pinc-software.de  Mon Nov 22 18:55:53 2010
+From: axeld at pinc-software.de (Axel =?windows-1252?q?D=F6rfler?=)
+Date: Mon, 22 Nov 2010 18:55:53 +0100
+Subject: [Ignition-commits] r59 - trunk/libs/scroller
+In-Reply-To: <20101121220706.8D788480F2F@sheep.berlios.de>
+Message-ID: <297486891-BeMail@quad>
+
+marust at mail.berlios.de wrote:
+> Log:
+> Finally made it linking.
+
+Thanks for cleanup up, it's appreciated!
+
+Bye,
+   Axel.
+
+
+

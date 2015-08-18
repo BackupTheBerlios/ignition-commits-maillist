@@ -1,0 +1,87 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r38 - trunk/add-ons
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2009-January/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r38%20-%20trunk/add-ons&In-Reply-To=%3C200901231750.n0NHoQss023626%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000056.html">
+   <LINK REL="Next"  HREF="000058.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r38 - trunk/add-ons</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r38%20-%20trunk/add-ons&In-Reply-To=%3C200901231750.n0NHoQss023626%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r38 - trunk/add-ons">marust at mail.berlios.de
+       </A><BR>
+    <I>Fri Jan 23 18:50:26 CET 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000056.html">[Ignition-commits] r37 - in trunk: . lib/safeclip libs/textedit	libs/textedit/include/gadgets
+</A></li>
+        <LI>Next message: <A HREF="000058.html">[Ignition-commits] r39 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#57">[ date ]</a>
+              <a href="thread.html#57">[ thread ]</a>
+              <a href="subject.html#57">[ subject ]</a>
+              <a href="author.html#57">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2009-01-23 18:50:16 +0100 (Fri, 23 Jan 2009)
+New Revision: 38
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=38&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=38&amp;view=rev</A>
+
+Modified:
+   trunk/add-ons/gclass_variadic.c
+Log:
+* Bugfix for
+  <A HREF="http://developer.berlios.de/bugs/?func=detailbug&amp;bug_id=15096&amp;group_id=8642">http://developer.berlios.de/bugs/?func=detailbug&amp;bug_id=15096&amp;group_id=8642</A>
+  (unindend recursion caused crash)
+
+Modified: trunk/add-ons/gclass_variadic.c
+===================================================================
+--- trunk/add-ons/gclass_variadic.c	2009-01-21 16:50:12 UTC (rev 37)
++++ trunk/add-ons/gclass_variadic.c	2009-01-23 17:50:16 UTC (rev 38)
+@@ -13,7 +13,7 @@
+ 
+ ULONG gDoSuperMethod(struct gClass *gc, APTR go, LONG data, ...)
+ {
+-	return gDoSuperMethod(gc, go, &amp;data);
++	return gDoSuperMethodA(gc, go, &amp;data);
+ }
+ 
+ struct FontInfo *SetFontInfo(struct FontInfo *fi, ULONG dpi, ULONG tag1, ...)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000056.html">[Ignition-commits] r37 - in trunk: . lib/safeclip libs/textedit	libs/textedit/include/gadgets
+</A></li>
+	<LI>Next message: <A HREF="000058.html">[Ignition-commits] r39 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#57">[ date ]</a>
+              <a href="thread.html#57">[ thread ]</a>
+              <a href="subject.html#57">[ subject ]</a>
+              <a href="author.html#57">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

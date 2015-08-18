@@ -1,0 +1,79 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r50 - in trunk: .	libs/gtdrag	libs/gtdrag/aros libs/gtdrag/aros/include	libs/gtdrag/aros/include/clib	libs/gtdrag/aros/include/defines	libs/gtdrag/aros/include/proto	libs/scroller libs/scroller/aros	libs/scroller/aros/include	libs/scroller/aros/include/clib	libs/scroller/aros/include/defines	libs/scroller/aros/include/proto	libs/textedit libs/textedit/aros	libs/textedit/aros/include	libs/textedit/aros/include/clib libs/textedit/aros/include/defines	libs/textedit/aros/include/proto locale
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2009-April/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r50%20-%20in%20trunk%3A%20.%0A%09libs/gtdrag%09libs/gtdrag/aros%20libs/gtdrag/aros/include%0A%09libs/gtdrag/aros/include/clib%09libs/gtdrag/aros/include/defines%0A%09libs/gtdrag/aros/include/proto%09libs/scroller%20libs/scroller/aros%0A%09libs/scroller/aros/include%09libs/scroller/aros/include/clib%0A%09libs/scroller/aros/include/defines%09libs/scroller/aros/include/proto%0A%09libs/textedit%20libs/textedit/aros%09libs/textedit/aros/include%0A%09libs/textedit/aros/include/clib%20libs/textedit/aros/include/defines%0A%09libs/textedit/aros/include/proto%20locale&In-Reply-To=%3C1240426285.8187.2.camel%40bellodello%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000078.html">
+   <LINK REL="Next"  HREF="000081.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r50 - in trunk: .	libs/gtdrag	libs/gtdrag/aros libs/gtdrag/aros/include	libs/gtdrag/aros/include/clib	libs/gtdrag/aros/include/defines	libs/gtdrag/aros/include/proto	libs/scroller libs/scroller/aros	libs/scroller/aros/include	libs/scroller/aros/include/clib	libs/scroller/aros/include/defines	libs/scroller/aros/include/proto	libs/textedit libs/textedit/aros	libs/textedit/aros/include	libs/textedit/aros/include/clib libs/textedit/aros/include/defines	libs/textedit/aros/include/proto locale</H1>
+    <B>Matthias Rustler</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r50%20-%20in%20trunk%3A%20.%0A%09libs/gtdrag%09libs/gtdrag/aros%20libs/gtdrag/aros/include%0A%09libs/gtdrag/aros/include/clib%09libs/gtdrag/aros/include/defines%0A%09libs/gtdrag/aros/include/proto%09libs/scroller%20libs/scroller/aros%0A%09libs/scroller/aros/include%09libs/scroller/aros/include/clib%0A%09libs/scroller/aros/include/defines%09libs/scroller/aros/include/proto%0A%09libs/textedit%20libs/textedit/aros%09libs/textedit/aros/include%0A%09libs/textedit/aros/include/clib%20libs/textedit/aros/include/defines%0A%09libs/textedit/aros/include/proto%20locale&In-Reply-To=%3C1240426285.8187.2.camel%40bellodello%3E"
+       TITLE="[Ignition-commits] r50 - in trunk: .	libs/gtdrag	libs/gtdrag/aros libs/gtdrag/aros/include	libs/gtdrag/aros/include/clib	libs/gtdrag/aros/include/defines	libs/gtdrag/aros/include/proto	libs/scroller libs/scroller/aros	libs/scroller/aros/include	libs/scroller/aros/include/clib	libs/scroller/aros/include/defines	libs/scroller/aros/include/proto	libs/textedit libs/textedit/aros	libs/textedit/aros/include	libs/textedit/aros/include/clib libs/textedit/aros/include/defines	libs/textedit/aros/include/proto locale">mrustler at gmx.de
+       </A><BR>
+    <I>Wed Apr 22 20:51:25 CEST 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000078.html">[Ignition-commits] r50 - in trunk: . libs/gtdrag libs/gtdrag/aros libs/gtdrag/aros/include libs/gtdrag/aros/include/clib libs/gtdrag/aros/include/defines libs/gtdrag/aros/include/proto libs/scroller libs/scroller/aros libs/scroller/aros/include libs/scroller/aros/include/clib  libs/scroller/aros/include/defines libs/scroller/aros/include/proto libs/textedit libs/textedit/aros libs/textedit/aros/include libs/textedit/aros/include/clib  libs/textedit/aros/include/defines libs/textedit/aros/include/proto locale
+</A></li>
+        <LI>Next message: <A HREF="000081.html">[Ignition-commits] r50 - in trunk: . libs/gtdrag libs/gtdrag/aros libs/gtdrag/aros/include libs/gtdrag/aros/include/clib libs/gtdrag/aros/include/defines libs/gtdrag/aros/include/proto libs/scroller libs/scroller/aros libs/scroller/aros/include libs/scroller/aros/include/clib libs/scroller/aros/include/defines libs/scroller/aros/include/proto libs/textedit libs/textedit/aros libs/textedit/aros/include libs/textedit/aros/include/clib  libs/textedit/aros/include/defines libs/textedit/aros/include/proto locale
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#79">[ date ]</a>
+              <a href="thread.html#79">[ thread ]</a>
+              <a href="subject.html#79">[ subject ]</a>
+              <a href="author.html#79">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Am Mittwoch, den 22.04.2009, 11:41 +0200 schrieb Axel D&#246;rfler:
+&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/ignition-commits">marust at mail.berlios.de</A> wrote:
+</I>
+&gt;<i> &gt; * Main mmakefile.src deleted
+</I>&gt;<i> &gt; * Added C_h_orig.sd for FlexCat
+</I>&gt;<i> 
+</I>&gt;<i> I guess FlexCat is also available for AmigaOS?
+</I>
+Yes.
+<A HREF="http://aminet.net/search?query=flexcat">http://aminet.net/search?query=flexcat</A>
+
+It's Open Source btw.:
+<A HREF="https://sourceforge.net/projects/flexcat/">https://sourceforge.net/projects/flexcat/</A>
+
+Regards,
+Matthias
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000078.html">[Ignition-commits] r50 - in trunk: . libs/gtdrag libs/gtdrag/aros libs/gtdrag/aros/include libs/gtdrag/aros/include/clib libs/gtdrag/aros/include/defines libs/gtdrag/aros/include/proto libs/scroller libs/scroller/aros libs/scroller/aros/include libs/scroller/aros/include/clib  libs/scroller/aros/include/defines libs/scroller/aros/include/proto libs/textedit libs/textedit/aros libs/textedit/aros/include libs/textedit/aros/include/clib  libs/textedit/aros/include/defines libs/textedit/aros/include/proto locale
+</A></li>
+	<LI>Next message: <A HREF="000081.html">[Ignition-commits] r50 - in trunk: . libs/gtdrag libs/gtdrag/aros libs/gtdrag/aros/include libs/gtdrag/aros/include/clib libs/gtdrag/aros/include/defines libs/gtdrag/aros/include/proto libs/scroller libs/scroller/aros libs/scroller/aros/include libs/scroller/aros/include/clib libs/scroller/aros/include/defines libs/scroller/aros/include/proto libs/textedit libs/textedit/aros libs/textedit/aros/include libs/textedit/aros/include/clib  libs/textedit/aros/include/defines libs/textedit/aros/include/proto locale
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#79">[ date ]</a>
+              <a href="thread.html#79">[ thread ]</a>
+              <a href="subject.html#79">[ subject ]</a>
+              <a href="author.html#79">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

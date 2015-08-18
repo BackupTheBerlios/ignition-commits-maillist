@@ -1,0 +1,1043 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r17 - in trunk: . add-ons	libs/gtdrag/include/libraries
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2008-December/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r17%20-%20in%20trunk%3A%20.%20add-ons%0A%09libs/gtdrag/include/libraries&In-Reply-To=%3C200812161906.mBGJ68Vl009652%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000028.html">
+   <LINK REL="Next"  HREF="000030.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r17 - in trunk: . add-ons	libs/gtdrag/include/libraries</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r17%20-%20in%20trunk%3A%20.%20add-ons%0A%09libs/gtdrag/include/libraries&In-Reply-To=%3C200812161906.mBGJ68Vl009652%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r17 - in trunk: . add-ons	libs/gtdrag/include/libraries">marust at mail.berlios.de
+       </A><BR>
+    <I>Tue Dec 16 20:06:08 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000028.html">[Ignition-commits] r16 - in trunk: . docs
+</A></li>
+        <LI>Next message: <A HREF="000030.html">[Ignition-commits] r18 - trunk/add-ons
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29">[ date ]</a>
+              <a href="thread.html#29">[ thread ]</a>
+              <a href="subject.html#29">[ subject ]</a>
+              <a href="author.html#29">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2008-12-16 20:05:58 +0100 (Tue, 16 Dec 2008)
+New Revision: 17
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=17&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=17&amp;view=rev</A>
+
+Modified:
+   trunk/add-ons/area_diagram.c
+   trunk/add-ons/ascii.c
+   trunk/add-ons/button.c
+   trunk/add-ons/checkbox.c
+   trunk/add-ons/circle_diagram.c
+   trunk/add-ons/column_diagram.c
+   trunk/add-ons/csv.c
+   trunk/add-ons/frame.c
+   trunk/add-ons/gclass.c
+   trunk/add-ons/gclass.h
+   trunk/add-ons/gradient.c
+   trunk/add-ons/iotype.c
+   trunk/add-ons/iotype.h
+   trunk/add-ons/line.c
+   trunk/add-ons/line_diagram.c
+   trunk/add-ons/rectangle.c
+   trunk/add-ons/text.c
+   trunk/add-ons/turbocalc.c
+   trunk/diagram.c
+   trunk/font.c
+   trunk/libs/gtdrag/include/libraries/gtdrag.h
+Log:
+* Replaced remaining __asm and reg( macros by
+  ASM and REG( from SDI_compiler.h
+
+
+Modified: trunk/add-ons/area_diagram.c
+===================================================================
+--- trunk/add-ons/area_diagram.c	2008-12-15 19:19:35 UTC (rev 16)
++++ trunk/add-ons/area_diagram.c	2008-12-16 19:05:58 UTC (rev 17)
+@@ -16,12 +16,6 @@
+ 
+ #include &lt;string.h&gt;
+ 
+-#define reg(x) register __ ## x
+-#define PUBLIC __saveds __asm
+-
+-extern void kprintf(STRPTR,...);
+-#define bug kprintf
+-
+ const char *version = &quot;$VER: area_diagram.gc 0.5 (7.8.2003)&quot;;
+ 
+ /** private instance structure **/
+@@ -56,8 +50,8 @@
+ 
+ 
+ void PUBLIC
+-draw(reg (d0) struct Page *page, reg (d1) ULONG dpi, reg (a0) struct RastPort *rp, reg (a1) struct gClass *gc,
+-	reg (a2) struct gDiagram *gd, reg (a3) struct gBounds *gb)
++draw(REG(d0, struct Page *page), REG(d1, ULONG dpi), REG(a0, struct RastPort *rp), REG(a1, struct gClass *gc),
++	REG(a2, struct gDiagram *gd), REG(a3, struct gBounds *gb))
+ {
+     struct gBounds *agb;
+ 	struct gArea *this_ga = GINST_DATA(gc, gd);
+@@ -217,7 +211,7 @@
+ 
+ 
+ ULONG PUBLIC
+-dispatch(reg (a0) struct gClass *gc,reg (a1) struct gDiagram *gd,reg (a2) Msg msg)
++dispatch(REG(a0, struct gClass *gc), REG(a1, struct gDiagram *gd), REG(a2, Msg msg))
+ {
+   struct gArea *ga = GINST_DATA(gc,gd);
+   ULONG  rc;
+@@ -280,7 +274,7 @@
+ 
+ 
+ ULONG PUBLIC
+-freeClass(reg (a0) struct gClass *gc)
++freeClass(REG(a0, struct gClass *gc))
+ {
+ 	CloseCatalog(sCatalog);
+ 	return TRUE;
+@@ -288,7 +282,7 @@
+ 
+ 
+ ULONG PUBLIC
+-initClass(reg (a0) struct gClass *gc)
++initClass(REG(a0, struct gClass *gc))
+ {
+ 	sCatalog = OpenCatalog(NULL, &quot;ignition.catalog&quot;, OC_BuiltInLanguage, &quot;deutsch&quot;, TAG_END);
+ 	interface[0].gi_Label = GetCatalogStr(sCatalog, MSG_AREA_OUTLINE_GAD, &quot;Fl&#228;che durch einen Rahmen begrenzen&quot;);
+
+Modified: trunk/add-ons/ascii.c
+===================================================================
+--- trunk/add-ons/ascii.c	2008-12-15 19:19:35 UTC (rev 16)
++++ trunk/add-ons/ascii.c	2008-12-16 19:05:58 UTC (rev 17)
+@@ -24,7 +24,7 @@
+ 
+ 
+ void PUBLIC
+-openPrefsGUI(reg (a0) struct Screen *src)
++openPrefsGUI(REG(a0, struct Screen *src))
+ {
+ }
+ 
+@@ -37,14 +37,14 @@
+ 
+ 
+ long PUBLIC
+-setPrefs(reg (a0) STRPTR t)
++setPrefs(REG(a0, STRPTR t))
+ {
+ 	return TRUE;
+ }
+ 
+ 
+ long PUBLIC
+-load(reg (d0) BPTR file,reg (a0) struct Mappe *mp)
++load(REG(d0, BPTR file), REG(a0, struct Mappe *mp))
+ {
+ 	struct Page *page;
+ 	struct Cell *c;
+@@ -67,7 +67,7 @@
+ 
+ 
+ long PUBLIC
+-save(reg (d0) BPTR file,reg (a0) struct Mappe *mp)
++save(REG(d0, BPTR file), REG(a0, struct Mappe *mp))
+ {
+ 	struct Page *page;
+ 	struct Cell *c;
+
+Modified: trunk/add-ons/button.c
+===================================================================
+--- trunk/add-ons/button.c	2008-12-15 19:19:35 UTC (rev 16)
++++ trunk/add-ons/button.c	2008-12-16 19:05:58 UTC (rev 17)
+@@ -15,12 +15,6 @@
+ #include &lt;string.h&gt;
+ 
+ 
+-#define reg(x) register __ ## x
+-#define PUBLIC __saveds __asm
+-
+-extern void kprintf(STRPTR,...);
+-#define bug kprintf
+-
+ const char *version = &quot;$VER: button.gc 0.15 (6.8.2003)&quot;;
+ 
+ struct gButton {
+@@ -52,8 +46,8 @@
+ 
+ 
+ void PUBLIC
+-draw(reg (d0) struct Page *page, reg (d1) ULONG dpi, reg (a0) struct RastPort *grp, reg (a1) struct gClass *gc,
+-	reg (a2) struct gObject *go, reg (a3) struct gBounds *gbo)
++draw(REG(d0, struct Page *page), REG(d1, ULONG dpi), REG(a0, struct RastPort *grp), REG(a1, struct gClass *gc),
++	REG(a2, struct gObject *go), REG(a3, struct gBounds *gbo))
+ {
+ 	struct gButton *gb = GINST_DATA(gc, go);
+ 	long bx, by, w, h;
+@@ -216,7 +210,7 @@
+ 
+ 
+ ULONG PUBLIC
+-dispatch(reg (a0) struct gClass *gc,reg (a1) struct gObject *go,reg (a2) Msg msg)
++dispatch(REG(a0, struct gClass *gc), REG(a2, struct gObject *go), REG(a2, Msg msg))
+ {
+   struct gButton *gb = GINST_DATA(gc,go);
+   ULONG rc = 0L;
+@@ -317,7 +311,7 @@
+ 
+ 
+ ULONG PUBLIC
+-freeClass(reg (a0) struct gClass *gc)
++freeClass(REG(a0, struct gClass *gc))
+ {
+ 	CloseCatalog(sCatalog);
+ 	return TRUE;
+@@ -325,7 +319,7 @@
+ 
+ 
+ ULONG PUBLIC
+-initClass(reg (a0) struct gClass *gc)
++initClass(REG(a0, struct gClass *gc))
+ {
+ 	sCatalog = OpenCatalog(NULL, &quot;ignition.catalog&quot;, OC_BuiltInLanguage, &quot;deutsch&quot;, TAG_END);
+ 
+
+Modified: trunk/add-ons/checkbox.c
+===================================================================
+--- trunk/add-ons/checkbox.c	2008-12-15 19:19:35 UTC (rev 16)
++++ trunk/add-ons/checkbox.c	2008-12-16 19:05:58 UTC (rev 17)
+@@ -14,12 +14,6 @@
+ 
+ #include &lt;string.h&gt;
+ 
+-#define reg(x) register __ ## x
+-#define PUBLIC __saveds __asm
+-
+-extern void kprintf(STRPTR,...);
+-#define bug kprintf
+-
+ const char *version = &quot;$VER: checkbox.gc 0.3 (6.8.2003)&quot;;
+ 
+ struct Checkbox
+@@ -63,7 +57,7 @@
+ 
+ 
+ void PUBLIC
+-draw(reg (d0) struct Page *page,reg (d1) ULONG dpi,reg (a0) struct RastPort *grp,reg (a1) struct gClass *gc,reg (a2) struct gObject *go,reg (a3) struct gBounds *gb)
++draw(REG(d0, struct Page *page), REG(d1, ULONG dpi), REG(a0, struct RastPort *grp), REG(a1, struct gClass *gc), REG(a2, struct gObject *go), REG(a3, struct gBounds *gb))
+ {
+   struct Checkbox *cb = GINST_DATA(gc,go);
+   long bx,by,bx2,h;
+@@ -248,7 +242,7 @@
+ }
+ 
+ 
+-ULONG PUBLIC dispatch(reg (a0) struct gClass *gc,reg (a1) struct gObject *go,reg (a2) Msg msg)
++ULONG PUBLIC dispatch(REG(a0, struct gClass *gc), REG(a1, struct gObject *go), REG(a2, Msg msg))
+ {
+   struct Checkbox *cb = GINST_DATA(gc,go);
+   ULONG rc = 0L;
+@@ -357,7 +351,7 @@
+ 
+ 
+ ULONG PUBLIC
+-freeClass(reg (a0) struct gClass *gc)
++freeClass(REG(a0, struct gClass *gc))
+ {
+ 	CloseCatalog(sCatalog);
+ 	return TRUE;
+@@ -365,7 +359,7 @@
+ 
+ 
+ ULONG PUBLIC
+-initClass(reg (a0) struct gClass *gc)
++initClass(REG(a0, struct gClass *gc))
+ {
+ 	sCatalog = OpenCatalog(NULL, &quot;ignition.catalog&quot;, OC_BuiltInLanguage, &quot;deutsch&quot;, TAG_END);
+ 
+
+Modified: trunk/add-ons/circle_diagram.c
+===================================================================
+--- trunk/add-ons/circle_diagram.c	2008-12-15 19:19:35 UTC (rev 16)
++++ trunk/add-ons/circle_diagram.c	2008-12-16 19:05:58 UTC (rev 17)
+@@ -18,12 +18,7 @@
+ #include &lt;stdio.h&gt;
+ #include &lt;math.h&gt;
+ 
+-#define reg(x) register __ ## x
+-#define PUBLIC __saveds __asm
+ 
+-extern void kprintf(STRPTR,...);
+-#define bug kprintf
+-
+ #define DEGREE_STEPS PI/128
+ 
+ const char *version = &quot;$VER: circle_diagram.gc 0.3 (7.8.2003)&quot;;
+@@ -117,8 +112,8 @@
+ 
+ 
+ void PUBLIC
+-draw(reg (d0) struct Page *page,reg (d1) ULONG dpi,reg (a0) struct RastPort *rp,reg (a1) struct gClass *gc,
+-    reg (a2) struct gDiagram *gd,reg (a3) struct gBounds *gb)
++draw(REG(d0, struct Page *page), REG(d1, ULONG dpi), REG(a0, struct RastPort *rp), REG(a1, struct gClass *gc),
++    REG(a2, struct gDiagram *gd), REG(a3, struct gBounds *gb))
+ {
+     struct gCircle *this_gc = GINST_DATA(gc, gd);
+     struct gLink *gl;
+@@ -236,7 +231,7 @@
+ 
+ 
+ ULONG PUBLIC
+-dispatch(reg (a0) struct gClass *gc, reg (a1) struct gDiagram *gd, reg (a2) Msg msg)
++dispatch(REG(a0, struct gClass *gc), REG(a1, struct gDiagram *gd), REG(a2, Msg msg))
+ {
+     struct gCircle *this_gc = GINST_DATA(gc, gd);
+     ULONG  rc;
+@@ -284,7 +279,7 @@
+ 
+ 
+ ULONG PUBLIC
+-freeClass(reg (a0) struct gClass *gc)
++freeClass(REG(a0, struct gClass *gc))
+ {
+ 	CloseCatalog(sCatalog);
+     return TRUE;
+@@ -292,7 +287,7 @@
+ 
+ 
+ ULONG PUBLIC
+-initClass(reg (a0) struct gClass *gc)
++initClass(REG(a0, struct gClass *gc))
+ {
+ 	sCatalog = OpenCatalog(NULL, &quot;ignition.catalog&quot;, OC_BuiltInLanguage, &quot;deutsch&quot;, TAG_END);
+ 	interface[0].gi_Label = GetCatalogStr(sCatalog, MSG_AREA_OUTLINE_GAD, &quot;Fl&#239;&#191;&#189;che durch einen Rahmen begrenzen&quot;);
+
+Modified: trunk/add-ons/column_diagram.c
+===================================================================
+--- trunk/add-ons/column_diagram.c	2008-12-15 19:19:35 UTC (rev 16)
++++ trunk/add-ons/column_diagram.c	2008-12-16 19:05:58 UTC (rev 17)
+@@ -16,12 +16,7 @@
+ 
+ #include &lt;string.h&gt;
+ 
+-#define reg(x) register __ ## x
+-#define PUBLIC __saveds __asm
+ 
+-extern void kprintf(STRPTR, ...);
+-#define bug kprintf
+-
+ const char *version = &quot;$VER: column_diagram.gc 0.7 (7.8.2003)&quot;;
+ 
+ /** private instance structure **/
+@@ -57,8 +52,8 @@
+ 
+  
+ void PUBLIC
+-draw(reg (d0) struct Page *page, reg (d1) ULONG dpi, reg (a0) struct RastPort *rp, reg (a1) struct gClass *gc,
+-	reg (a2) struct gDiagram *gd, reg (a3) struct gBounds *gb)
++draw(REG(d0, struct Page *page), REG(d1, ULONG dpi), REG(a0, struct RastPort *rp), REG(a1, struct gClass *gc),
++	REG(a2, struct gDiagram *gd), REG(a3, struct gBounds *gb))
+ {
+     struct gBounds *agb;
+ 	struct gBalken *this_gb = GINST_DATA(gc, gd);
+@@ -217,7 +212,7 @@
+ 
+ 
+ ULONG PUBLIC
+-dispatch(reg (a0) struct gClass *gc,reg (a1) struct gDiagram *gd,reg (a2) Msg msg)
++dispatch(REG(a0, struct gClass *gc), REG(a2, struct gDiagram *gd), REG(a1, Msg msg))
+ {
+   struct gBalken *gb = GINST_DATA(gc,gd);
+   ULONG  rc;
+@@ -259,7 +254,7 @@
+ 
+ 
+ ULONG PUBLIC
+-freeClass(reg (a0) struct gClass *gc)
++freeClass(REG(a0, struct gClass *gc))
+ {
+ 	CloseCatalog(sCatalog);
+     return TRUE;
+@@ -267,7 +262,7 @@
+ 
+ 
+ ULONG PUBLIC
+-initClass(reg (a0) struct gClass *gc)
++initClass(REG(a0, struct gClass *gc))
+ {
+ 	sCatalog = OpenCatalog(NULL, &quot;ignition.catalog&quot;, OC_BuiltInLanguage, &quot;deutsch&quot;, TAG_END);
+ 	interface[0].gi_Label = GetCatalogStr(sCatalog, MSG_AREA_OUTLINE_GAD, &quot;Fl&#228;che durch einen Rahmen begrenzen&quot;);
+
+Modified: trunk/add-ons/csv.c
+===================================================================
+--- trunk/add-ons/csv.c	2008-12-15 19:19:35 UTC (rev 16)
++++ trunk/add-ons/csv.c	2008-12-16 19:05:58 UTC (rev 17)
+@@ -31,7 +31,7 @@
+ 
+ 
+ void PUBLIC
+-openPrefsGUI(reg (a0) struct Screen *src)
++openPrefsGUI(REG(a0, struct Screen *src))
+ {
+ }
+ 
+@@ -66,7 +66,7 @@
+ 
+ 
+ long PUBLIC
+-setPrefs(reg (a0) STRPTR t)
++setPrefs(REG(a0, STRPTR t))
+ {
+   UBYTE  ok = TRUE;
+   STRPTR s;
+@@ -108,7 +108,7 @@
+ }
+ 
+ 
+-long PUBLIC load(reg (d0) BPTR file,reg (a0) struct Mappe *mp)
++long PUBLIC load(REG(d0, BPTR file), REG(a0, struct Mappe *mp))
+ {
+   char   *buffer = NULL,*s,sep;
+   struct Page *page;
+@@ -215,7 +215,7 @@
+ }
+ 
+ 
+-long PUBLIC save(reg (d0) BPTR dat,reg (a0) struct Mappe *mp)
++long PUBLIC save(REG(d0, BPTR dat), REG(a0, struct Mappe *mp))
+ {
+   struct Page *page;
+   struct Cell *c;
+
+Modified: trunk/add-ons/frame.c
+===================================================================
+--- trunk/add-ons/frame.c	2008-12-15 19:19:35 UTC (rev 16)
++++ trunk/add-ons/frame.c	2008-12-16 19:05:58 UTC (rev 17)
+@@ -14,8 +14,6 @@
+ 
+ #include &lt;string.h&gt;
+ 
+-#define reg(x) register __ ## x
+-#define PUBLIC __saveds __asm
+ 
+ extern void kprintf(STRPTR,...);
+ #define bug kprintf
+@@ -121,7 +119,7 @@
+ }
+ 
+ 
+-void PUBLIC draw(reg (d0) struct Page *page,reg (d1) ULONG dpi,reg (a0) struct RastPort *grp,reg (a1) struct gClass *gc,reg (a2) struct gObject *go,reg (a3) struct gBounds *gb)
++void PUBLIC draw(REG(d0, struct Page *page), REG(d1, ULONG dpi), REG(a0, struct RastPort *grp), REG(a1, struct gClass *gc), REG(a2, struct gObject *go), REG(a3, struct gBounds *gb))
+ {
+   struct Frame *f = GINST_DATA(gc,go);
+   long bx,by;
+@@ -184,7 +182,7 @@
+ }
+ 
+ 
+-ULONG PUBLIC dispatch(reg (a0) struct gClass *gc,reg (a1) struct gObject *go,reg (a2) Msg msg)
++ULONG PUBLIC dispatch(REG(a0, struct gClass *gc), REG(a2, struct gObject *go), REG(a1, Msg msg))
+ {
+   struct Frame *f = GINST_DATA(gc,go);
+   ULONG rc = 0L;
+@@ -247,7 +245,7 @@
+ 
+ 
+ ULONG PUBLIC
+-freeClass(reg (a0) struct gClass *gc)
++freeClass(REG(a0, struct gClass *gc))
+ {
+ 	CloseCatalog(sCatalog);
+ 	return TRUE;
+@@ -255,7 +253,7 @@
+ 
+ 
+ ULONG PUBLIC
+-initClass(reg (a0) struct gClass *gc)
++initClass(REG(a0, struct gClass *gc))
+ {
+ 	sCatalog = OpenCatalog(NULL, &quot;ignition.catalog&quot;, OC_BuiltInLanguage, &quot;deutsch&quot;, TAG_END);
+ 
+
+Modified: trunk/add-ons/gclass.c
+===================================================================
+--- trunk/add-ons/gclass.c	2008-12-15 19:19:35 UTC (rev 16)
++++ trunk/add-ons/gclass.c	2008-12-16 19:05:58 UTC (rev 17)
+@@ -22,13 +22,7 @@
+ 
+ #include &quot;gclass.h&quot;
+ 
+-#define reg(x) register __ ## x
+-#define PUBLIC __saveds __asm
+ 
+-extern kprintf(STRPTR,...);
+-#define bug kprintf
+-
+-
+ struct __gClass {
+ 	struct ImageNode gc_Node;   /* name and icon, only for non-diagrams */
+ 	struct gClass *gc_Super;    /* super class */
+@@ -37,9 +31,9 @@
+ 	ULONG  gc_Flags;
+ 	struct gInterface *gc_Interface;
+ 	BPTR   gc_Segment;
+-	ULONG  __asm (*gc_Dispatch)(reg (a0) struct gClass *,reg (a1) APTR,reg (a2) Msg);
+-	ULONG  __asm (*gc_Draw)(reg (d0) struct Page *,reg (d1) ULONG,reg (a0) struct RastPort *,reg (a1) struct gClass *,reg (a2) struct gObject *,reg (a3) struct gBounds *);
+-	ULONG  __asm (*gc_FreeClass)(reg (a0) struct gClass *);
++	ULONG  ASM (*gc_Dispatch)(REG(a0, struct gClass *), REG(a1, APTR), REG(a2, Msg));
++	ULONG  ASM (*gc_Draw)(REG(d0, struct Page *), REG(d1, ULONG), REG(a0, struct RastPort *), REG(a1, struct gClass *), REG(a2, struct gObject *), REG(a3, struct gBounds *));
++	ULONG  ASM (*gc_FreeClass)(REG(a0, struct gClass *));
+ 	STRPTR gc_ClassName;        /* internal access (filename) */
+ };
+ 
+@@ -52,19 +46,19 @@
+ 
+ /* Module functions */
+ 
+-extern ULONG PUBLIC dispatch(reg (a0) struct gClass *gc,reg (a1) APTR obj,reg (a2) Msg msg);
+-extern ULONG PUBLIC draw(reg (d0) struct Page *,reg (d0) ULONG,reg (a0) struct RastPort *,reg (a1) struct gClass *,reg (a2) struct gObject *,reg (a3) struct gBounds *);
+-extern ULONG PUBLIC freeClass(reg (a0) struct gClass *gc);
+-extern ULONG PUBLIC initClass(reg (a0) struct gClass *gc);
++extern ULONG PUBLIC dispatch(REG(a0, struct gClass *gc), REG(a1, APTR obj), REG(a2, Msg msg));
++extern ULONG PUBLIC draw(REG(d0, struct Page *), REG(d0, ULONG), REG(a0) struct RastPort *), REG(a1, struct gClass *), REG(a2, struct gObject *), REG(a3, struct gBounds *));
++extern ULONG PUBLIC freeClass(REG(a0, struct gClass *gc));
++extern ULONG PUBLIC initClass(REG(a0, struct gClass *gc));
+ extern struct gInterface interface[];
+ extern ULONG instanceSize;
+ extern const STRPTR superClass;
+ 
+ 
+ BOOL PUBLIC
+-InitGClass(reg (a6) struct ExecBase *ExecBase, reg (a0) struct __gClass *gc, reg (a1) APTR table, reg (a2) APTR mainpool,
+-	reg (a3) APTR gfxbase, reg (d0) APTR mathbase, reg (d1) APTR mathtrans, reg (d2) APTR utilitybase, reg (d3) APTR localebase,
+-    reg (d4) long magic)
++InitGClass(REG(a6, struct ExecBase *ExecBase), REG(a0, struct __gClass *gc), REG(a1, APTR table), REG(a2, APTR mainpool),
++	REG(a3, APTR gfxbase), REG(d0, APTR mathbase), REG(d1, APTR mathtrans), REG(d2, APTR utilitybase), REG(d3, APTR localebase),
++    REG(d4, long magic))
+ {
+ #ifdef IGNITION_LITE_EDITION
+ 	if (magic != MAKE_ID('I', 'G', 'N', '\0') &amp;&amp; magic != MAKE_ID('I', 'G', 'L', '\0'))
+
+Modified: trunk/add-ons/gclass.h
+===================================================================
+--- trunk/add-ons/gclass.h	2008-12-15 19:19:35 UTC (rev 16)
++++ trunk/add-ons/gclass.h	2008-12-16 19:05:58 UTC (rev 17)
+@@ -19,6 +19,8 @@
+ #include &lt;proto/utility.h&gt;
+ #include &lt;proto/locale.h&gt;
+ 
++#include &quot;SDI_compiler.h&quot;
++
+ extern APTR gcBase;
+ 
+ #ifndef CELL_H
+@@ -36,8 +38,8 @@
+   ULONG  gc_Flags;
+   struct gInterface *gc_Interface;
+ /*  BPTR   gc_Segment;
+-  ULONG  __asm (*gc_Dispatch)(reg (a0) struct gClass *,reg (a1) APTR,reg (a2) Msg);
+-  ULONG  __asm (*gc_Draw)(reg (a0) struct Page *,reg (a1) struct gObject *,reg (a2) struct RastPort *,reg (d0) long,reg (d1) long);
++  ULONG  ASM (*gc_Dispatch)(REG(a0, struct gClass *), REG(a2, APTR), REG(a1, Msg));
++  ULONG  ASM (*gc_Draw)(REG(a0, struct Page *), REG(a1, struct gObject *), REG(a2, struct RastPort *), REG(d0, long), REG(d1, long));
+   ULONG  (*gc_FreeClass)(void);
+   STRPTR gc_ClassName;        /* interner Zugriff (Dateiname) */*/
+ };
+
+Modified: trunk/add-ons/gradient.c
+===================================================================
+--- trunk/add-ons/gradient.c	2008-12-15 19:19:35 UTC (rev 16)
++++ trunk/add-ons/gradient.c	2008-12-16 19:05:58 UTC (rev 17)
+@@ -13,12 +13,6 @@
+ #include &quot;ignition_strings.h&quot;
+ 
+ 
+-#define reg(x) register __ ## x
+-#define PUBLIC __saveds __asm
+-
+-extern void kprintf(STRPTR,...);
+-#define bug kprintf
+-
+ const char *version = &quot;$VER: gradient.gc 0.3 (7.8.2003)&quot;;
+ 
+ struct Gradient {
+@@ -48,7 +42,7 @@
+ 
+ 
+ void PUBLIC
+-draw(reg (d0) struct Page *page, reg (d1) ULONG dpi, reg (a0) struct RastPort *grp, reg (a1) struct gClass *gc, reg (a2) struct gObject *go, reg (a3) struct gBounds *gb)
++draw(REG(d0, struct Page *page), REG(d1, ULONG dpi), REG(a0, struct RastPort *grp), REG(a1, struct gClass *gc), REG(a2, struct gObject *go), REG(a3, struct gBounds *gb))
+ {
+     struct Gradient *g = GINST_DATA(gc, go);
+     long x = gb-&gt;gb_Left,y = gb-&gt;gb_Top;
+@@ -134,7 +128,7 @@
+ 
+ 
+ ULONG PUBLIC
+-dispatch(reg (a0) struct gClass *gc, reg (a1) struct gObject *go, reg (a2) Msg msg)
++dispatch(REG(a0, struct gClass *gc), REG(a2, struct gObject *go), REG(a2, Msg msg))
+ {
+     struct Gradient *g = GINST_DATA(gc, go);
+     ULONG rc = 0L;
+@@ -183,7 +177,7 @@
+ 
+ 
+ ULONG PUBLIC
+-freeClass(reg (a0) struct gClass *gc)
++freeClass(REG(a0, struct gClass *gc))
+ {
+ 	CloseCatalog(sCatalog);
+     return TRUE;
+@@ -191,7 +185,7 @@
+ 
+ 
+ ULONG PUBLIC
+-initClass(reg (a0) struct gClass *gc)
++initClass(REG(a0, struct gClass *gc))
+ {
+ 	sCatalog = OpenCatalog(NULL, &quot;ignition.catalog&quot;, OC_BuiltInLanguage, &quot;deutsch&quot;, TAG_END);
+ 	interface[0].gi_Label = GetCatalogStr(sCatalog, MSG_FIRST_COLOR_LABEL, &quot;Erste Farbe:&quot;);
+
+Modified: trunk/add-ons/iotype.c
+===================================================================
+--- trunk/add-ons/iotype.c	2008-12-15 19:19:35 UTC (rev 16)
++++ trunk/add-ons/iotype.c	2008-12-16 19:05:58 UTC (rev 17)
+@@ -20,15 +20,7 @@
+ #include &lt;math.h&gt;
+ /*#include &lt;mieeedoub.h&gt;*/
+ 
+-#define reg(x) register __ ## x
+-#define PUBLIC __saveds __asm
+ 
+-#ifdef DEBUG
+-  extern kprintf(STRPTR,...);
+-# define bug kprintf
+-#endif
+-
+-
+ // Must always be in sync with the definition in io.h !!!
+ 
+ struct IOType {
+@@ -41,12 +33,12 @@
+   STRPTR io_OriginalBytes;
+   UBYTE  io_Flags;
+   BPTR   io_Segment;
+-  long   __asm (*io_Load)(reg (d0) BPTR,reg (a0) struct Mappe *);
+-  long   __asm (*io_Save)(reg (d0) BPTR,reg (a0) struct Mappe *);
+-  long   __asm (*io_SetPrefs)(reg (a0) STRPTR);
+-  STRPTR __asm (*io_GetPrefs)(void);
+-  void   __asm (*io_OpenPrefsGUI)(reg (a0) struct Screen *);
+-  void   __asm (*io_ClosePrefsGUI)(void);
++  long   ASM (*io_Load)(REG(d0, BPTR), REG(a0, struct Mappe *));
++  long   ASM (*io_Save)(REG(d0, BPTR), REG(a0, struct Mappe *));
++  long   ASM (*io_SetPrefs)(REG(a0, STRPTR));
++  STRPTR ASM (*io_GetPrefs)(void);
++  void   ASM (*io_OpenPrefsGUI)(REG(a0) struct Screen *);
++  void   ASM (*io_ClosePrefsGUI)(void);
+   STRPTR io_Short;
+   STRPTR io_Prefs;
+   STRPTR io_Suffix;
+@@ -69,21 +61,21 @@
+ 
+ /* Modul-Funktionen*/
+ 
+-extern LONG PUBLIC load(reg (d0) BPTR dat,reg (a0) struct Mappe *mp);
+-extern LONG PUBLIC save(reg (d0) BPTR dat,reg (a0) struct Mappe *mp);
+-extern LONG PUBLIC setPrefs(reg (a0) STRPTR);
++extern LONG PUBLIC load(REG(d0, BPTR dat), REG(a0, struct Mappe *mp));
++extern LONG PUBLIC save(REG(d0, BPTR dat), REG(a0, struct Mappe *mp));
++extern LONG PUBLIC setPrefs(REG(a0, STRPTR));
+ extern STRPTR PUBLIC getPrefs(void);
+ extern UBYTE PUBLIC hasPrefsGUI(void);
+-extern void PUBLIC openPrefsGUI(reg (a0) struct Screen *scr);
++extern void PUBLIC openPrefsGUI(REG(a0, struct Screen *scr));
+ extern void PUBLIC closePrefsGUI(void);
+ 
+ #define MAKE_ID(a,b,c,d) ((a &lt;&lt; 24) | (b &lt;&lt; 16) | (c &lt;&lt; 8) | d)
+ 
+ 
+ BOOL PUBLIC
+-InitModule(reg (a6) struct ExecBase *execBase,reg (a0) struct IOType *io,reg (a1) APTR table,reg (a2) APTR mainpool,
+-	reg (a3) APTR dosBase, reg (d0) APTR mathBase,reg (d1) APTR mathtransBase, reg (d2) long magic,
+-	reg (d3) APTR utilityBase, reg (d4) APTR localeBase)
++InitModule(REG(a6, struct ExecBase *execBase), REG(a0, struct IOType *io), REG(a1, APTR table), REG(a2, APTR mainpool),
++	REG(a3, APTR dosBase), REG(d0, APTR mathBase), REG(d1, APTR mathtransBase), REG(d2, long magic),
++	REG(d3, APTR utilityBase), REG(d4, APTR localeBase))
+ {
+ #ifdef IGNITION_LITE_EDITION
+ 	if (magic != MAKE_ID('I', 'G', 'N', '\0') &amp;&amp; magic != MAKE_ID('I', 'G', 'L', '\0'))
+
+Modified: trunk/add-ons/iotype.h
+===================================================================
+--- trunk/add-ons/iotype.h	2008-12-15 19:19:35 UTC (rev 16)
++++ trunk/add-ons/iotype.h	2008-12-16 19:05:58 UTC (rev 17)
+@@ -30,10 +30,8 @@
+ #include &quot;cell.h&quot;
+ #endif
+ 
+-#define reg(x) register __ ## x
+-#define PUBLIC __saveds __asm
++#include &quot;SDI_compiler.h&quot;
+ 
+-
+ /*** Project related ***/
+ 
+ struct Event
+
+Modified: trunk/add-ons/line.c
+===================================================================
+--- trunk/add-ons/line.c	2008-12-15 19:19:35 UTC (rev 16)
++++ trunk/add-ons/line.c	2008-12-16 19:05:58 UTC (rev 17)
+@@ -10,13 +10,7 @@
+ #include &quot;gclass_protos.h&quot;
+ #include &quot;gclass_pragmas.h&quot;
+ 
+-#define reg(x) register __ ## x
+-#define PUBLIC __saveds __asm
+ 
+-extern void kprintf(STRPTR,...);
+-#define bug kprintf
+-
+-
+ const char *version = &quot;$VER: line.gc 0.12 (2.3.2003)&quot;;
+ 
+ 
+@@ -44,7 +38,7 @@
+ 
+ 
+ void PUBLIC
+-draw(reg (d0) struct Page *page,reg (d1) ULONG dpi,reg (a0) struct RastPort *grp,reg (a1) struct gClass *gc,reg (a2) struct gObject *go,reg (a3) struct gBounds *gb)
++draw(REG(d0, struct Page *page), REG(d1, ULONG dpi), REG(a0, struct RastPort *grp), REG(a1, struct gClass *gc), REG(a2, struct gObject *go), REG(a3, struct gBounds *gb))
+ {
+   struct gLine *gl = GINST_DATA(gc,go);
+   struct point2d *p = go-&gt;go_Knobs;
+@@ -120,7 +114,7 @@
+ }
+ 
+ 
+-ULONG PUBLIC dispatch(reg (a0) struct gClass *gc,reg (a1) struct gObject *go,reg (a2) Msg msg)
++ULONG PUBLIC dispatch(REG(a0, struct gClass *gc), REG(a1, struct gObject *go), REG(a2, Msg msg))
+ {
+   struct gLine *gl = GINST_DATA(gc,go);
+   ULONG  rc = 0L;
+@@ -290,13 +284,13 @@
+ }
+ 
+ 
+-ULONG PUBLIC freeClass(reg (a0) struct gClass *gc)
++ULONG PUBLIC freeClass(REG(a0, struct gClass *gc))
+ {
+   return(TRUE);
+ }
+ 
+ 
+-ULONG PUBLIC initClass(reg (a0) struct gClass *gc)
++ULONG PUBLIC initClass(REG(a0, struct gClass *gc))
+ {
+   return(TRUE);
+ }
+
+Modified: trunk/add-ons/line_diagram.c
+===================================================================
+--- trunk/add-ons/line_diagram.c	2008-12-15 19:19:35 UTC (rev 16)
++++ trunk/add-ons/line_diagram.c	2008-12-16 19:05:58 UTC (rev 17)
+@@ -17,12 +17,6 @@
+ #include &lt;string.h&gt;
+ 
+ 
+-#define reg(x) register __ ## x
+-#define PUBLIC __saveds __asm
+-
+-extern void kprintf(STRPTR,...);
+-#define bug kprintf
+-
+ const char *version = &quot;$VER: line_diagram.gc 0.3 (7.8.2003)&quot;;
+ 
+ /** private instance structure **/
+@@ -49,7 +43,7 @@
+  
+ 
+ void PUBLIC
+-draw(reg (d0) struct Page *page,reg (d1) ULONG dpi,reg (a0) struct RastPort *rp,reg (a1) struct gClass *gc,reg (a2) struct gDiagram *gd,reg (a3) struct gBounds *gb)
++draw(REG(d0, struct Page *page), REG(d1, ULONG dpi), REG(a0, struct RastPort *rp), REG(a1, struct gClass *gc), REG(a2, struct gDiagram *gd), REG(a3, struct gBounds *gb))
+ {
+   struct gBounds *agb;
+   /*struct gArea *this_ga = GINST_DATA(gc,gd);*/
+@@ -175,7 +169,7 @@
+ }
+ 
+ 
+-ULONG PUBLIC dispatch(reg (a0) struct gClass *gc,reg (a1) struct gDiagram *gd,reg (a2) Msg msg)
++ULONG PUBLIC dispatch(REG(a0, struct gClass *gc), REG(a1, struct gDiagram *gd), REG(a2, Msg msg))
+ {
+ //  struct gLine *gl = GINST_DATA(gc,gd);
+   ULONG  rc;
+@@ -230,7 +224,7 @@
+ 
+ 
+ ULONG PUBLIC
+-freeClass(reg (a0) struct gClass *gc)
++freeClass(REG(a0, struct gClass *gc))
+ {
+ 	CloseCatalog(sCatalog);
+ 	return TRUE;
+@@ -238,7 +232,7 @@
+ 
+ 
+ ULONG PUBLIC
+-initClass(reg (a0) struct gClass *gc)
++initClass(REG(a0, struct gClass *gc))
+ {
+ 	sCatalog = OpenCatalog(NULL, &quot;ignition.catalog&quot;, OC_BuiltInLanguage, &quot;deutsch&quot;, TAG_END);
+ 	//interface[0].gi_Label = GetCatalogStr(sCatalog, MSG_AREA_OUTLINE_GAD, &quot;Fl&#228;che durch einen Rahmen begrenzen&quot;);
+
+Modified: trunk/add-ons/rectangle.c
+===================================================================
+--- trunk/add-ons/rectangle.c	2008-12-15 19:19:35 UTC (rev 16)
++++ trunk/add-ons/rectangle.c	2008-12-16 19:05:58 UTC (rev 17)
+@@ -9,12 +9,6 @@
+ #include &quot;gclass_protos.h&quot;
+ #include &quot;gclass_pragmas.h&quot;
+ 
+-#define reg(x) register __ ## x
+-#define PUBLIC __saveds __asm
+-
+-extern void kprintf(STRPTR,...);
+-#define bug kprintf
+-
+ const char *version = &quot;$VER: rectangle.gc 0.6 (2.3.2003)&quot;;
+ 
+ struct Rect
+@@ -35,8 +29,8 @@
+ 
+ 
+ void PUBLIC
+-draw(reg (d0) struct Page *page, reg (d1) ULONG dpi, reg (a0) struct RastPort *grp, reg (a1) struct gClass *gc,
+-	reg (a2) struct gObject *go, reg (a3) struct gBounds *gb)
++draw(REG(d0, struct Page *page), REG(d1, ULONG dpi), REG(a0, struct RastPort *grp), REG(a1, struct gClass *gc),
++	REG(a2, struct gObject *go), REG(a3, struct gBounds *gb))
+ {
+   struct Rect *r = GINST_DATA(gc, go);
+   long x = gb-&gt;gb_Left,y = gb-&gt;gb_Top;
+@@ -103,7 +97,7 @@
+ }
+ 
+ 
+-ULONG PUBLIC dispatch(reg (a0) struct gClass *gc,reg (a1) struct gObject *go,reg (a2) Msg msg)
++ULONG PUBLIC dispatch(REG(a0, struct gClass *gc), REG(a1, struct gObject *go), REG(a2, Msg msg))
+ {
+   struct Rect *r = GINST_DATA(gc,go);
+   ULONG rc = 0L;
+@@ -151,14 +145,14 @@
+ 
+ 
+ ULONG PUBLIC
+-freeClass(reg (a0) struct gClass *gc)
++freeClass(REG(a0, struct gClass *gc))
+ {
+ 	return TRUE;
+ }
+ 
+ 
+ ULONG PUBLIC
+-initClass(reg (a0) struct gClass *gc)
++initClass(REG(a0, struct gClass *gc))
+ {
+ 	return TRUE;
+ }
+
+Modified: trunk/add-ons/text.c
+===================================================================
+--- trunk/add-ons/text.c	2008-12-15 19:19:35 UTC (rev 16)
++++ trunk/add-ons/text.c	2008-12-16 19:05:58 UTC (rev 17)
+@@ -14,12 +14,7 @@
+ 
+ #include &lt;string.h&gt;
+ 
+-#define reg(x) register __ ## x
+-#define PUBLIC __saveds __asm
+ 
+-extern void kprintf(STRPTR,...);
+-#define bug kprintf
+-
+ const char *version = &quot;$VER: text.gc 0.2 (6.8.2003)&quot;;
+ 
+ struct gText {
+@@ -43,8 +38,8 @@
+  
+ 
+ void PUBLIC
+-draw(reg (d0) struct Page *page, reg (d1) ULONG dpi, reg (a0) struct RastPort *grp, reg (a1) struct gClass *gc,
+-	reg (a2) struct gObject *go, reg (a3) struct gBounds *gb)
++draw(REG(d0, struct Page *page), REG(d1, ULONG dpi), REG(a0, struct RastPort *grp), REG(a1, struct gClass *gc),
++	REG(a2, struct gObject *go), REG(a3, struct gBounds *gb))
+ {	
+ 	struct gText *gt = GINST_DATA(gc, go);
+ 	long w, h;
+@@ -112,7 +107,7 @@
+ 
+ 
+ ULONG PUBLIC
+-dispatch(reg (a0) struct gClass *gc, reg (a1) struct gObject *go, reg (a2) Msg msg)
++dispatch(REG(a0, struct gClass *gc), REG(a1, struct gObject *go), REG(a2, Msg msg))
+ {
+ 	struct gText *gt = GINST_DATA(gc, go);
+ 	ULONG rc = 0L;
+@@ -197,7 +192,7 @@
+ 
+ 
+ ULONG PUBLIC
+-freeClass(reg (a0) struct gClass *gc)
++freeClass(REG(a0, struct gClass *gc))
+ {
+ 	CloseCatalog(sCatalog);
+ 	return TRUE;
+@@ -205,7 +200,7 @@
+ 
+ 
+ ULONG PUBLIC
+-initClass(reg (a0) struct gClass *gc)
++initClass(REG(a0, struct gClass *gc))
+ {
+ 	sCatalog = OpenCatalog(NULL, &quot;ignition.catalog&quot;, OC_BuiltInLanguage, &quot;deutsch&quot;, TAG_END);
+ 	interface[0].gi_Label = GetCatalogStr(sCatalog, MSG_TEXT_COLOR_LABEL, &quot;Textfarbe:&quot;);
+
+Modified: trunk/add-ons/turbocalc.c
+===================================================================
+--- trunk/add-ons/turbocalc.c	2008-12-15 19:19:35 UTC (rev 16)
++++ trunk/add-ons/turbocalc.c	2008-12-16 19:05:58 UTC (rev 17)
+@@ -72,7 +72,7 @@
+ 
+ 
+ long PUBLIC
+-load(reg (d0) BPTR dat,reg (a0) struct Mappe *mp)
++load(REG(d0, BPTR dat), REG(a0, struct Mappe *mp))
+ {
+ 	struct Cell *c;
+ 	struct Page *page;
+@@ -322,7 +322,7 @@
+ 
+ 
+ long PUBLIC
+-save(reg (d0) BPTR dat,reg (a0) struct Mappe *mp)
++save(REG(d0, BPTR dat), REG(a0, struct Mappe *mp))
+ {
+ 	return RETURN_WARN;
+ }
+@@ -335,7 +335,7 @@
+ 
+ 
+ void PUBLIC
+-openPrefsGUI(reg (a0) struct Screen *scr)
++openPrefsGUI(REG(a0, struct Screen *scr))
+ {
+ }
+ 
+@@ -348,7 +348,7 @@
+ 
+ 
+ long PUBLIC
+-setPrefs(reg (a0) STRPTR t)
++setPrefs(REG(a0, STRPTR t))
+ {
+ 	return TRUE;
+ }
+
+Modified: trunk/diagram.c
+===================================================================
+--- trunk/diagram.c	2008-12-15 19:19:35 UTC (rev 16)
++++ trunk/diagram.c	2008-12-16 19:05:58 UTC (rev 17)
+@@ -861,8 +861,8 @@
+ 
+ 
+ void PUBLIC
+-gDiagram3dDraw(reg (d0) struct Page *page, reg (d1) ULONG dpi, reg (a0) struct RastPort *rp, reg (a1) struct gClass *gc,
+-	reg (a2) struct gDiagram3d *gd, reg (a3) struct gBounds *gb)
++gDiagram3dDraw(REG(d0, struct Page *page), REG(d1, ULONG dpi), REG(a0, struct RastPort *rp), REG(a1, struct gClass *gc),
++	REG(a2, struct gDiagram3d *gd), REG(a3, struct gBounds *gb))
+ {
+ 	LONG x = gb-&gt;gb_Left,y = gb-&gt;gb_Top;
+ 	LONG w = gb-&gt;gb_Right-gb-&gt;gb_Left;
+@@ -1033,8 +1033,8 @@
+ 
+ 
+ void PUBLIC
+-gBalken3dDraw(reg (d0) struct Page *page, reg (d1) ULONG dpi, reg (a0) struct RastPort *rp, reg (a1) struct gClass *gc,
+-	reg (a2) struct gDiagram3d *gd, reg (a3) struct gBounds *gb)
++gBalken3dDraw(REG(d0, struct Page *page), REG(d1, ULONG dpi), REG(a0, struct RastPort *rp), REG(a1, struct gClass *gc),
++	REG(a2, struct gDiagram3d *gd), REG(a3, struct gBounds *gb))
+ {
+ 	//struct point3d rectps[] = {{0.0,0.0,0.0},{6.0,0.0,0.0},{6.0,0.0,2.0}};
+ 	struct point3d boxps[] = {{0.3,3.0,0.5},{0.3,0.0,0.5},{1.3,0.0,0.5},{0.3,0.0,1.5}};
+
+Modified: trunk/font.c
+===================================================================
+--- trunk/font.c	2008-12-15 19:19:35 UTC (rev 16)
++++ trunk/font.c	2008-12-16 19:05:58 UTC (rev 17)
+@@ -279,7 +279,7 @@
+ 
+ #if 0
+ void PUBLIC
+-DrawTextWithWidth(reg (a0) struct RastPort *rp,reg (a1) struct FontInfo *fi,reg (a2) STRPTR t,reg (d0) long x,reg (d1) long y,reg (d2) long width)
++DrawTextWithWidth(REG(a0, struct RastPort *rp), REG(a1, struct FontInfo *fi), REG(a2, STRPTR t), REG(d0, long x), REG(d1, long y), REG(d2, long width))
+ {
+ 	struct FontSize *fs;
+ 	struct FontChar *fc;
+
+Modified: trunk/libs/gtdrag/include/libraries/gtdrag.h
+===================================================================
+--- trunk/libs/gtdrag/include/libraries/gtdrag.h	2008-12-15 19:19:35 UTC (rev 16)
++++ trunk/libs/gtdrag/include/libraries/gtdrag.h	2008-12-16 19:05:58 UTC (rev 17)
+@@ -19,11 +19,6 @@
+ #endif
+ 
+ 
+-#ifndef reg
+-#define reg(x) register __ ## x
+-#endif
+-
+-
+ /********************* ObjectDescription structure *********************/
+ 
+ /* the ObjectDescription structure describes the contents of the object
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000028.html">[Ignition-commits] r16 - in trunk: . docs
+</A></li>
+	<LI>Next message: <A HREF="000030.html">[Ignition-commits] r18 - trunk/add-ons
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29">[ date ]</a>
+              <a href="thread.html#29">[ thread ]</a>
+              <a href="subject.html#29">[ subject ]</a>
+              <a href="author.html#29">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

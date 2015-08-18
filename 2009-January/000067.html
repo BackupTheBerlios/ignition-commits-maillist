@@ -1,0 +1,1076 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r44 - trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2009-January/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r44%20-%20trunk&In-Reply-To=%3C200901241041.n0OAfwig028404%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000065.html">
+   <LINK REL="Next"  HREF="000068.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r44 - trunk</H1>
+    <B>axeld at BerliOS</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r44%20-%20trunk&In-Reply-To=%3C200901241041.n0OAfwig028404%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r44 - trunk">axeld at mail.berlios.de
+       </A><BR>
+    <I>Sat Jan 24 11:41:58 CET 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000065.html">[Ignition-commits] r43 - trunk
+</A></li>
+        <LI>Next message: <A HREF="000068.html">[Ignition-commits] r45 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#67">[ date ]</a>
+              <a href="thread.html#67">[ thread ]</a>
+              <a href="subject.html#67">[ subject ]</a>
+              <a href="author.html#67">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: axeld
+Date: 2009-01-24 11:41:57 +0100 (Sat, 24 Jan 2009)
+New Revision: 44
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=44&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=44&amp;view=rev</A>
+
+Modified:
+   trunk/edit.c
+Log:
+* trackFunctions() did try to add ~0 functions to the recently used function
+  list.
+* Cleanup.
+
+
+Modified: trunk/edit.c
+===================================================================
+--- trunk/edit.c	2009-01-24 03:17:24 UTC (rev 43)
++++ trunk/edit.c	2009-01-24 10:41:57 UTC (rev 44)
+@@ -1,6 +1,6 @@
+ /* functions for the text/formula edit field
+  *
+- * Copyright &#169;1996-2008 pinc Software. All Rights Reserved.
++ * Copyright 1996-2009 pinc Software. All Rights Reserved.
+  * Licensed under the terms of the GNU General Public License, version 3.
+  */
+ 
+@@ -11,8 +11,11 @@
+ #define RIGHTOFFSET 10
+ 
+ extern bool gSessionChanged;
++extern struct MinList flangs;
+ 
++long complen, comppos;
+ 
++
+ bool
+ DocumentSecurity(struct Page *page, struct tableField *tf)
+ {
+@@ -77,8 +80,6 @@
+ 	return b;
+ }
+ 
+-extern struct MinList flangs;
+-long complen,comppos;
+ 
+ int
+ compcmp(STRPTR *a, STRPTR *b)
+@@ -100,7 +101,8 @@
+ 	BOOL rc = FALSE;
+ 	STRPTR t;
+ 
+-	if (!page || page-&gt;pg_Gad.DispPos &lt;= PGS_FRAME || !(tf = page-&gt;pg_Gad.tf) || !tf-&gt;tf_Text)
++	if (!page || page-&gt;pg_Gad.DispPos &lt;= PGS_FRAME || !(tf = page-&gt;pg_Gad.tf)
++		|| !tf-&gt;tf_Text)
+ 		return FALSE;
+ 
+ 	if (!comppos) {
+@@ -109,8 +111,9 @@
+ 		l = (APTR)page-&gt;pg_Mappe-&gt;mp_Names.mlh_Head;
+ 		fpos = 0;
+ 	} else {
+-		tf-&gt;tf_Text = RemoveString(tf-&gt;tf_Text,comppos,page-&gt;pg_Gad.DispPos-comppos);
+-		if (imsg.Qualifier &amp; IEQUALIFIER_SHIFT)
++		tf-&gt;tf_Text = RemoveString(tf-&gt;tf_Text, comppos,
++			page-&gt;pg_Gad.DispPos - comppos);
++		if ((imsg.Qualifier &amp; IEQUALIFIER_SHIFT) != 0)
+ 			fpos--;
+ 		else
+ 			fpos++;
+@@ -121,7 +124,7 @@
+ 			else
+ 				l = (APTR)l-&gt;l_Node.mln_Succ;
+ 		}
+-		if (imsg.Qualifier &amp; IEQUALIFIER_ALT &amp;&amp; fl != (APTR)~0L) {
++		if ((imsg.Qualifier &amp; IEQUALIFIER_ALT) != 0 &amp;&amp; fl != (APTR)~0L) {
+ 			second = FALSE;
+ 			rc = TRUE;
+ 		}
+@@ -130,22 +133,34 @@
+ 		return TRUE;
+ 
+ 	complen = 0;
+-	for (t = tf-&gt;tf_Text+comppos-1;IsAlNum(loc,*t) || *t == '_';t--,complen++);
++	for (t = tf-&gt;tf_Text + comppos - 1; IsAlNum(loc, t[0]) || t[0] == '_';
++			t--, complen++)
++		;
++
+ 	t++;
+ 
+ 	if (!(imsg.Qualifier &amp; IEQUALIFIER_ALT) &amp;&amp; fl != (APTR)~0L) {
+ 		do {
+-			for (;fl-&gt;fl_Node.ln_Succ;fl = (APTR)fl-&gt;fl_Node.ln_Succ) {
+-				if (!fl-&gt;fl_Node.ln_Succ-&gt;ln_Succ)  // interne Funktionsnamen werden nicht gepr&#252;ft
++			for (; fl-&gt;fl_Node.ln_Succ; fl = (APTR)fl-&gt;fl_Node.ln_Succ) {
++				if (!fl-&gt;fl_Node.ln_Succ-&gt;ln_Succ) {
++					// internal function names aren't checked
+ 					break;
++				}
+ 
+-				while (fpos &lt; fl-&gt;fl_Length &amp;&amp; strnicmp(fl-&gt;fl_Array[fpos].fn_Name,t,complen) &lt; 0)
++				while (fpos &lt; fl-&gt;fl_Length
++					&amp;&amp; strnicmp(fl-&gt;fl_Array[fpos].fn_Name, t, complen) &lt; 0) {
+ 					fpos++;
++				}
+ 
+-				if (fpos &lt; fl-&gt;fl_Length &amp;&amp; !strnicmp(fl-&gt;fl_Array[fpos].fn_Name,t,complen)) {
+-					for(;IsAlNum(loc,*(fl-&gt;fl_Array[fpos].fn_Name+len));len++);
+-					tf-&gt;tf_Text = InsertString(tf-&gt;tf_Text,fl-&gt;fl_Array[fpos].fn_Name+complen,comppos,len-complen);
+-					page-&gt;pg_Gad.DispPos = comppos+len-complen;
++				if (fpos &lt; fl-&gt;fl_Length
++					&amp;&amp; !strnicmp(fl-&gt;fl_Array[fpos].fn_Name, t, complen)) {
++					for (; IsAlNum(loc, *(fl-&gt;fl_Array[fpos].fn_Name + len));
++							len++)
++						;
++					tf-&gt;tf_Text = InsertString(tf-&gt;tf_Text,
++						fl-&gt;fl_Array[fpos].fn_Name + complen, comppos,
++						len - complen);
++					page-&gt;pg_Gad.DispPos = comppos + len - complen;
+ 					return TRUE;
+ 				}
+ 			}
+@@ -158,10 +173,13 @@
+ 	fl = (APTR)~0L;
+ 
+ 	do {
+-		for (;l-&gt;l_Node.mln_Succ;l = (APTR)l-&gt;l_Node.mln_Succ) {
+-			if (!strnicmp((nm = (struct Name *)l-&gt;l_Link)-&gt;nm_Node.ln_Name,t,complen)) {
+-				tf-&gt;tf_Text = InsertString(tf-&gt;tf_Text,nm-&gt;nm_Node.ln_Name+complen,comppos,(len = strlen(nm-&gt;nm_Node.ln_Name))-complen);
+-				page-&gt;pg_Gad.DispPos = comppos+len-complen;
++		for (; l-&gt;l_Node.mln_Succ; l = (APTR)l-&gt;l_Node.mln_Succ) {
++			if (!strnicmp((nm = (struct Name *)l-&gt;l_Link)-&gt;nm_Node.ln_Name, t,
++					complen)) {
++				len = strlen(nm-&gt;nm_Node.ln_Name);
++				tf-&gt;tf_Text = InsertString(tf-&gt;tf_Text, nm-&gt;nm_Node.ln_Name
++					+ complen, comppos, len - complen);
++				page-&gt;pg_Gad.DispPos = comppos + len - complen;
+ 				return TRUE;
+ 			}
+ 		}
+@@ -177,7 +195,7 @@
+ 
+ 
+ BOOL
+-TestForCompletion(struct Page *page,struct tableField *tf)
++TestForCompletion(struct Page *page, struct tableField *tf)
+ {
+ 	return (BOOL)(page-&gt;pg_Gad.DispPos &gt; 1 &amp;&amp; *tf-&gt;tf_Text == '=');
+ }
+@@ -189,33 +207,39 @@
+ 	struct FunctionLanguage *fl;
+ 	struct FunctionName *fn;
+ 	struct tableField *tf;
+-	long   x,y;
++	long   x, y;
+ 	STRPTR t;
+ 
+-	if (!page || page-&gt;pg_Gad.DispPos &lt;= PGS_FRAME || !(tf = page-&gt;pg_Gad.tf) || !tf-&gt;tf_Text || *(tf-&gt;tf_Text+page-&gt;pg_Gad.DispPos-1) != '(')
++	if (!page || page-&gt;pg_Gad.DispPos &lt;= PGS_FRAME || !(tf = page-&gt;pg_Gad.tf)
++		|| !tf-&gt;tf_Text || *(tf-&gt;tf_Text + page-&gt;pg_Gad.DispPos - 1) != '(')
+ 		return;
+ 
+-	t = tf-&gt;tf_Text+page-&gt;pg_Gad.DispPos-2;
+-	if (!IsAlNum(loc,*t))
++	t = tf-&gt;tf_Text + page-&gt;pg_Gad.DispPos - 2;
++	if (!IsAlNum(loc, *t))
+ 		return;
+-	for(;IsAlNum(loc,*t) || *t == '_';t--);
++	for (; IsAlNum(loc, *t) || *t == '_'; t--);
+ 	t++;
+ 
+-	x = page-&gt;pg_Gad.cp.cp_X;  y = page-&gt;pg_Gad.cp.cp_Y+page-&gt;pg_Gad.cp.cp_H;
++	x = page-&gt;pg_Gad.cp.cp_X;
++	y = page-&gt;pg_Gad.cp.cp_Y + page-&gt;pg_Gad.cp.cp_H;
++
+ 	if (x &lt; page-&gt;pg_wTabX)
+ 		x = page-&gt;pg_wTabX;
+-	if (y &gt; page-&gt;pg_wTabY+page-&gt;pg_wTabH)
+-		y = page-&gt;pg_wTabY+page-&gt;pg_wTabH;
+-	x += 5+page-&gt;pg_Window-&gt;LeftEdge;  y += 5+page-&gt;pg_Window-&gt;TopEdge;
++	if (y &gt; page-&gt;pg_wTabY + page-&gt;pg_wTabH)
++		y = page-&gt;pg_wTabY + page-&gt;pg_wTabH;
+ 
+-	foreach (&amp;flangs, fl)
+-	{
+-		if (!fl-&gt;fl_Node.ln_Succ-&gt;ln_Succ)  // interne Funktionsnamen werden nicht gepr&#252;ft
++	x += 5 + page-&gt;pg_Window-&gt;LeftEdge;
++	y += 5 + page-&gt;pg_Window-&gt;TopEdge;
++
++	foreach (&amp;flangs, fl) {
++		if (!fl-&gt;fl_Node.ln_Succ-&gt;ln_Succ) {
++			// internal function names aren't checked
+ 			break;
++		}
+ 
+-		if ((fn = bsearch(&amp;t, fl-&gt;fl_Array, fl-&gt;fl_Length, sizeof(struct FunctionName), (APTR)cmdcmp)) != 0)
+-		{
+-			ShowPopUpText(fn-&gt;fn_Name,x,y);
++		if ((fn = bsearch(&amp;t, fl-&gt;fl_Array, fl-&gt;fl_Length,
++				sizeof(struct FunctionName), (APTR)cmdcmp)) != 0) {
++			ShowPopUpText(fn-&gt;fn_Name, x, y);
+ 			return;
+ 		}
+ 	}
+@@ -247,8 +271,9 @@
+ 	struct tableField *tf;
+ 	bool oldCell = page-&gt;pg_Gad.tf != NULL;
+ 
+-	if ((page-&gt;pg_Gad.tf = tf = AllocTableField(page, page-&gt;pg_Gad.cp.cp_Col, page-&gt;pg_Gad.cp.cp_Row)) != 0)
+-	{
++	page-&gt;pg_Gad.tf = tf = AllocTableField(page, page-&gt;pg_Gad.cp.cp_Col,
++		page-&gt;pg_Gad.cp.cp_Row);
++	if (tf != NULL) {
+ 		if (page-&gt;pg_Gad.Undo)
+ 			FreeTableField(page-&gt;pg_Gad.Undo);
+ 
+@@ -263,19 +288,18 @@
+ 			tf-&gt;tf_Original = NULL;
+ 		}
+ 
+-		if (!tf-&gt;tf_Text &amp;&amp; !(tf-&gt;tf_Flags &amp; TFF_FONTSET))
+-		{
++		if (!tf-&gt;tf_Text &amp;&amp; !(tf-&gt;tf_Flags &amp; TFF_FONTSET)) {
+ 			tf-&gt;tf_FontInfo = SetFontInfo(tf-&gt;tf_FontInfo, page-&gt;pg_DPI,
+-									FA_Family,	   page-&gt;pg_Family,
+-									FA_PointHeight,  page-&gt;pg_PointHeight,
++									FA_Family,		page-&gt;pg_Family,
++									FA_PointHeight,	page-&gt;pg_PointHeight,
+ 									TAG_END);
+-			if (prefs.pr_Table-&gt;pt_Flags &amp; PTF_AUTOCELLSIZE)
+-			{
+-				char t[20];
++			if ((prefs.pr_Table-&gt;pt_Flags &amp; PTF_AUTOCELLSIZE) != 0) {
++				char t[32];
++				sprintf(t, &quot;%ld pt&quot;, ((page-&gt;pg_PointHeight * 4) &gt;&gt; 16) / 3);
+ 
+-				sprintf(t,&quot;%ld pt&quot;,((page-&gt;pg_PointHeight*4) &gt;&gt; 16)/3);
+-				if (ConvertNumber(t,CNT_MM) &gt; (page-&gt;pg_tfHeight+tf-&gt;tf_Row-1)-&gt;ts_mm/1024.0)
+-					ChangeCellSize(page,NULL,t,CCS_STANDARD,NULL);
++				if (ConvertNumber(t, CNT_MM)
++						&gt; (page-&gt;pg_tfHeight + tf-&gt;tf_Row - 1)-&gt;ts_mm / 1024.0)
++					ChangeCellSize(page, NULL, t, CCS_STANDARD, NULL);
+ 			}
+ 		}
+ 	}
+@@ -287,88 +311,89 @@
+ SetTabGadget(struct Page *page, STRPTR t, long pos)
+ {
+ 	struct tableField *tf;
+-	BYTE   changed = FALSE;
++	BYTE changed = FALSE;
+ 
+ 	if (page-&gt;pg_Gad.DispPos == PGS_NONE)
+ 		return;
+-	if ((!t || t == (STRPTR)~0L) &amp;&amp; pos &lt;= PGS_FRAME &amp;&amp; !GetTableField(page,page-&gt;pg_Gad.cp.cp_Col,page-&gt;pg_Gad.cp.cp_Row))
++	if ((!t || t == (STRPTR)~0L) &amp;&amp; pos &lt;= PGS_FRAME
++		&amp;&amp; !GetTableField(page, page-&gt;pg_Gad.cp.cp_Col, page-&gt;pg_Gad.cp.cp_Row))
+ 		return;
+ 	if (DocumentSecurity(page, tf = page-&gt;pg_Gad.tf))
+ 		return;
+ 
+-	if (!t &amp;&amp; tf || t != (STRPTR)~0L)
+-	{
++	if (!t &amp;&amp; tf || t != (STRPTR)~0L) {
+ 		long prepos;
+ 
+ 		prepos = page-&gt;pg_Gad.DispPos;
+ 		if (prepos == PGS_FRAME)
+ 			BeginTabGadget(page);
+-		if (tf)
+-		{
++		if (tf) {
+ 			FreeString(tf-&gt;tf_Text);
+ 			tf-&gt;tf_Text = AllocString(t);
+ 			SetTFWidth(page,tf);
+-			/* MERKER: falls cp_W-Aktualisierung aus SetTFWidth() rausfliegt, mu&#223; sie hierhin...*/
++			/* TODO: if the cp_W-update is removed from SetTFWidth(),
++			   it must end up here... */
+ 			changed = TRUE;
+ 		}
+-		if (prepos == PGS_FRAME &amp;&amp; pos == PGS_IGNORE)
+-			CreateTabGadget(page,page-&gt;pg_Gad.cp.cp_Col,page-&gt;pg_Gad.cp.cp_Row,FALSE);
++		if (prepos == PGS_FRAME &amp;&amp; pos == PGS_IGNORE) {
++			CreateTabGadget(page, page-&gt;pg_Gad.cp.cp_Col,
++				page-&gt;pg_Gad.cp.cp_Row, FALSE);
++		}
+ 	}
+-	if (pos != PGS_IGNORE)
+-	{
++
++	if (pos != PGS_IGNORE) {
+ 		long len;
+ 
+ 		if (pos == PGS_NONE)
+ 			FreeTabGadget(page);
+-		else if (pos == PGS_FRAME)
+-		{
+-			if (page-&gt;pg_Gad.DispPos &gt; PGS_FRAME)
+-				CreateTabGadget(page,page-&gt;pg_Gad.cp.cp_Col,page-&gt;pg_Gad.cp.cp_Row,FALSE);
+-		}
+-		else if (page-&gt;pg_Gad.DispPos == PGS_FRAME)
++		else if (pos == PGS_FRAME) {
++			if (page-&gt;pg_Gad.DispPos &gt; PGS_FRAME) {
++				CreateTabGadget(page, page-&gt;pg_Gad.cp.cp_Col,
++					page-&gt;pg_Gad.cp.cp_Row, FALSE);
++			}
++		} else if (page-&gt;pg_Gad.DispPos == PGS_FRAME)
+ 			BeginTabGadget(page);
+-		if ((tf = page-&gt;pg_Gad.tf) &amp;&amp; pos &gt; (len = tf-&gt;tf_Text ? strlen(tf-&gt;tf_Text) : 0))
++
++		tf = page-&gt;pg_Gad.tf;
++		if (tf != NULL &amp;&amp; pos &gt; (len = tf-&gt;tf_Text ? strlen(tf-&gt;tf_Text) : 0))
+ 			pos = len;
+ 		page-&gt;pg_Gad.DispPos = pos;
+ 		if (tf)
+ 			changed = TRUE;
+ 	}
+ 	if (changed)
+-		DrawTableField(page,tf);
++		DrawTableField(page, tf);
+ }
+ 
+ 
+-/** F&#252;gt alle im Term enthaltenen Funktionen zu den zuletzt
+- *  benutzten Funktionen hinzu, falls diese nicht bereits
+- *  darin erfa&#223;t waren.
+- *  &#196;ndert sich diese Liste, wird daf&#252;r gesorgt, da&#223; sie
+- *  bei Programmende gespeichert wird (gSessionChanged).
+- *
+- *  @param t der zu untersuchende Term
+- */
++/*!	Adds all functions contained in the term to the list of the
++	least recently used functions, if they are not yet part of it.
++	Existing entries are moved to the top of the list.
+ 
++	If the list changes, the gSessionChanged variable is set, which
++	causes it to be changed on program exit.
++
++	@param t The term to be scanned.
++*/
+ void
+ trackFunctions(struct Term *t)
+ {
+ 	if (!t)
+ 		return;
+ 
+-	if (t-&gt;t_Op == OP_FUNC)
+-	{
++	if (t-&gt;t_Op == OP_FUNC) {
+ 		struct Function *f = t-&gt;t_Function;
+ 		struct FuncArg *fa;
+ 		struct Node *ln;
+ 
+-		if (f == NULL)
++		if (f == NULL || f == (APTR)~0L)
+ 			return;
+-		if ((ln = (APTR)FindLink(&amp;usedfuncs, f)) != 0)
+-		{
++
++		if ((ln = (APTR)FindLink(&amp;usedfuncs, f)) != 0) {
+ 			if ((APTR)usedfuncs.mlh_Head != ln)
+ 				gSessionChanged = true;
+ 			MyRemove(ln);
+-		}
+-		else if ((ln = AllocPooled(pool, sizeof(struct Node))) != 0)
+-		{
++		} else if ((ln = AllocPooled(pool, sizeof(struct Node))) != 0) {
+ 			ln-&gt;ln_Name = (APTR)f;
+ 			gSessionChanged = true;
+ 		}
+@@ -376,11 +401,9 @@
+ 		if (ln)
+ 			MyAddHead(&amp;usedfuncs, ln);
+ 
+-		foreach(&amp;t-&gt;t_Args,fa)
++		foreach (&amp;t-&gt;t_Args, fa)
+ 			trackFunctions(fa-&gt;fa_Root);
+-	}
+-	else
+-	{
++	} else {
+ 		trackFunctions(t-&gt;t_Left);
+ 		trackFunctions(t-&gt;t_Right);
+ 	}
+@@ -392,14 +415,14 @@
+ {
+ 	struct UndoNode *un = NULL;
+ 	struct tableField *tf;
+-	char   t[128];
+-	int32  x,y,w,h,a,b;
+-	bool   changed = false;
++	char t[128];
++	int32 x, y, w, h, a, b;
++	bool changed = false;
+ 
+ 	if (page-&gt;pg_Gad.DispPos == PGS_NONE)
+ 		return;
+-	else if (page-&gt;pg_Gad.DispPos &gt;= 0)
+-	{
++
++	if (page-&gt;pg_Gad.DispPos &gt;= 0) {
+ 		changed = true;  comppos = 0;
+ 		if (strcmp(page-&gt;pg_Gad.tf-&gt;tf_Text ? page-&gt;pg_Gad.tf-&gt;tf_Text : (STRPTR)&quot;&quot;,
+ 				page-&gt;pg_Gad.Undo &amp;&amp; page-&gt;pg_Gad.Undo-&gt;tf_Original ? page-&gt;pg_Gad.Undo-&gt;tf_Original : (STRPTR)&quot;&quot;))
+@@ -436,27 +459,32 @@
+ 
+ 		WriteTabGadget(page, un);
+ 
+-		if (un)
+-		{
++		if (un) {
+ 			un-&gt;un_Node.ln_Type &amp;= ~UNDO_NOREDO;
+ 			if ((tf = CopyCell(page, page-&gt;pg_Gad.tf)) != 0)
+ 				MyAddTail(&amp;un-&gt;un_RedoList, tf);
+ 		}
+-		handleEvent(page, EVT_FIELDEND, page-&gt;pg_Gad.cp.cp_Col, page-&gt;pg_Gad.cp.cp_Row);
++		handleEvent(page, EVT_FIELDEND, page-&gt;pg_Gad.cp.cp_Col,
++			page-&gt;pg_Gad.cp.cp_Row);
+ 
+-		/*** benutzte Funktionen herausfiltern ***/
++		/* track used functions */
+ 
+ 		if (page-&gt;pg_Gad.tf-&gt;tf_Type &amp; TFT_FORMULA)
+ 			trackFunctions(page-&gt;pg_Gad.tf-&gt;tf_Root);
+ 	}
++
+ 	x = page-&gt;pg_Gad.cp.cp_X;  y = page-&gt;pg_Gad.cp.cp_Y;
+ 	w = page-&gt;pg_Gad.cp.cp_W;  h = page-&gt;pg_Gad.cp.cp_H;
+ 	page-&gt;pg_Gad.DispPos = PGS_NONE;
+ 	page-&gt;pg_Gad.tf = NULL;
+-	if (page-&gt;pg_Window)
+-	{
+-		if ((a = max(x-2,page-&gt;pg_wTabX)) &lt; page-&gt;pg_wTabX+page-&gt;pg_wTabW &amp;&amp; (b = max(y-2,page-&gt;pg_wTabY)) &lt; page-&gt;pg_wTabY+page-&gt;pg_wTabH)
+-			DrawTableCoord(page,a,b,changed ? page-&gt;pg_wTabX+page-&gt;pg_wTabW : min(x+w,page-&gt;pg_wTabX+page-&gt;pg_wTabW),min(y+h,page-&gt;pg_wTabY+page-&gt;pg_wTabH));
++
++	if (page-&gt;pg_Window) {
++		if ((a = max(x - 2, page-&gt;pg_wTabX)) &lt; page-&gt;pg_wTabX + page-&gt;pg_wTabW
++			&amp;&amp; (b = max(y - 2, page-&gt;pg_wTabY)) &lt; page-&gt;pg_wTabY + page-&gt;pg_wTabH)
++			DrawTableCoord(page, a, b, changed
++					? page-&gt;pg_wTabX + page-&gt;pg_wTabW
++					: min(x + w, page-&gt;pg_wTabX + page-&gt;pg_wTabW),
++				min(y + h, page-&gt;pg_wTabY + page-&gt;pg_wTabH));
+ 	}
+ }
+ 
+@@ -464,8 +492,11 @@
+ void
+ RefreshTabGadgetLine(struct Page *page)
+ {
+-	SetTFWidth(page,GetRealTableField(page,page-&gt;pg_Gad.cp.cp_Col,page-&gt;pg_Gad.cp.cp_Row));
+-	DrawTableCoord(page,page-&gt;pg_wTabX,page-&gt;pg_Gad.cp.cp_Y,page-&gt;pg_wTabX+page-&gt;pg_wTabW,page-&gt;pg_Gad.cp.cp_Y+page-&gt;pg_Gad.cp.cp_H);
++	SetTFWidth(page, GetRealTableField(page, page-&gt;pg_Gad.cp.cp_Col,
++		page-&gt;pg_Gad.cp.cp_Row));
++	DrawTableCoord(page, page-&gt;pg_wTabX, page-&gt;pg_Gad.cp.cp_Y,
++		page-&gt;pg_wTabX + page-&gt;pg_wTabW,
++		page-&gt;pg_Gad.cp.cp_Y + page-&gt;pg_Gad.cp.cp_H);
+ }
+ 
+ 
+@@ -474,15 +505,14 @@
+ {
+ 	struct tableField *tf;
+ 	struct RastPort *rp = page-&gt;pg_Window-&gt;RPort;
+-	STRPTR t,st;
+-	BOOL   firsttab = FALSE,changed = FALSE;
+-	long   col,row,len = -1,i,j,oldw,oldfc,bspace = page-&gt;pg_CellTextSpace;
++	STRPTR t, st;
++	BOOL firsttab = FALSE,changed = FALSE;
++	long col, row, len = -1, i, j, oldw, oldfc, bspace = page-&gt;pg_CellTextSpace;
+ 
+ 	if (imsg.Qualifier &amp; (IEQUALIFIER_RCOMMAND | IEQUALIFIER_LCOMMAND))
+ 		return;
+ 
+-	if (page-&gt;pg_Gad.DispPos == PGS_NONE)
+-	{
++	if (page-&gt;pg_Gad.DispPos == PGS_NONE) {
+ 		CreateTabGadget(page, 1, 1, TRUE);
+ 		if (!(imsg.Class == IDCMP_VANILLAKEY &amp;&amp; imsg.Code != 13))
+ 			return;
+@@ -493,112 +523,103 @@
+ 	col = page-&gt;pg_Gad.cp.cp_Col;
+ 	row = page-&gt;pg_Gad.cp.cp_Row;
+ 
+-	if (page-&gt;pg_Gad.DispPos == PGS_FRAME)
+-	{
+-		if (imsg.Class == IDCMP_VANILLAKEY &amp;&amp; imsg.Code != 13)
+-		{
++	if (page-&gt;pg_Gad.DispPos == PGS_FRAME) {
++		if (imsg.Class == IDCMP_VANILLAKEY &amp;&amp; imsg.Code != 13) {
+ 			if (imsg.Class == IDCMP_VANILLAKEY &amp;&amp; imsg.Code == 9)
+ 				firsttab = TRUE;
+-			if ((tf = BeginTabGadget(page)) != 0)
+-				page-&gt;pg_Gad.DispPos = tf-&gt;tf_Text ? strlen(tf-&gt;tf_Text) : 0;
+-			else
++			
++			tf = BeginTabGadget(page);
++			if (tf == NULL)
+ 				return;
++
++			page-&gt;pg_Gad.DispPos = tf-&gt;tf_Text ? strlen(tf-&gt;tf_Text) : 0;
+ 		}
+ 
+ 		// draw cell with cursor
+-		if (page-&gt;pg_Gad.DispPos &gt;= 0)
+-		{
++		if (page-&gt;pg_Gad.DispPos &gt;= 0) {
+ 			SetTFWidth(page, tf);
+ 			DrawTableField(page, tf);
+ 		}
+ 	}
+ 
+-	if (tf &amp;&amp; page-&gt;pg_Gad.DispPos &gt;= 0)
+-	{
+-		i = page-&gt;pg_Gad.cp.cp_X + bspace
+-			+ OutlineLength(tf-&gt;tf_FontInfo, tf-&gt;tf_Text + page-&gt;pg_Gad.FirstChar, page-&gt;pg_Gad.DispPos - page-&gt;pg_Gad.FirstChar);
++	if (tf &amp;&amp; page-&gt;pg_Gad.DispPos &gt;= 0) {
++		i = page-&gt;pg_Gad.cp.cp_X + bspace + OutlineLength(tf-&gt;tf_FontInfo,
++				tf-&gt;tf_Text + page-&gt;pg_Gad.FirstChar,
++				page-&gt;pg_Gad.DispPos - page-&gt;pg_Gad.FirstChar);
+ 
+ 		if (i &lt; wd-&gt;wd_TabX
+ 			|| i &gt; wd-&gt;wd_TabX + wd-&gt;wd_TabW
+ 			|| page-&gt;pg_Gad.cp.cp_Y &lt; wd-&gt;wd_TabY
+-			|| page-&gt;pg_Gad.cp.cp_Y &gt; wd-&gt;wd_TabY + wd-&gt;wd_TabH)
+-		{
++			|| page-&gt;pg_Gad.cp.cp_Y &gt; wd-&gt;wd_TabY + wd-&gt;wd_TabH) {
+ 			page-&gt;pg_Gad.cp.cp_X -= wd-&gt;wd_TabX;
+ 			page-&gt;pg_Gad.cp.cp_Y -= wd-&gt;wd_TabY;
+ 			ShowTable(page, &amp;page-&gt;pg_Gad.cp, 0, 0);
+ 		}
+ 
+ 		page-&gt;pg_Gad.DispPos = -page-&gt;pg_Gad.DispPos - 1;
+-		DrawTableCoord(page,i,page-&gt;pg_Gad.cp.cp_Y + 1, i + 1, page-&gt;pg_Gad.cp.cp_Y + page-&gt;pg_Gad.cp.cp_H - 3);
++		DrawTableCoord(page,i,page-&gt;pg_Gad.cp.cp_Y + 1, i + 1,
++			page-&gt;pg_Gad.cp.cp_Y + page-&gt;pg_Gad.cp.cp_H - 3);
+ 		page-&gt;pg_Gad.DispPos = -page-&gt;pg_Gad.DispPos - 1;
+ 
+-		if (imsg.Class == IDCMP_RAWKEY)
+-		{
+-			if (imsg.Code == CURSORLEFT &amp;&amp; page-&gt;pg_Gad.DispPos &gt; 0)
+-			{
++		if (imsg.Class == IDCMP_RAWKEY) {
++			if (imsg.Code == CURSORLEFT &amp;&amp; page-&gt;pg_Gad.DispPos &gt; 0) {
+ 				if (imsg.Qualifier &amp; 3)
+ 					page-&gt;pg_Gad.DispPos = 0;
+ 				else
+ 					page-&gt;pg_Gad.DispPos--;
+-			}
+-			else if (imsg.Code == CURSORRIGHT &amp;&amp; tf-&gt;tf_Text &amp;&amp; page-&gt;pg_Gad.DispPos &lt; strlen(tf-&gt;tf_Text))
+-			{
+-				if (imsg.Qualifier &amp; 3)
++			} else if (imsg.Code == CURSORRIGHT &amp;&amp; tf-&gt;tf_Text
++				&amp;&amp; page-&gt;pg_Gad.DispPos &lt; strlen(tf-&gt;tf_Text)) {
++				if ((imsg.Qualifier &amp; 3) != 0)
+ 					page-&gt;pg_Gad.DispPos = strlen(tf-&gt;tf_Text);
+ 				else
+ 					page-&gt;pg_Gad.DispPos++;
+-			}
+-			else if (imsg.Code &lt; 96 || imsg.Code &gt; 101)
+-			{
+-				if (imsg.Code == 66 &amp;&amp; TestForCompletion(page, tf))
+-				{
++			} else if (imsg.Code &lt; 96 || imsg.Code &gt; 101) {
++				if (imsg.Code == 66 &amp;&amp; TestForCompletion(page, tf)) {
+ 					if (CompleteFunctionNames(page))
+ 						RefreshTabGadgetLine(page);
+-				}
+-				else
++				} else
+ 					page-&gt;pg_Gad.DispPos = PGS_FRAME;
+ 			}
+-		}
+-		else
+-		{
++		} else {
+ 			if (imsg.Code != 9)
+ 				comppos = 0;
+ 
+-			switch (imsg.Code)
+-			{
++			switch (imsg.Code) {
+ 				case 9:	 // Tab
+ 					if (firsttab)
+ 						break;
+-					if (TestForCompletion(page, tf))
+-					{
++					if (TestForCompletion(page, tf)) {
+ 						if (CompleteFunctionNames(page))
+ 							RefreshTabGadgetLine(page);
+ 						break;
+ 					}
++					// supposed to fall through
++
+ 				case 13:	// Return
+ 					page-&gt;pg_Gad.DispPos = PGS_FRAME;
+ 					break;
++
+ 				case 27:  	// Escape
+ 					page-&gt;pg_Gad.DispPos = PGS_FRAME;
+ 					FreeString(tf-&gt;tf_Text);
+ 					
+ 					// Restore old text
+-					if (page-&gt;pg_Gad.Undo)
+-						tf-&gt;tf_Text = AllocString(page-&gt;pg_Gad.Undo-&gt;tf_Original);
+-					else
++					if (page-&gt;pg_Gad.Undo) {
++						tf-&gt;tf_Text
++							= AllocString(page-&gt;pg_Gad.Undo-&gt;tf_Original);
++					} else
+ 						tf-&gt;tf_Text = NULL;
+ 					break;
++
+ 				case 8:		// backspace
+-					if (page-&gt;pg_Gad.DispPos == 0)
+-					{
++					if (page-&gt;pg_Gad.DispPos == 0) {
+ 						DisplayBeep(NULL);
+ 						break;
+ 					}
+-					if (imsg.Qualifier &amp; 3)
+-					{
+-						if ((t = tf-&gt;tf_Text) != 0)
+-						{
+-							tf-&gt;tf_Text = AllocString(tf-&gt;tf_Text + page-&gt;pg_Gad.DispPos);
++					if ((imsg.Qualifier &amp; 3) != 0) {
++						if ((t = tf-&gt;tf_Text) != NULL) {
++							tf-&gt;tf_Text = AllocString(tf-&gt;tf_Text
++								+ page-&gt;pg_Gad.DispPos);
+ 							FreeString(t);
+ 							len = page-&gt;pg_Gad.DispPos = 0;
+ 							break;
+@@ -606,30 +627,31 @@
+ 						break;
+ 					}
+ 					page-&gt;pg_Gad.DispPos--;
++					// supposed to fall through
++
+ 				case 127:	// delete
+-					if (imsg.Qualifier &amp; 3)
+-					{
+-						if ((t = tf-&gt;tf_Text) &amp;&amp; (tf-&gt;tf_Text = AllocPooled(pool,page-&gt;pg_Gad.DispPos+1)))
+-						{
+-							CopyMem(t,tf-&gt;tf_Text,page-&gt;pg_Gad.DispPos);
++					if ((imsg.Qualifier &amp; 3) != 0) {
++						if ((t = tf-&gt;tf_Text)
++							&amp;&amp; (tf-&gt;tf_Text = AllocPooled(pool,
++								page-&gt;pg_Gad.DispPos + 1))) {
++							CopyMem(t, tf-&gt;tf_Text, page-&gt;pg_Gad.DispPos);
+ 							FreeString(t);
+ 							len = page-&gt;pg_Gad.DispPos;
+ 							break;
+ 						}
+ 						break;
+ 					}
+-					if (tf-&gt;tf_Text &amp;&amp; strlen(tf-&gt;tf_Text) &gt; page-&gt;pg_Gad.DispPos)
+-					{
+-						if (strlen(tf-&gt;tf_Text) &gt; 1 &amp;&amp; (st = t = AllocPooled(pool,strlen(tf-&gt;tf_Text))))
+-						{
+-							for(i = 0;*(tf-&gt;tf_Text+i);i++)
+-							{
++					if (tf-&gt;tf_Text &amp;&amp; strlen(tf-&gt;tf_Text)
++							&gt; page-&gt;pg_Gad.DispPos) {
++						if (strlen(tf-&gt;tf_Text) &gt; 1 &amp;&amp; (st = t
++								= AllocPooled(pool, strlen(tf-&gt;tf_Text)))) {
++							for (i = 0; tf-&gt;tf_Text[i]; i++) {
+ 								if (i != page-&gt;pg_Gad.DispPos)
+-									*(st++) = *(tf-&gt;tf_Text+i);
++									*(st++) = tf-&gt;tf_Text[i];
+ 							}
+-						}
+-						else
++						} else
+ 							t = NULL;
++
+ 						FreeString(tf-&gt;tf_Text);
+ 						tf-&gt;tf_Text = t;
+ 						if (!tf-&gt;tf_Text)
+@@ -637,12 +659,11 @@
+ 						len = page-&gt;pg_Gad.DispPos;
+ 					}
+ 					break;
++
+ 				default:
+ 					len = ((st = tf-&gt;tf_Text) ? strlen(st) : 0);
+-					if ((t = AllocPooled(pool, len + 2)) != 0)
+-					{
+-						for (i = 0; i &lt; len + 1; i++)
+-						{
++					if ((t = AllocPooled(pool, len + 2)) != NULL) {
++						for (i = 0; i &lt; len + 1; i++) {
+ 							if (i == page-&gt;pg_Gad.DispPos)
+ 								*(t+i) = imsg.Code;
+ 							else
+@@ -655,8 +676,9 @@
+ 						tf-&gt;tf_Text = t;
+ 						if (!st)
+ 							RefreshTabGadgetLine(page);
+-						
+-						// if it's a formula and the parameter starts '(', show function help
++
++						// if it's a formula and the parameter starts '(',
++						// show function help
+ 						if (imsg.Code == '(' &amp;&amp; t[0] == '=')
+ 							ShowFunctionHelp(page);
+ 					}
+@@ -665,30 +687,37 @@
+ 		}
+ 		if (page-&gt;pg_Gad.DispPos == PGS_FRAME)
+ 			changed = TRUE;
+-		else
+-		{
+-			i = bspace + OutlineLength(tf-&gt;tf_FontInfo, tf-&gt;tf_Text, tf-&gt;tf_Text ? strlen(tf-&gt;tf_Text) : 0);
++		else {
++			i = bspace + OutlineLength(tf-&gt;tf_FontInfo, tf-&gt;tf_Text,
++				tf-&gt;tf_Text ? strlen(tf-&gt;tf_Text) : 0);
+ 
+-			if (tf-&gt;tf_WidthSet == 0xffff &amp;&amp; tf-&gt;tf_Width != tf-&gt;tf_MaxWidth)
+-			{
++			if (tf-&gt;tf_WidthSet == 0xffff &amp;&amp; tf-&gt;tf_Width != tf-&gt;tf_MaxWidth) {
+ 				oldw = page-&gt;pg_Gad.cp.cp_W;
+-				for(page-&gt;pg_Gad.cp.cp_W = 0,j = page-&gt;pg_Gad.cp.cp_Col;i &gt; page-&gt;pg_Gad.cp.cp_W;page-&gt;pg_Gad.cp.cp_W += GetTFWidth(page,j++));
+-				if (oldw != page-&gt;pg_Gad.cp.cp_W)
+-				{
+-					SetTFWidth(page,tf);
+-					DrawTableCoord(page,min(oldw,page-&gt;pg_Gad.cp.cp_W)+page-&gt;pg_Gad.cp.cp_X-4,page-&gt;pg_Gad.cp.cp_Y-2,wd-&gt;wd_TabX+wd-&gt;wd_TabW,page-&gt;pg_Gad.cp.cp_Y+page-&gt;pg_Gad.cp.cp_H/*+2*/);
++				for (page-&gt;pg_Gad.cp.cp_W = 0, j = page-&gt;pg_Gad.cp.cp_Col;
++					i &gt; page-&gt;pg_Gad.cp.cp_W;
++					page-&gt;pg_Gad.cp.cp_W += GetTFWidth(page, j++))
++					;
++				if (oldw != page-&gt;pg_Gad.cp.cp_W) {
++					SetTFWidth(page, tf);
++					DrawTableCoord(page, min(oldw, page-&gt;pg_Gad.cp.cp_W)
++							+ page-&gt;pg_Gad.cp.cp_X - 4,
++						page-&gt;pg_Gad.cp.cp_Y - 2, wd-&gt;wd_TabX + wd-&gt;wd_TabW,
++						page-&gt;pg_Gad.cp.cp_Y + page-&gt;pg_Gad.cp.cp_H/*+2*/);
+ 				}
+ 			}
+ 
+ 			oldfc = page-&gt;pg_Gad.FirstChar;
+ 
+-			if (page-&gt;pg_Gad.DispPos &gt; page-&gt;pg_Gad.FirstChar)
+-			{
+-				i = bspace+OutlineLength(tf-&gt;tf_FontInfo,tf-&gt;tf_Text+page-&gt;pg_Gad.FirstChar,page-&gt;pg_Gad.DispPos-page-&gt;pg_Gad.FirstChar);
+-				for(;i &gt; page-&gt;pg_Gad.cp.cp_W;i = bspace+OutlineLength(tf-&gt;tf_FontInfo,tf-&gt;tf_Text+ ++page-&gt;pg_Gad.FirstChar,page-&gt;pg_Gad.DispPos-page-&gt;pg_Gad.FirstChar));
+-			}
+-			else
+-			{
++			if (page-&gt;pg_Gad.DispPos &gt; page-&gt;pg_Gad.FirstChar) {
++				i = bspace + OutlineLength(tf-&gt;tf_FontInfo,
++					tf-&gt;tf_Text + page-&gt;pg_Gad.FirstChar,
++					page-&gt;pg_Gad.DispPos - page-&gt;pg_Gad.FirstChar);
++				for (; i &gt; page-&gt;pg_Gad.cp.cp_W;
++					i = bspace + OutlineLength(tf-&gt;tf_FontInfo,
++						tf-&gt;tf_Text + ++page-&gt;pg_Gad.FirstChar,
++						page-&gt;pg_Gad.DispPos - page-&gt;pg_Gad.FirstChar))
++					;
++			} else {
+ 				i = bspace;
+ 				if ((page-&gt;pg_Gad.FirstChar = page-&gt;pg_Gad.DispPos) &lt; 0)
+ 					page-&gt;pg_Gad.FirstChar = 0;
+@@ -699,58 +728,74 @@
+ 
+ 				i += page-&gt;pg_Gad.cp.cp_X;
+ 
+-				if (i &gt; wd-&gt;wd_TabX+(wd-&gt;wd_TabW*(RIGHTOFFSET-1)/RIGHTOFFSET)-3)
++				if (i &gt; wd-&gt;wd_TabX + (wd-&gt;wd_TabW * (RIGHTOFFSET - 1)
++						/ RIGHTOFFSET) - 3)
+ 					i += wd-&gt;wd_TabW/RIGHTOFFSET-wd-&gt;wd_TabW,  scroll = TRUE;
+ 				else if (i &lt; wd-&gt;wd_TabX)
+ 					scroll = TRUE;
+ 
+ 				// ScrollTable(page-&gt;pg_Window,page-&gt;pg_TabX-wd-&gt;wd_TabX+i,page-&gt;pg_TabY+j);
+ 
+-				if (scroll)
+-					ScrollTable(page-&gt;pg_Window,page-&gt;pg_TabX+(scroll ? i-wd-&gt;wd_TabX : 0),page-&gt;pg_TabY);
++				if (scroll) {
++					ScrollTable(page-&gt;pg_Window,
++						page-&gt;pg_TabX + (scroll ? i - wd-&gt;wd_TabX : 0),
++						page-&gt;pg_TabY);
++				}
+ 			}
+ 
+-			if (oldfc != page-&gt;pg_Gad.FirstChar)
+-				DrawTableCoord(page,page-&gt;pg_Gad.cp.cp_X,page-&gt;pg_Gad.cp.cp_Y,page-&gt;pg_Gad.cp.cp_X+page-&gt;pg_Gad.cp.cp_W,page-&gt;pg_Gad.cp.cp_Y+page-&gt;pg_Gad.cp.cp_H);
+-			else
+-			{
+-				i = page-&gt;pg_Gad.cp.cp_X+bspace+OutlineLength(tf-&gt;tf_FontInfo,tf-&gt;tf_Text+page-&gt;pg_Gad.FirstChar,page-&gt;pg_Gad.DispPos-page-&gt;pg_Gad.FirstChar);
+-				if (imsg.Class == IDCMP_VANILLAKEY)
+-				{
+-					j = 0;  oldw = page-&gt;pg_Gad.cp.cp_X+page-&gt;pg_Gad.cp.cp_W-3;
+-					if (len &gt;= 0)
+-						j = page-&gt;pg_Gad.cp.cp_X+bspace+OutlineLength(tf-&gt;tf_FontInfo,tf-&gt;tf_Text+page-&gt;pg_Gad.FirstChar,len-page-&gt;pg_Gad.FirstChar);
+-					else if (page-&gt;pg_Gad.DispPos &gt; 0)
+-					{
+-						j = page-&gt;pg_Gad.cp.cp_X+bspace+OutlineLength(tf-&gt;tf_FontInfo,tf-&gt;tf_Text+page-&gt;pg_Gad.FirstChar,page-&gt;pg_Gad.DispPos-1-page-&gt;pg_Gad.FirstChar);
++			if (oldfc != page-&gt;pg_Gad.FirstChar) {
++				DrawTableCoord(page, page-&gt;pg_Gad.cp.cp_X, page-&gt;pg_Gad.cp.cp_Y,
++					page-&gt;pg_Gad.cp.cp_X + page-&gt;pg_Gad.cp.cp_W,
++					page-&gt;pg_Gad.cp.cp_Y + page-&gt;pg_Gad.cp.cp_H);
++			} else {
++				i = page-&gt;pg_Gad.cp.cp_X + bspace
++					+ OutlineLength(tf-&gt;tf_FontInfo,
++						tf-&gt;tf_Text + page-&gt;pg_Gad.FirstChar,
++						page-&gt;pg_Gad.DispPos - page-&gt;pg_Gad.FirstChar);
++				if (imsg.Class == IDCMP_VANILLAKEY) {
++					j = 0;
++					oldw = page-&gt;pg_Gad.cp.cp_X + page-&gt;pg_Gad.cp.cp_W - 3;
++					if (len &gt;= 0) {
++						j = page-&gt;pg_Gad.cp.cp_X + bspace
++							+ OutlineLength(tf-&gt;tf_FontInfo,
++								tf-&gt;tf_Text + page-&gt;pg_Gad.FirstChar,
++								len - page-&gt;pg_Gad.FirstChar);
++					} else if (page-&gt;pg_Gad.DispPos &gt; 0) {
++						j = page-&gt;pg_Gad.cp.cp_X + bspace
++							+ OutlineLength(tf-&gt;tf_FontInfo,
++								tf-&gt;tf_Text + page-&gt;pg_Gad.FirstChar,
++								page-&gt;pg_Gad.DispPos - 1
++									- page-&gt;pg_Gad.FirstChar);
+ 						if (len == -1)
+ 							oldw = i;
+ 					}
+-					if (j)
+-						DrawTableCoord(page,j,page-&gt;pg_Gad.cp.cp_Y,oldw,page-&gt;pg_Gad.cp.cp_Y+page-&gt;pg_Gad.cp.cp_H-2);
++
++					if (j) {
++						DrawTableCoord(page, j, page-&gt;pg_Gad.cp.cp_Y, oldw,
++							page-&gt;pg_Gad.cp.cp_Y + page-&gt;pg_Gad.cp.cp_H - 2);
++					}
+ 				}
+-				makeClip(page-&gt;pg_Window,wd-&gt;wd_TabX,wd-&gt;wd_TabY,wd-&gt;wd_TabW,wd-&gt;wd_TabH);
++				makeClip(page-&gt;pg_Window, wd-&gt;wd_TabX, wd-&gt;wd_TabY,
++					wd-&gt;wd_TabW, wd-&gt;wd_TabH);
+ 				if (tf-&gt;tf_BPen == page-&gt;pg_APen)
+-					SetHighColor(rp,tf-&gt;tf_APen);
++					SetHighColor(rp, tf-&gt;tf_APen);
+ 				else
+-					SetHighColor(rp,page-&gt;pg_APen);
+-				RectFill(rp,i,page-&gt;pg_Gad.cp.cp_Y+1,i+1,page-&gt;pg_Gad.cp.cp_Y+page-&gt;pg_Gad.cp.cp_H-3);
++					SetHighColor(rp, page-&gt;pg_APen);
++				RectFill(rp, i, page-&gt;pg_Gad.cp.cp_Y + 1, i + 1,
++					page-&gt;pg_Gad.cp.cp_Y + page-&gt;pg_Gad.cp.cp_H - 3);
+ 				freeClip(win);
+ 			}
+ 		}
+ 	}
+ 
+-	if (page-&gt;pg_Gad.DispPos == PGS_FRAME)
+-	{
++	if (page-&gt;pg_Gad.DispPos == PGS_FRAME) {
+ 		struct Mask *ma = NULL;
+ 
+ 		if (page-&gt;pg_MarkCol != -1)
+ 			SetMark(page, -1, 0, 0, 0);
+ 
+-		if (imsg.Class == IDCMP_RAWKEY)
+-		{
+-			switch (imsg.Code)
+-			{
++		if (imsg.Class == IDCMP_RAWKEY) {
++			switch (imsg.Code) {
+ 				case CURSORDOWN:
+ 					row++;
+ 					break;
+@@ -759,46 +804,44 @@
+ 					break;
+ 				case CURSORLEFT:
+ 					col--;
+-					if (imsg.Qualifier &amp; 3)
++					if ((imsg.Qualifier &amp; 3) != 0)
+ 						col = 1;
+ 					break;
+ 				case CURSORRIGHT:
+ 					col++;
+ 					break;
+ 				case 66:  // TAB
+-					if (imsg.Qualifier &amp; 3)
++					if ((imsg.Qualifier &amp; 3) != 0)
+ 						col--;
+ 					else
+ 						col++;
+ 					break;
+ 			}
+-		}
+-		else
+-		{
+-			if (page-&gt;pg_Mappe-&gt;mp_Flags &amp; MPF_SCRIPTS &amp;&amp; (imsg.Code == 13 || imsg.Code == 9) &amp;&amp; (ma = IsOverMask(page)))
+-			{
++		} else {
++			if ((page-&gt;pg_Mappe-&gt;mp_Flags &amp; MPF_SCRIPTS) != 0
++				&amp;&amp; (imsg.Code == 13 || imsg.Code == 9)
++				&amp;&amp; (ma = IsOverMask(page))) {
+ 				struct MaskField *mf;
+ 
+-				foreach (&amp;ma-&gt;ma_Fields, mf)
+-				{
++				foreach (&amp;ma-&gt;ma_Fields, mf) {
+ 					if (mf-&gt;mf_Col == col &amp;&amp; mf-&gt;mf_Row == row)
+ 						break;
+ 				}
+-				if ((mf = (struct MaskField *)mf-&gt;mf_Node.ln_Succ) &amp;&amp; mf-&gt;mf_Node.ln_Succ)
+-				{
++				if ((mf = (struct MaskField *)mf-&gt;mf_Node.ln_Succ) != NULL
++					&amp;&amp; mf-&gt;mf_Node.ln_Succ) {
+ 					col = mf-&gt;mf_Col;  row = mf-&gt;mf_Row;
+ 					ma = NULL;
++				} else if (mf == NULL) {
++					/* not the last field */
++					ma = NULL;
+ 				}
+-				else if (!mf)  /* not the last field */
+-					ma = NULL;
+-			}
+-			else if (imsg.Code == 13)
++			} else if (imsg.Code == 13)
+ 				row++;
+ 			else if (imsg.Code == 9)
+ 				col++;
+ 		}
+-		if (col &lt;= 0 || row &lt;= 0)
+-		{
++
++		if (col &lt;= 0 || row &lt;= 0) {
+ 			DisplayBeep(NULL);
+ 			return;
+ 		}
+@@ -813,15 +856,16 @@
+ 
+ 		if (changed)
+ 			page-&gt;pg_Gad.DispPos = 0;
+-		if (changed || col != page-&gt;pg_Gad.cp.cp_Col || row != page-&gt;pg_Gad.cp.cp_Row)
++		if (changed || col != page-&gt;pg_Gad.cp.cp_Col
++			|| row != page-&gt;pg_Gad.cp.cp_Row)
+ 			FreeTabGadget(page);
+ 
+-		if (ma)	  /* update indices/filter or start db-search */
+-		{
++		if (ma) {
++			/* update indices/filter or start db-search */
+ 			struct Database *db;
+ 
+-			if ((db = (APTR)MyFindName(&amp;page-&gt;pg_Mappe-&gt;mp_Databases, ma-&gt;ma_Node.ln_Name)) != 0)
+-			{
++			if ((db = (APTR)MyFindName(&amp;page-&gt;pg_Mappe-&gt;mp_Databases,
++					ma-&gt;ma_Node.ln_Name)) != NULL) {
+ 				if (ma-&gt;ma_Node.ln_Type)
+ 					MakeSearchFilter(db, ma);
+ 				else
+@@ -830,7 +874,8 @@
+ 			}
+ 		}
+ 
+-		if (changed || col != page-&gt;pg_Gad.cp.cp_Col || row != page-&gt;pg_Gad.cp.cp_Row)
++		if (changed || col != page-&gt;pg_Gad.cp.cp_Col
++			|| row != page-&gt;pg_Gad.cp.cp_Row)
+ 			CreateTabGadget(page, col, row, TRUE);
+ 	}
+ }
+@@ -858,8 +903,7 @@
+ 
+ 	if (makevisible)
+ 		ShowTable(page, cp, 0, 0);
+-	else
+-	{
++	else {
+ 		cp-&gt;cp_X += page-&gt;pg_wTabX;
+ 		cp-&gt;cp_Y += page-&gt;pg_wTabY;
+ 	}
+@@ -870,7 +914,8 @@
+ 	page-&gt;pg_Gad.tf = GetTableField(page, cp-&gt;cp_Col, cp-&gt;cp_Row);
+ 	page-&gt;pg_SelectPos = -1;  page-&gt;pg_SelectLength = 0;
+ 
+-	DrawTableCoord(page, cp-&gt;cp_X - 2, cp-&gt;cp_Y - 2, cp-&gt;cp_X + cp-&gt;cp_W + 2, cp-&gt;cp_Y + cp-&gt;cp_H);
++	DrawTableCoord(page, cp-&gt;cp_X - 2, cp-&gt;cp_Y - 2, cp-&gt;cp_X + cp-&gt;cp_W + 2,
++		cp-&gt;cp_Y + cp-&gt;cp_H);
+ 	DisplayTablePos(page);
+ 	RefreshToolBar(page);
+ }
+@@ -884,7 +929,7 @@
+ 	struct IntuiMessage *msg;
+ 	struct Window *win;
+ 	CONST_STRPTR s[4];
+-	long i,w;
++	long i, w;
+ 
+ 	if (!(gad = CreateContext(&amp;gadlist)))
+ 		return false;
+@@ -914,7 +959,9 @@
+ 	ngad.ng_Width = gWidth - ngad.ng_LeftEdge - rborder;
+ 	ngad.ng_Flags = PLACETEXT_LEFT;
+ 	ngad.ng_GadgetID = 1;				   // 1
+-	if ((pgad = CreateGadget(STRING_KIND, gad, &amp;ngad, GT_Underscore, '_', GTST_String, NULL, GTST_EditHook, &amp;passwordEditHook, GTST_MaxChars, 32, TAG_END)) != 0)
++	if ((pgad = CreateGadget(STRING_KIND, gad, &amp;ngad, GT_Underscore, '_',
++			GTST_String, NULL, GTST_EditHook, &amp;passwordEditHook,
++			GTST_MaxChars, 32, TAG_END)) != 0)
+ 		pgad-&gt;UserData = AllocPooled(pool,32);
+ 
+ 	ngad.ng_LeftEdge = lborder;
+@@ -930,20 +977,22 @@
+ 	ngad.ng_GadgetID++;					 // 3
+ 	gad = CreateGadget(BUTTON_KIND, gad, &amp;ngad, TAG_END);
+ 
+-	if ((win = OpenWindowTags(NULL, WA_Flags,		WFLG_DRAGBAR | WFLG_DEPTHGADGET | WFLG_ACTIVATE,
+-								   WA_Left,			(scr-&gt;Width - gWidth) &gt;&gt; 1,
+-								   WA_Top,			(scr-&gt;Height - gHeight) &gt;&gt; 1,
+-								   WA_Title,		GetString(&amp;gLocaleInfo, MSG_SECURITY_CHECK_TITLE),
+-								   WA_Width,		gWidth,
+-								   WA_Height,		gHeight,
+-								   WA_PubScreen,	scr,
+-								   WA_Gadgets,		gadlist,
+-								   WA_IDCMP,		IDCMP_GADGETUP,
+-								   TAG_END)) != 0) {
++	if ((win = OpenWindowTags(NULL,
++			WA_Flags,		WFLG_DRAGBAR | WFLG_DEPTHGADGET | WFLG_ACTIVATE,
++			WA_Left,		(scr-&gt;Width - gWidth) &gt;&gt; 1,
++			WA_Top,			(scr-&gt;Height - gHeight) &gt;&gt; 1,
+
+[... truncated: 38 lines follow ...]
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000065.html">[Ignition-commits] r43 - trunk
+</A></li>
+	<LI>Next message: <A HREF="000068.html">[Ignition-commits] r45 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#67">[ date ]</a>
+              <a href="thread.html#67">[ thread ]</a>
+              <a href="subject.html#67">[ subject ]</a>
+              <a href="author.html#67">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,1097 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r18 - trunk/add-ons
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2008-December/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r18%20-%20trunk/add-ons&In-Reply-To=%3C200812162219.mBGMJH4t032465%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000029.html">
+   <LINK REL="Next"  HREF="000031.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r18 - trunk/add-ons</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r18%20-%20trunk/add-ons&In-Reply-To=%3C200812162219.mBGMJH4t032465%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r18 - trunk/add-ons">marust at mail.berlios.de
+       </A><BR>
+    <I>Tue Dec 16 23:19:17 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000029.html">[Ignition-commits] r17 - in trunk: . add-ons	libs/gtdrag/include/libraries
+</A></li>
+        <LI>Next message: <A HREF="000031.html">[Ignition-commits] r19 - trunk/add-ons
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30">[ date ]</a>
+              <a href="thread.html#30">[ thread ]</a>
+              <a href="subject.html#30">[ subject ]</a>
+              <a href="author.html#30">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2008-12-16 23:19:05 +0100 (Tue, 16 Dec 2008)
+New Revision: 18
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=18&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=18&amp;view=rev</A>
+
+Added:
+   trunk/add-ons/mmakefile.src
+Modified:
+   trunk/add-ons/area_diagram.c
+   trunk/add-ons/ascii.c
+   trunk/add-ons/button.c
+   trunk/add-ons/checkbox.c
+   trunk/add-ons/circle_diagram.c
+   trunk/add-ons/column_diagram.c
+   trunk/add-ons/csv.c
+   trunk/add-ons/frame.c
+   trunk/add-ons/gclass.c
+   trunk/add-ons/gclass.h
+   trunk/add-ons/gclass_protos.h
+   trunk/add-ons/gradient.c
+   trunk/add-ons/iotype.c
+   trunk/add-ons/iotype.h
+   trunk/add-ons/line.c
+   trunk/add-ons/line_diagram.c
+   trunk/add-ons/rectangle.c
+   trunk/add-ons/text.c
+   trunk/add-ons/turbocalc.c
+Log:
+* Attempt to build the add-ons for AROS
+  They are almost compiling, but no linking, because
+  of the missing Ignition functions.
+
+
+
+Modified: trunk/add-ons/area_diagram.c
+===================================================================
+--- trunk/add-ons/area_diagram.c	2008-12-16 19:05:58 UTC (rev 17)
++++ trunk/add-ons/area_diagram.c	2008-12-16 22:19:05 UTC (rev 18)
+@@ -9,8 +9,11 @@
+ 
+ #include &quot;gclass.h&quot;
+ #include &quot;gclass_protos.h&quot;
+-#include &quot;gclass_pragmas.h&quot;
+ 
++#if defined(__SASC)
++#	include &quot;gclass_pragmas.h&quot;
++#endif
++
+ #define CATCOMP_NUMBERS
+ #include &quot;ignition_strings.h&quot;
+ 
+@@ -32,7 +35,7 @@
+ struct gInterface interface[] = {
+ 	{GAA_Frame,	NULL /*&quot;Fl&#228;che durch einen Rahmen begrenzen&quot;*/, GIT_CHECKBOX, NULL, NULL},
+ 	{GAA_Pseudo3D, NULL /*&quot;Pseudo-3D&quot;*/, GIT_CHECKBOX, NULL, NULL},
+-	{NULL}
++	{0}
+ };
+ 
+ const STRPTR superClass = &quot;axes&quot;;
+@@ -195,7 +198,7 @@
+ 	if (tstate == NULL)
+ 		return GCPR_NONE;
+ 
+-	while (ti = NextTagItem(&amp;tstate)) {
++	while ((ti = NextTagItem(&amp;tstate)) != 0) {
+ 		switch (ti-&gt;ti_Tag) {
+ 			case GAA_Frame:
+ 				if (ga-&gt;ga_Frame != ti-&gt;ti_Data) {
+@@ -211,7 +214,7 @@
+ 
+ 
+ ULONG PUBLIC
+-dispatch(REG(a0, struct gClass *gc), REG(a1, struct gDiagram *gd), REG(a2, Msg msg))
++dispatch(REG(a0, struct gClass *gc), REG(a2, struct gDiagram *gd), REG(a1, Msg msg))
+ {
+   struct gArea *ga = GINST_DATA(gc,gd);
+   ULONG  rc;
+@@ -219,7 +222,7 @@
+   switch(msg-&gt;MethodID)
+   {
+     case GCM_NEW:
+-      if (rc = gDoSuperMethodA(gc,gd,msg))
++      if ((rc = gDoSuperMethodA(gc, gd, msg)) != 0)
+       {
+         ga = GINST_DATA(gc,rc);
+         ga-&gt;ga_Frame = 1;
+@@ -248,7 +251,7 @@
+     /*case GCM_HITTEST:
+       break;*/
+     case GCDM_SETLINKATTR:
+-      if (rc = gDoSuperMethodA(gc,gd,msg))  // something has changed
++      if ((rc = gDoSuperMethodA(gc, gd, msg)) != 0) // something has changed
+       {
+         struct gcpSetLinkAttr *gcps = (APTR)msg;
+         ULONG  color = gcps-&gt;gcps_Color;
+@@ -290,4 +293,3 @@
+ 
+ 	return TRUE;
+ }
+-
+
+Modified: trunk/add-ons/ascii.c
+===================================================================
+--- trunk/add-ons/ascii.c	2008-12-16 19:05:58 UTC (rev 17)
++++ trunk/add-ons/ascii.c	2008-12-16 22:19:05 UTC (rev 18)
+@@ -11,12 +11,7 @@
+ 
+ const STRPTR __version = &quot;$VER: ascii.io 0.1 (5.3.2001)&quot;;
+ 
+-#ifdef DEBUG
+-	void kprintf(STRPTR,...);
+-#	define bug kprintf
+-#endif
+ 
+-
+ void PUBLIC
+ closePrefsGUI(void)
+ {
+@@ -51,9 +46,9 @@
+ 	char t[512];
+ 	ULONG row = 1;
+ 
+-	if (page = NewPage(mp)) {
++	if ((page = NewPage(mp)) != 0) {
+ 		while (FGets(file, t, 512)) {
+-			if (c = NewCell(page,1,row++)) {
++			if ((c = NewCell(page, 1, row++)) != 0) {
+ 				if (t[strlen(t)-1] == '\n')
+ 					t[strlen(t)-1] = 0;
+ 				c-&gt;c_Text = AllocString(t);
+@@ -89,9 +84,9 @@
+ }
+ 
+ 
+-void __stdargs
++#if defined(__SASC)
++void STDARGS
+ _XCEXIT(long a)
+ {
+ }
+-
+-
++#endif
+
+Modified: trunk/add-ons/button.c
+===================================================================
+--- trunk/add-ons/button.c	2008-12-16 19:05:58 UTC (rev 17)
++++ trunk/add-ons/button.c	2008-12-16 22:19:05 UTC (rev 18)
+@@ -7,8 +7,11 @@
+ 
+ #include &quot;gclass.h&quot;
+ #include &quot;gclass_protos.h&quot;
+-#include &quot;gclass_pragmas.h&quot;
+ 
++#if defined(__SASC)
++#	include &quot;gclass_pragmas.h&quot;
++#endif
++
+ #define CATCOMP_NUMBERS
+ #include &quot;ignition_strings.h&quot;
+ 
+@@ -148,7 +151,7 @@
+ 
+   if (tstate)
+   {
+-    while(ti = NextTagItem(&amp;tstate))
++    while ((ti = NextTagItem(&amp;tstate)) != 0)
+     {
+       switch(ti-&gt;ti_Tag)
+       {
+@@ -210,7 +213,7 @@
+ 
+ 
+ ULONG PUBLIC
+-dispatch(REG(a0, struct gClass *gc), REG(a2, struct gObject *go), REG(a2, Msg msg))
++dispatch(REG(a0, struct gClass *gc), REG(a2, struct gObject *go), REG(a1, Msg msg))
+ {
+   struct gButton *gb = GINST_DATA(gc,go);
+   ULONG rc = 0L;
+@@ -218,7 +221,7 @@
+   switch(msg-&gt;MethodID)
+   {
+     case GCM_NEW:
+-      if (rc = gDoSuperMethodA(gc,go,msg))
++      if ((rc = gDoSuperMethodA(gc, go, msg)) != 0)
+       {
+         go = (struct gObject *)rc;  gb = GINST_DATA(gc,go);
+ 
+@@ -244,7 +247,7 @@
+     {
+       struct gObject *cgo;
+ 
+-      if (cgo = (struct gObject *)(rc = gDoSuperMethodA(gc,go,msg)))
++      if ((cgo = (struct gObject *)(rc = gDoSuperMethodA(gc, go, msg))) != 0)
+       {
+         struct gButton *cgb = GINST_DATA(gc,cgo);
+ 
+
+Modified: trunk/add-ons/checkbox.c
+===================================================================
+--- trunk/add-ons/checkbox.c	2008-12-16 19:05:58 UTC (rev 17)
++++ trunk/add-ons/checkbox.c	2008-12-16 22:19:05 UTC (rev 18)
+@@ -7,8 +7,11 @@
+ 
+ #include &quot;gclass.h&quot;
+ #include &quot;gclass_protos.h&quot;
+-#include &quot;gclass_pragmas.h&quot;
+ 
++#if defined(__SASC)
++#	include &quot;gclass_pragmas.h&quot;
++#endif
++
+ #define CATCOMP_NUMBERS
+ #include &quot;ignition_strings.h&quot;
+ 
+@@ -31,7 +34,7 @@
+ #define GCA_CheckPen  GOA_TagUser + 4
+ #define GCA_PlaceText GOA_TagUser + 5
+ 
+-static char *sPlaceTextLabels[3];
++static CONST_STRPTR sPlaceTextLabels[3];
+ #define PLACE_TEXT_RIGHT 0
+ #define PLACE_TEXT_LEFT 1
+ 
+@@ -47,7 +50,7 @@
+ 	{GOA_Text,     NULL,GIT_FORMULA,NULL,NULL},
+ 	{GOA_Command,  NULL,GIT_TEXT,NULL,NULL},
+ 	{GCA_PlaceText, &quot;Textplazierung:&quot;, GIT_CYCLE, &amp;sPlaceTextLabels, &quot;placetext&quot;},
+-	{NULL}
++	{0}
+ };
+ 
+ const STRPTR superClass = &quot;root&quot;;
+@@ -168,7 +171,7 @@
+ 
+   if (tstate)
+   {
+-    while(ti = NextTagItem(&amp;tstate))
++    while ((ti = NextTagItem(&amp;tstate)) != 0)
+     {
+       switch(ti-&gt;ti_Tag)
+       {
+@@ -242,7 +245,7 @@
+ }
+ 
+ 
+-ULONG PUBLIC dispatch(REG(a0, struct gClass *gc), REG(a1, struct gObject *go), REG(a2, Msg msg))
++ULONG PUBLIC dispatch(REG(a0, struct gClass *gc), REG(a2, struct gObject *go), REG(a1, Msg msg))
+ {
+   struct Checkbox *cb = GINST_DATA(gc,go);
+   ULONG rc = 0L;
+@@ -250,7 +253,7 @@
+   switch(msg-&gt;MethodID)
+   {
+     case GCM_NEW:
+-      if (rc = gDoSuperMethodA(gc,go,msg))
++      if ((rc = gDoSuperMethodA(gc, go, msg)) != 0)
+       {
+         go = (struct gObject *)rc;  cb = GINST_DATA(gc,go);
+ 
+@@ -274,7 +277,7 @@
+     {
+       struct gObject *cgo;
+ 
+-      if (cgo = (struct gObject *)(rc = gDoSuperMethodA(gc,go,msg)))
++      if ((cgo = (struct gObject *)(rc = gDoSuperMethodA(gc, go, msg))) != 0)
+       {
+         struct Checkbox *ccb = GINST_DATA(gc,cgo);
+ 
+
+Modified: trunk/add-ons/circle_diagram.c
+===================================================================
+--- trunk/add-ons/circle_diagram.c	2008-12-16 19:05:58 UTC (rev 17)
++++ trunk/add-ons/circle_diagram.c	2008-12-16 22:19:05 UTC (rev 18)
+@@ -9,8 +9,11 @@
+ 
+ #include &quot;gclass.h&quot;
+ #include &quot;gclass_protos.h&quot;
+-#include &quot;gclass_pragmas.h&quot;
+ 
++#if defined (__SASC)
++#	include &quot;gclass_pragmas.h&quot;
++#endif
++
+ #define CATCOMP_NUMBERS
+ #include &quot;ignition_strings.h&quot;
+ 
+@@ -41,7 +44,7 @@
+ 	{GCA_Frame, NULL /*&quot;Fl&#239;&#191;&#189;che durch einen Rahmen begrenzen&quot;*/, GIT_CHECKBOX, NULL, NULL},
+ 	{GCA_Pseudo3D, NULL /*&quot;Pseudo-3D&quot;*/, GIT_CHECKBOX, NULL, NULL},
+ 	{GCA_StartAngle, NULL /*&quot;Pseudo-3D&quot;*/, GIT_TEXT, NULL, NULL},
+-	{NULL}
++	{0}
+ };
+ 
+ const STRPTR superClass = &quot;diagram&quot;;
+@@ -205,7 +208,7 @@
+     if (tstate == NULL)
+         return GCPR_NONE;
+ 
+-	while (ti = NextTagItem(&amp;tstate)) {
++	while ((ti = NextTagItem(&amp;tstate)) != 0) {
+ 		switch (ti-&gt;ti_Tag) {
+             case GCA_Frame:
+ 				if (gc-&gt;gc_Frame != ti-&gt;ti_Data) {
+@@ -231,14 +234,14 @@
+ 
+ 
+ ULONG PUBLIC
+-dispatch(REG(a0, struct gClass *gc), REG(a1, struct gDiagram *gd), REG(a2, Msg msg))
++dispatch(REG(a0, struct gClass *gc), REG(a2, struct gDiagram *gd), REG(a1, Msg msg))
+ {
+     struct gCircle *this_gc = GINST_DATA(gc, gd);
+     ULONG  rc;
+ 
+ 	switch (msg-&gt;MethodID) {
+         case GCM_NEW:
+-			if (rc = gDoSuperMethodA(gc, gd, msg)) {
++			if ((rc = gDoSuperMethodA(gc, gd, msg)) != 0) {
+                 this_gc = GINST_DATA(gc, rc);
+                 this_gc-&gt;gc_Frame = 1;
+ 
+@@ -297,8 +300,9 @@
+ 	return TRUE;
+ }
+ 
+-
+-void __stdargs
++#if defined(__SASC)
++void STDARGS
+ _XCEXIT(void)
+ {
+ }
++#endif
+
+Modified: trunk/add-ons/column_diagram.c
+===================================================================
+--- trunk/add-ons/column_diagram.c	2008-12-16 19:05:58 UTC (rev 17)
++++ trunk/add-ons/column_diagram.c	2008-12-16 22:19:05 UTC (rev 18)
+@@ -9,8 +9,11 @@
+ 
+ #include &quot;gclass.h&quot;
+ #include &quot;gclass_protos.h&quot;
+-#include &quot;gclass_pragmas.h&quot;
+ 
++#if defined(__SASC)
++#	include &quot;gclass_pragmas.h&quot;
++#endif
++
+ #define CATCOMP_NUMBERS
+ #include &quot;ignition_strings.h&quot;
+ 
+@@ -34,7 +37,7 @@
+ {
+ 	{GBA_Frame, NULL /*&quot;Fl&#228;che durch einen Rahmen begrenzen&quot;*/, GIT_CHECKBOX, NULL, NULL},
+ 	{GAA_Pseudo3D, NULL /*&quot;Pseudo-3D&quot;*/, GIT_CHECKBOX, NULL, NULL},
+-	{NULL}
++	{0}
+ };
+ 
+ const STRPTR superClass = &quot;axes&quot;;
+@@ -194,7 +197,7 @@
+ 		return GCPR_NONE;
+ 
+ 
+-	while (ti = NextTagItem(&amp;tstate))
++	while ((ti = NextTagItem(&amp;tstate)) != 0)
+ 	{
+ 		switch(ti-&gt;ti_Tag)
+ 		{
+@@ -220,7 +223,7 @@
+   switch (msg-&gt;MethodID)
+   {
+     case GCM_NEW:
+-      if (rc = gDoSuperMethodA(gc,gd,msg))
++      if ((rc = gDoSuperMethodA(gc, gd, msg)) != 0)
+       {
+         gb = GINST_DATA(gc,rc);
+         gb-&gt;gb_Frame = 1;
+
+Modified: trunk/add-ons/csv.c
+===================================================================
+--- trunk/add-ons/csv.c	2008-12-16 19:05:58 UTC (rev 17)
++++ trunk/add-ons/csv.c	2008-12-16 22:19:05 UTC (rev 18)
+@@ -74,7 +74,7 @@
+   if (!t)
+     return(TRUE);
+ 
+-  if (s = strchr(t,'&amp;'))
++  if ((s = strchr(t,'&amp;')) != 0)
+   {
+     if (*(s+1) == '&amp;')  // &#252;berschreiben eines Strings der uns nicht geh&#246;rt
+       s++;
+@@ -157,7 +157,7 @@
+   else
+     sep = loadprefs;
+ 
+-  if (page = NewPage(mp))
++  if ((page = NewPage(mp)) != 0)
+   {
+     long col = 1,row = 1,i;
+     char *a;
+@@ -176,7 +176,7 @@
+         col++;
+         continue;
+       }
+-      if (c = NewCell(page,col,row))
++      if ((c = NewCell(page, col, row)) != 0)
+       {
+         a = s;
+         if (*s == '&quot;')   // cell contains special characters
+@@ -187,7 +187,7 @@
+           for(i = 0;!(*s == '&quot;' &amp;&amp; *(s+1) != '&quot;');s++,i++)
+             if (*s == '&quot;')
+               s++;
+-          if (c-&gt;c_Text = b = AllocPooled(pool,i+1))
++          if ((c-&gt;c_Text = b = AllocPooled(pool, i+1)) != 0)
+           {
+             s = a;
+             for(;!(*s == '&quot;' &amp;&amp; *(s+1) != '&quot;');)
+@@ -266,8 +266,8 @@
+ }
+ 
+ 
+-void __stdargs _XCEXIT(long a)
++#if defined(__SASC)
++void STDARGS _XCEXIT(long a)
+ {
+ }
+-
+-
++#endif
+
+Modified: trunk/add-ons/frame.c
+===================================================================
+--- trunk/add-ons/frame.c	2008-12-16 19:05:58 UTC (rev 17)
++++ trunk/add-ons/frame.c	2008-12-16 22:19:05 UTC (rev 18)
+@@ -7,17 +7,17 @@
+ 
+ #include &quot;gclass.h&quot;
+ #include &quot;gclass_protos.h&quot;
+-#include &quot;gclass_pragmas.h&quot;
+ 
++#if defined(__SASC)
++#	include &quot;gclass_pragmas.h&quot;
++#endif
++
+ #define CATCOMP_NUMBERS
+ #include &quot;ignition_strings.h&quot;
+ 
+ #include &lt;string.h&gt;
+ 
+ 
+-extern void kprintf(STRPTR,...);
+-#define bug kprintf
+-
+ const char *version = &quot;$VER: frame.gc 0.3 (7.8.2003)&quot;;
+ 
+ #define BORDER_SIZE 1536
+@@ -41,7 +41,7 @@
+ 	{GFA_ShadowPen, NULL /*&quot;Dunkle Kanten:&quot;*/, GIT_PEN, NULL, &quot;darkpen&quot;},
+ 	{GFA_Recessed, NULL /*&quot;Eingedr&#252;ckt:&quot;*/, GIT_CHECKBOX, NULL, &quot;recessed&quot;},
+ 	{GFA_Doubled,  NULL /*&quot;Doppelter Rahmen:&quot;*/, GIT_CHECKBOX, NULL, &quot;doubled&quot;},
+-	{NULL}
++	{0}
+ };
+ 			
+ const STRPTR superClass = &quot;root&quot;;
+@@ -143,7 +143,7 @@
+ 
+   if (tstate)
+   {
+-    while(ti = NextTagItem(&amp;tstate))
++    while ((ti = NextTagItem(&amp;tstate)) != 0)
+     {
+       switch(ti-&gt;ti_Tag)
+       {
+@@ -190,7 +190,7 @@
+   switch(msg-&gt;MethodID)
+   {
+     case GCM_NEW:
+-      if (rc = gDoSuperMethodA(gc,go,msg))
++      if ((rc = gDoSuperMethodA(gc, go, msg)) != 0)
+       {
+         go = (struct gObject *)rc;  f = GINST_DATA(gc,go);
+ 
+
+Modified: trunk/add-ons/gclass.c
+===================================================================
+--- trunk/add-ons/gclass.c	2008-12-16 19:05:58 UTC (rev 17)
++++ trunk/add-ons/gclass.c	2008-12-16 22:19:05 UTC (rev 18)
+@@ -11,6 +11,7 @@
+ #include &lt;exec/memory.h&gt;
+ #include &lt;dos/dos.h&gt;
+ #include &lt;libraries/gtdrag.h&gt;
++#include &lt;libraries/iffparse.h&gt;
+ 
+ #include &lt;clib/exec_protos.h&gt;
+ #include &lt;clib/dos_protos.h&gt;
+@@ -31,7 +32,7 @@
+ 	ULONG  gc_Flags;
+ 	struct gInterface *gc_Interface;
+ 	BPTR   gc_Segment;
+-	ULONG  ASM (*gc_Dispatch)(REG(a0, struct gClass *), REG(a1, APTR), REG(a2, Msg));
++	ULONG  ASM (*gc_Dispatch)(REG(a0, struct gClass *), REG(a2, APTR), REG(a1, Msg));
+ 	ULONG  ASM (*gc_Draw)(REG(d0, struct Page *), REG(d1, ULONG), REG(a0, struct RastPort *), REG(a1, struct gClass *), REG(a2, struct gObject *), REG(a3, struct gBounds *));
+ 	ULONG  ASM (*gc_FreeClass)(REG(a0, struct gClass *));
+ 	STRPTR gc_ClassName;        /* internal access (filename) */
+@@ -39,15 +40,16 @@
+ 
+ struct ExecBase *SysBase;
+ struct GfxBase *GfxBase;
+-struct Library *UtilityBase, *LocaleBase;
++struct UtilityBase *UtilityBase;
++struct LocaleBase *LocaleBase;
+ struct Library *MathIeeeDoubBasBase, *MathIeeeDoubTransBase;
+ APTR   pool, gcBase;
+ 
+ 
+ /* Module functions */
+ 
+-extern ULONG PUBLIC dispatch(REG(a0, struct gClass *gc), REG(a1, APTR obj), REG(a2, Msg msg));
+-extern ULONG PUBLIC draw(REG(d0, struct Page *), REG(d0, ULONG), REG(a0) struct RastPort *), REG(a1, struct gClass *), REG(a2, struct gObject *), REG(a3, struct gBounds *));
++extern ULONG PUBLIC dispatch(REG(a0, struct gClass *gc), REG(a2, APTR obj), REG(a1, Msg msg));
++extern ULONG PUBLIC draw(REG(d0, struct Page *), REG(d0, ULONG), REG(a0, struct RastPort *), REG(a1, struct gClass *), REG(a2, struct gObject *), REG(a3, struct gBounds *));
+ extern ULONG PUBLIC freeClass(REG(a0, struct gClass *gc));
+ extern ULONG PUBLIC initClass(REG(a0, struct gClass *gc));
+ extern struct gInterface interface[];
+@@ -89,4 +91,3 @@
+ 
+ 	return TRUE;
+ }
+-
+
+Modified: trunk/add-ons/gclass.h
+===================================================================
+--- trunk/add-ons/gclass.h	2008-12-16 19:05:58 UTC (rev 17)
++++ trunk/add-ons/gclass.h	2008-12-16 22:19:05 UTC (rev 18)
+@@ -37,11 +37,13 @@
+   ULONG  gc_InstSize;
+   ULONG  gc_Flags;
+   struct gInterface *gc_Interface;
+-/*  BPTR   gc_Segment;
++#if 0
++  BPTR   gc_Segment;
+   ULONG  ASM (*gc_Dispatch)(REG(a0, struct gClass *), REG(a2, APTR), REG(a1, Msg));
+   ULONG  ASM (*gc_Draw)(REG(a0, struct Page *), REG(a1, struct gObject *), REG(a2, struct RastPort *), REG(d0, long), REG(d1, long));
+   ULONG  (*gc_FreeClass)(void);
+-  STRPTR gc_ClassName;        /* interner Zugriff (Dateiname) */*/
++  STRPTR gc_ClassName;        /* interner Zugriff (Dateiname) */
++#endif
+ };
+ 
+ #define GINST_DATA(gc,go) (APTR)((UBYTE *)(go)+((struct gClass *)gc)-&gt;gc_InstOffset)
+@@ -135,7 +137,7 @@
+ struct gInterface
+ {
+   ULONG  gi_Tag;         /* eigener oder vordefinierter Tag f&#252;r GCM_SET/GCM_GET */
+-  STRPTR gi_Label;       /* Bezeichner beim Gadget */
++  CONST_STRPTR gi_Label; /* Bezeichner beim Gadget */
+   ULONG  gi_Type;        /* Typ des Gadgets (Checkbox, Cycle, String, ...) */
+   APTR   gi_Special;     /* z.B. Auswahl bei Cycle-Gadgets */
+   STRPTR gi_Name;        /* f&#252;r REXX/Funktions-Interface */
+
+Modified: trunk/add-ons/gclass_protos.h
+===================================================================
+--- trunk/add-ons/gclass_protos.h	2008-12-16 19:05:58 UTC (rev 17)
++++ trunk/add-ons/gclass_protos.h	2008-12-16 22:19:05 UTC (rev 18)
+@@ -14,6 +14,8 @@
+ #include &lt;exec/types.h&gt;
+ #endif
+ 
++struct TablePos;
++
+ /**/
+ /* memory */
+ /**/
+
+Modified: trunk/add-ons/gradient.c
+===================================================================
+--- trunk/add-ons/gradient.c	2008-12-16 19:05:58 UTC (rev 17)
++++ trunk/add-ons/gradient.c	2008-12-16 22:19:05 UTC (rev 18)
+@@ -7,8 +7,11 @@
+ 
+ #include &quot;gclass.h&quot;
+ #include &quot;gclass_protos.h&quot;
+-#include &quot;gclass_pragmas.h&quot;
+ 
++#if defined(__SASC)
++#	include &quot;gclass_pragmas.h&quot;
++#endif
++
+ #define CATCOMP_NUMBERS
+ #include &quot;ignition_strings.h&quot;
+ 
+@@ -28,7 +31,7 @@
+ #define GGA_Direction   (GOA_TagUser + 3)
+ 
+ static struct Catalog *sCatalog;
+-static char *sAlignmentLabels[3];
++static CONST_STRPTR sAlignmentLabels[3];
+ 
+ struct gInterface interface[] = {
+ 	{GGA_FirstPen,    NULL /*&quot;First Colour:&quot;*/, GIT_PEN, NULL, &quot;firstpen&quot;},
+@@ -95,7 +98,7 @@
+     if (!tstate)
+         return GCPR_NONE;
+ 
+-    while (ti = NextTagItem(&amp;tstate))
++    while ((ti = NextTagItem(&amp;tstate)) != 0)
+     {
+         switch (ti-&gt;ti_Tag)
+         {
+@@ -128,7 +131,7 @@
+ 
+ 
+ ULONG PUBLIC
+-dispatch(REG(a0, struct gClass *gc), REG(a2, struct gObject *go), REG(a2, Msg msg))
++dispatch(REG(a0, struct gClass *gc), REG(a2, struct gObject *go), REG(a1, Msg msg))
+ {
+     struct Gradient *g = GINST_DATA(gc, go);
+     ULONG rc = 0L;
+@@ -136,7 +139,7 @@
+     switch (msg-&gt;MethodID)
+     {
+         case GCM_NEW:
+-            if (rc = gDoSuperMethodA(gc, go, msg))
++            if ((rc = gDoSuperMethodA(gc, go, msg)) != 0)
+             {
+                 go = (struct gObject *)rc;  g = GINST_DATA(gc, go);
+ 
+@@ -201,9 +204,9 @@
+ 
+ /** this file is linked without startup code (SAS/C specific) */
+ 
+-void __stdargs
++#if defined(__SASC)
++void STDARGS
+ _XCEXIT(void)
+ {
+ }
+-
+-
++#endif
+
+Modified: trunk/add-ons/iotype.c
+===================================================================
+--- trunk/add-ons/iotype.c	2008-12-16 19:05:58 UTC (rev 17)
++++ trunk/add-ons/iotype.c	2008-12-16 22:19:05 UTC (rev 18)
+@@ -4,23 +4,31 @@
+  * Licensed under the terms of the MIT License.
+  */
+ 
++#define __DOS_STDLIBBASE__
+ 
+ #include &lt;exec/types.h&gt;
+ #include &lt;exec/lists.h&gt;
+ #include &lt;exec/nodes.h&gt;
+ #include &lt;exec/memory.h&gt;
+ #include &lt;dos/dos.h&gt;
++#include &lt;intuition/screens.h&gt;
+ 
+-#include &lt;clib/exec_protos.h&gt;
+-#include &lt;clib/dos_protos.h&gt;
+-#include &lt;pragmas/exec_pragmas.h&gt;
+-#include &lt;pragmas/dos_pragmas.h&gt;
++#include &lt;proto/exec.h&gt;
++#include &lt;proto/dos.h&gt;
+ 
++#if defined(__SASC)
++#	include &lt;pragmas/exec_pragmas.h&gt;
++#	include &lt;pragmas/dos_pragmas.h&gt;
++#endif
++
+ #include &lt;string.h&gt;
+ #include &lt;math.h&gt;
+ /*#include &lt;mieeedoub.h&gt;*/
+ 
++struct Mappe;
+ 
++#include &quot;SDI_compiler.h&quot;
++
+ // Must always be in sync with the definition in io.h !!!
+ 
+ struct IOType {
+@@ -37,7 +45,7 @@
+   long   ASM (*io_Save)(REG(d0, BPTR), REG(a0, struct Mappe *));
+   long   ASM (*io_SetPrefs)(REG(a0, STRPTR));
+   STRPTR ASM (*io_GetPrefs)(void);
+-  void   ASM (*io_OpenPrefsGUI)(REG(a0) struct Screen *);
++  void   ASM (*io_OpenPrefsGUI)(REG(a0, struct Screen *));
+   void   ASM (*io_ClosePrefsGUI)(void);
+   STRPTR io_Short;
+   STRPTR io_Prefs;
+
+Modified: trunk/add-ons/iotype.h
+===================================================================
+--- trunk/add-ons/iotype.h	2008-12-16 19:05:58 UTC (rev 17)
++++ trunk/add-ons/iotype.h	2008-12-16 22:19:05 UTC (rev 18)
+@@ -9,28 +9,35 @@
+ ** All Rights Reserved
+ */
+ 
++#include &quot;SDI_compiler.h&quot;
++
++#define __DOS_STDLIBBASE__
++
+ #include &lt;exec/types.h&gt;
+ #include &lt;exec/lists.h&gt;
+ #include &lt;exec/nodes.h&gt;
+ #include &lt;exec/memory.h&gt;
+ #include &lt;dos/dos.h&gt;
++#include &lt;intuition/screens.h&gt;
+ 
+-#include &lt;clib/exec_protos.h&gt;
+-#include &lt;clib/dos_protos.h&gt;
+-#include &lt;clib/alib_stdio_protos.h&gt;
+-#include &lt;pragmas/exec_pragmas.h&gt;
+-#include &lt;pragmas/dos_pragmas.h&gt;
++#include &lt;proto/exec.h&gt;
++#include &lt;proto/dos.h&gt;
+ 
++#if defined(__SASC)
++#	include &lt;clib/alib_stdio_protos.h&gt;
++#	include &lt;pragmas/exec_pragmas.h&gt;
++#	include &lt;pragmas/dos_pragmas.h&gt;
++#endif
++
+ #include &lt;string.h&gt;
+ #include &lt;math.h&gt;
+ 
+ #define foreach(l,v) for(v = (APTR)((struct List *)l)-&gt;lh_Head;((struct Node *)v)-&gt;ln_Succ;v = (APTR)((struct Node *)v)-&gt;ln_Succ)
+ 
+ #ifndef CELL_H
+-#include &quot;cell.h&quot;
++#	include &quot;cell.h&quot;
+ #endif
+ 
+-#include &quot;SDI_compiler.h&quot;
+ 
+ /*** Project related ***/
+ 
+@@ -436,22 +443,24 @@
+ void   FreeString(STRPTR);
+ STRPTR ita(double d,long komma ,UBYTE flags);
+ 
+-#pragma tagcall ioBase Error 5a 9802
+-#pragma libcall ioBase ErrorA 5a 9802
+-#pragma libcall ioBase NewPage 54 801
+-#pragma libcall ioBase CalculatePageDPI 4e 801
+-#pragma libcall ioBase NewCell 48 10803
+-#pragma libcall ioBase UpdateCellText 42 9802
+-#pragma libcall ioBase SetTableSize 3c 10803
+-#pragma libcall ioBase FindColorPen 36 21003
+-#pragma libcall ioBase AddPen 30 210804
+-#pragma libcall ioBase Coord2String 2a 321004
+-#pragma libcall ioBase pixel 24 10803
+-#pragma libcall ioBase mm 1e 10803
+-#pragma libcall ioBase AllocStringLength 18 0802
+-#pragma libcall ioBase AllocString 12 801
+-#pragma libcall ioBase FreeString c 801
+-#pragma libcall ioBase ita 6 32003
++#if defined(__SASC)
++#	pragma tagcall ioBase Error 5a 9802
++#	pragma libcall ioBase ErrorA 5a 9802
++#	pragma libcall ioBase NewPage 54 801
++#	pragma libcall ioBase CalculatePageDPI 4e 801
++#	pragma libcall ioBase NewCell 48 10803
++#	pragma libcall ioBase UpdateCellText 42 9802
++#	pragma libcall ioBase SetTableSize 3c 10803
++#	pragma libcall ioBase FindColorPen 36 21003
++#	pragma libcall ioBase AddPen 30 210804
++#	pragma libcall ioBase Coord2String 2a 321004
++#	pragma libcall ioBase pixel 24 10803
++#	pragma libcall ioBase mm 1e 10803
++#	pragma libcall ioBase AllocStringLength 18 0802
++#	pragma libcall ioBase AllocString 12 801
++#	pragma libcall ioBase FreeString c 801
++#	pragma libcall ioBase ita 6 32003
++#endif
+ 
+ /********************************* Variables ************************************/
+ 
+
+Modified: trunk/add-ons/line.c
+===================================================================
+--- trunk/add-ons/line.c	2008-12-16 19:05:58 UTC (rev 17)
++++ trunk/add-ons/line.c	2008-12-16 22:19:05 UTC (rev 18)
+@@ -8,9 +8,12 @@
+ 
+ #include &quot;gclass.h&quot;
+ #include &quot;gclass_protos.h&quot;
+-#include &quot;gclass_pragmas.h&quot;
+ 
++#if defined(__SASC)
++#	include &quot;gclass_pragmas.h&quot;
++#endif
+ 
++
+ const char *version = &quot;$VER: line.gc 0.12 (2.3.2003)&quot;;
+ 
+ 
+@@ -114,7 +117,7 @@
+ }
+ 
+ 
+-ULONG PUBLIC dispatch(REG(a0, struct gClass *gc), REG(a1, struct gObject *go), REG(a2, Msg msg))
++ULONG PUBLIC dispatch(REG(a0, struct gClass *gc), REG(a2, struct gObject *go), REG(a1, Msg msg))
+ {
+   struct gLine *gl = GINST_DATA(gc,go);
+   ULONG  rc = 0L;
+
+Modified: trunk/add-ons/line_diagram.c
+===================================================================
+--- trunk/add-ons/line_diagram.c	2008-12-16 19:05:58 UTC (rev 17)
++++ trunk/add-ons/line_diagram.c	2008-12-16 22:19:05 UTC (rev 18)
+@@ -9,13 +9,17 @@
+ 
+ #include &quot;gclass.h&quot;
+ #include &quot;gclass_protos.h&quot;
+-#include &quot;gclass_pragmas.h&quot;
+ 
++#if defined(__SASC)
++#	include &quot;gclass_pragmas.h&quot;
++#endif
++
+ #define CATCOMP_NUMBERS
+ #include &quot;ignition_strings.h&quot;
+ 
+ #include &lt;string.h&gt;
+ 
++struct gArea;
+ 
+ const char *version = &quot;$VER: line_diagram.gc 0.3 (7.8.2003)&quot;;
+ 
+@@ -33,7 +37,7 @@
+ struct gInterface interface[] = {
+ //  {GAA_Frame,&quot;Fl&#228;che durch einen Rahmen begrenzen&quot;,GIT_CHECKBOX,NULL,NULL},
+ 	{GAA_Pseudo3D,&quot;Pseudo-3D&quot;,GIT_CHECKBOX,NULL,NULL},
+-	{NULL,     NULL,NULL,NULL,NULL}
++	{0,           NULL,0,NULL,NULL}
+ };
+ 
+ const STRPTR superClass = &quot;diagram&quot;;
+@@ -169,7 +173,7 @@
+ }
+ 
+ 
+-ULONG PUBLIC dispatch(REG(a0, struct gClass *gc), REG(a1, struct gDiagram *gd), REG(a2, Msg msg))
++ULONG PUBLIC dispatch(REG(a0, struct gClass *gc), REG(a2, struct gDiagram *gd), REG(a1, Msg msg))
+ {
+ //  struct gLine *gl = GINST_DATA(gc,gd);
+   ULONG  rc;
+@@ -177,7 +181,7 @@
+   switch(msg-&gt;MethodID)
+   {
+     case GCM_NEW:
+-      if (rc = gDoSuperMethodA(gc,gd,msg))
++      if ((rc = gDoSuperMethodA(gc, gd, msg)) != 0)
+       {
+         set((struct gDiagram *)rc,NULL /*ga*/,((struct gcpSet *)msg)-&gt;gcps_AttrList);
+       }
+@@ -198,7 +202,7 @@
+       }
+       break;
+     case GCDM_SETLINKATTR:
+-      if (rc = gDoSuperMethodA(gc,gd,msg))  // something has changed
++      if ((rc = gDoSuperMethodA(gc, gd, msg)) != 0) // something has changed
+       {
+         struct gcpSetLinkAttr *gcps = (APTR)msg;
+         ULONG  color = gcps-&gt;gcps_Color;
+
+Added: trunk/add-ons/mmakefile.src
+===================================================================
+--- trunk/add-ons/mmakefile.src	2008-12-16 19:05:58 UTC (rev 17)
++++ trunk/add-ons/mmakefile.src	2008-12-16 22:19:05 UTC (rev 18)
+@@ -0,0 +1,99 @@
++#
++# meta-makefile for Ignition for AROS
++#
++
++include $(TOP)/config/make.cfg
++
++#MM- contrib-ignition-addons : contrib-ignition-addon-turbocalc
++
++#MM  contrib-ignition-addon-area_diagram : includes linklibs
++#MM  contrib-ignition-addon-button : includes linklibs
++#MM  contrib-ignition-addon-checkbox : includes linklibs
++#MM  contrib-ignition-addon-circle_diagram : includes linklibs
++#MM  contrib-ignition-addon-column_diagram : includes linklibs
++#MM  contrib-ignition-addon-frame : includes linklibs
++#MM  contrib-ignition-addon-gradient : includes linklibs
++#MM  contrib-ignition-addon-line : includes linklibs
++#MM  contrib-ignition-addon-line_diagram : includes linklibs
++#MM  contrib-ignition-addon-rectangle : includes linklibs
++#MM  contrib-ignition-addon-text : includes linklibs
++
++#MM  contrib-ignition-addon-ascii : includes linklibs
++#MM  contrib-ignition-addon-csv : includes linklibs
++#MM  contrib-ignition-addon-turbocalc : includes linklibs
++
++TARGETDIR := $(AROS_CONTRIB)/Office/Ingition/add-ons
++USER_INCLUDES := -I../libs/include -I..
++
++
++#### gclass
++
++%build_module_simple mmake=contrib-ignition-addon-area_diagram \
++	modname=area_diagramm modtype=gc \
++	files=&quot;gclass area_diagram&quot; moduledir=$(TARGETDIR) \
++	uselibs=
++
++%build_module_simple mmake=contrib-ignition-addon-button \
++	modname=button modtype=gc \
++	files=&quot;gclass button&quot; moduledir=$(TARGETDIR) \
++	uselibs=
++
++%build_module_simple mmake=contrib-ignition-addon-checkbox \
++	modname=checkbox modtype=gc \
++	files=&quot;gclass checkbox&quot; moduledir=$(TARGETDIR) \
++	uselibs=
++
++%build_module_simple mmake=contrib-ignition-addon-circle_diagram \
++	modname=circle_diagram modtype=gc \
++	files=&quot;gclass circle_diagram&quot; moduledir=$(TARGETDIR) \
++	uselibs=
++
++%build_module_simple mmake=contrib-ignition-addon-column_diagram \
++	modname=column_diagram modtype=gc \
++	files=&quot;gclass column_diagram&quot; moduledir=$(TARGETDIR) \
++	uselibs=
++
++%build_module_simple mmake=contrib-ignition-addon-frame \
++	modname=frame modtype=gc \
++	files=&quot;gclass frame&quot; moduledir=$(TARGETDIR) \
++	uselibs=
++
++%build_module_simple mmake=contrib-ignition-addon-gradient \
++	modname=gradient modtype=gc \
++	files=&quot;gclass gradient&quot; moduledir=$(TARGETDIR) \
++	uselibs=
++
++%build_module_simple mmake=contrib-ignition-addon-line \
++	modname=line modtype=gc \
++	files=&quot;gclass gradient&quot; moduledir=$(TARGETDIR) \
++	uselibs=
++
++%build_module_simple mmake=contrib-ignition-addon-rectangle \
++	modname=rectangle modtype=gc \
++	files=&quot;gclass rectangle&quot; moduledir=$(TARGETDIR) \
++	uselibs=
++
++%build_module_simple mmake=contrib-ignition-addon-text \
++	modname=text modtype=gc \
++	files=&quot;gclass text&quot; moduledir=$(TARGETDIR) \
++	uselibs=
++
++
++#### iotype
++
++%build_module_simple mmake=contrib-ignition-addon-ascii \
++	modname=text modtype=io \
++	files=&quot;iotype ascii&quot; moduledir=$(TARGETDIR) \
++	uselibs=
++
++%build_module_simple mmake=contrib-ignition-addon-csv \
++	modname=csv modtype=io \
++	files=&quot;iotype csv&quot; moduledir=$(TARGETDIR) \
++	uselibs=
++
++%build_module_simple mmake=contrib-ignition-addon-turbocalc \
++	modname=turbocalc modtype=io \
++	files=&quot;iotype turbocalc&quot; moduledir=$(TARGETDIR) \
++	uselibs=
++
++%common
+
+
+Property changes on: trunk/add-ons/mmakefile.src
+___________________________________________________________________
+Name: svn:keywords
+   + Id Date Revision Author
+Name: svn:eol-style
+   + native
+
+Modified: trunk/add-ons/rectangle.c
+===================================================================
+--- trunk/add-ons/rectangle.c	2008-12-16 19:05:58 UTC (rev 17)
++++ trunk/add-ons/rectangle.c	2008-12-16 22:19:05 UTC (rev 18)
+@@ -7,8 +7,11 @@
+ 
+ #include &quot;gclass.h&quot;
+ #include &quot;gclass_protos.h&quot;
+-#include &quot;gclass_pragmas.h&quot;
+ 
++#if defined(__SASC)
++#	include &quot;gclass_pragmas.h&quot;
++#endif
++
+ const char *version = &quot;$VER: rectangle.gc 0.6 (2.3.2003)&quot;;
+ 
+ struct Rect
+@@ -21,7 +24,7 @@
+   {GOA_FillPen,    NULL,GIT_PEN,NULL,NULL},
+   {GOA_OutlinePen, NULL,GIT_PEN,NULL,NULL},
+ //  {GOA_Weight,     NULL,GIT_WEIGHT,NULL,NULL},
+-  {NULL,           NULL,NULL,NULL,NULL}
++  {0,              NULL,0,NULL,NULL}
+ };
+ 
+ const STRPTR superClass = &quot;root&quot;;
+@@ -65,7 +68,7 @@
+ 
+   if (tstate)
+   {
+-    while(ti = NextTagItem(&amp;tstate))
++    while ((ti = NextTagItem(&amp;tstate)) != 0)
+     {
+       switch(ti-&gt;ti_Tag)
+       {
+@@ -97,7 +100,7 @@
+ }
+ 
+ 
+-ULONG PUBLIC dispatch(REG(a0, struct gClass *gc), REG(a1, struct gObject *go), REG(a2, Msg msg))
++ULONG PUBLIC dispatch(REG(a0, struct gClass *gc), REG(a2, struct gObject *go), REG(a1, Msg msg))
+ {
+   struct Rect *r = GINST_DATA(gc,go);
+   ULONG rc = 0L;
+@@ -105,7 +108,7 @@
+   switch(msg-&gt;MethodID)
+   {
+     case GCM_NEW:
+
+[... truncated: 138 lines follow ...]
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000029.html">[Ignition-commits] r17 - in trunk: . add-ons	libs/gtdrag/include/libraries
+</A></li>
+	<LI>Next message: <A HREF="000031.html">[Ignition-commits] r19 - trunk/add-ons
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30">[ date ]</a>
+              <a href="thread.html#30">[ thread ]</a>
+              <a href="subject.html#30">[ subject ]</a>
+              <a href="author.html#30">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

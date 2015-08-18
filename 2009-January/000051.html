@@ -1,0 +1,101 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r35 - trunk/libs/include
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2009-January/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r35%20-%20trunk/libs/include&In-Reply-To=%3C200901211327.n0LDRmK6014079%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000055.html">
+   <LINK REL="Next"  HREF="000052.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r35 - trunk/libs/include</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r35%20-%20trunk/libs/include&In-Reply-To=%3C200901211327.n0LDRmK6014079%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r35 - trunk/libs/include">marust at mail.berlios.de
+       </A><BR>
+    <I>Wed Jan 21 14:27:48 CET 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000055.html">[Ignition-commits] r34 - in trunk: . add-ons lib	lib/safeclip	lib/safeclip/gcc-68k lib/safeclip/gcc-all	lib/safeclip/sasc-68k	libs/textedit libs/textedit/include/gadgets
+</A></li>
+        <LI>Next message: <A HREF="000052.html">[Ignition-commits] r36 - trunk/libs/textedit
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#51">[ date ]</a>
+              <a href="thread.html#51">[ thread ]</a>
+              <a href="subject.html#51">[ subject ]</a>
+              <a href="author.html#51">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2009-01-21 14:26:57 +0100 (Wed, 21 Jan 2009)
+New Revision: 35
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=35&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=35&amp;view=rev</A>
+
+Modified:
+   trunk/libs/include/SDI_compiler.h
+Log:
+* Moved definition of ALIGNED to avoid a &quot;redefinition error&quot;.
+  (In the future we should remove this macro and instead use
+  AllocDosObject() for all data which needs 4-byte alignment)
+
+
+Modified: trunk/libs/include/SDI_compiler.h
+===================================================================
+--- trunk/libs/include/SDI_compiler.h	2009-01-21 12:53:54 UTC (rev 34)
++++ trunk/libs/include/SDI_compiler.h	2009-01-21 13:26:57 UTC (rev 35)
+@@ -210,9 +210,6 @@
+ #if !defined(DEPRECATED)
+   #define DEPRECATED
+ #endif
+-#if !defined(ALIGNED)
+-  #define ALIGNED
+-#endif
+ 
+ /*************************************************************************/
+ 
+@@ -271,6 +268,11 @@
+    // TODO write LIB_... macros
+ #  define LIBFUNC_INIT
+ #  define LIBFUNC_EXIT
++
++#  if !defined(ALIGNED)
++#    define ALIGNED
++#  endif
++
+ #endif
+ 
+ #if defined(__AROS__)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000055.html">[Ignition-commits] r34 - in trunk: . add-ons lib	lib/safeclip	lib/safeclip/gcc-68k lib/safeclip/gcc-all	lib/safeclip/sasc-68k	libs/textedit libs/textedit/include/gadgets
+</A></li>
+	<LI>Next message: <A HREF="000052.html">[Ignition-commits] r36 - trunk/libs/textedit
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#51">[ date ]</a>
+              <a href="thread.html#51">[ thread ]</a>
+              <a href="subject.html#51">[ subject ]</a>
+              <a href="author.html#51">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

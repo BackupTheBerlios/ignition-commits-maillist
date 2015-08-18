@@ -1,0 +1,336 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r20 - in trunk: . add-ons libs/include
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2008-December/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r20%20-%20in%20trunk%3A%20.%20add-ons%20libs/include&In-Reply-To=%3C200812172150.mBHLopLH024783%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000031.html">
+   <LINK REL="Next"  HREF="000033.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r20 - in trunk: . add-ons libs/include</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r20%20-%20in%20trunk%3A%20.%20add-ons%20libs/include&In-Reply-To=%3C200812172150.mBHLopLH024783%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r20 - in trunk: . add-ons libs/include">marust at mail.berlios.de
+       </A><BR>
+    <I>Wed Dec 17 22:50:51 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000031.html">[Ignition-commits] r19 - trunk/add-ons
+</A></li>
+        <LI>Next message: <A HREF="000033.html">[Ignition-commits] r20 - in trunk: . add-ons libs/include
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#32">[ date ]</a>
+              <a href="thread.html#32">[ thread ]</a>
+              <a href="subject.html#32">[ subject ]</a>
+              <a href="author.html#32">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2008-12-17 22:50:42 +0100 (Wed, 17 Dec 2008)
+New Revision: 20
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=20&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=20&amp;view=rev</A>
+
+Modified:
+   trunk/add-ons/button.c
+   trunk/add-ons/gclass.c
+   trunk/add-ons/iotype.c
+   trunk/add-ons/line.c
+   trunk/add-ons/mmakefile.src
+   trunk/add-ons/turbocalc.c
+   trunk/classes.c
+   trunk/io.c
+   trunk/libs/include/SDI_compiler.h
+   trunk/mmakefile.src
+Log:
+* Unification of the argument order of the add-on initialisation functions
+
+* Use MKBADDR for a platform independent conversion from BPTR to APTR
+
+* Forgot to copy the *.iodescr (only the *.gcdescr were copied)
+
+* Copy of some sheets for testing purposes (only a temporary solution)
+
+* Removed &quot;bug&quot; macro from SDI_compiler.h because it's defined in debug.h
+
+* Re-added &quot;bug&quot; and &quot;D&quot; macro to turbocalc.c because it doesn't
+  include debug.h
+
+* Some compiler warnings removed
+
+
+Modified: trunk/add-ons/button.c
+===================================================================
+--- trunk/add-ons/button.c	2008-12-16 23:11:38 UTC (rev 19)
++++ trunk/add-ons/button.c	2008-12-17 21:50:42 UTC (rev 20)
+@@ -39,7 +39,7 @@
+ 	{GOA_Text,     NULL, GIT_FORMULA, NULL, NULL},
+ 	{GOA_Command,  NULL, GIT_TEXT, NULL, NULL},
+ 	{GOA_ContinualCommand, NULL, GIT_CHECKBOX, NULL, NULL},
+-	{NULL}
++	{0}
+ };
+ 
+ const STRPTR superClass = &quot;root&quot;;
+
+Modified: trunk/add-ons/gclass.c
+===================================================================
+--- trunk/add-ons/gclass.c	2008-12-16 23:11:38 UTC (rev 19)
++++ trunk/add-ons/gclass.c	2008-12-17 21:50:42 UTC (rev 20)
+@@ -58,8 +58,8 @@
+ 
+ 
+ BOOL PUBLIC
+-InitGClass(REG(a6, struct ExecBase *ExecBase), REG(a0, struct __gClass *gc), REG(a1, APTR table), REG(a2, APTR mainpool),
+-	REG(a3, APTR gfxbase), REG(d0, APTR mathbase), REG(d1, APTR mathtrans), REG(d2, APTR utilitybase), REG(d3, APTR localebase),
++InitGClass(REG(a0, struct __gClass *gc), REG(a1, APTR table), REG(a2, APTR mainpool), REG(a3, APTR gfxbase),
++	REG(a6, struct ExecBase *ExecBase), REG(d0, APTR mathbase), REG(d1, APTR mathtrans), REG(d2, APTR utilitybase), REG(d3, APTR localebase),
+     REG(d4, long magic))
+ {
+ #ifdef IGNITION_LITE_EDITION
+
+Modified: trunk/add-ons/iotype.c
+===================================================================
+--- trunk/add-ons/iotype.c	2008-12-16 23:11:38 UTC (rev 19)
++++ trunk/add-ons/iotype.c	2008-12-17 21:50:42 UTC (rev 20)
+@@ -81,9 +81,9 @@
+ 
+ 
+ BOOL PUBLIC
+-InitModule(REG(a6, struct ExecBase *execBase), REG(a0, struct IOType *io), REG(a1, APTR table), REG(a2, APTR mainpool),
+-	REG(a3, APTR dosBase), REG(d0, APTR mathBase), REG(d1, APTR mathtransBase), REG(d2, long magic),
+-	REG(d3, APTR utilityBase), REG(d4, APTR localeBase))
++InitModule(REG(a0, struct IOType *io), REG(a1, APTR table), REG(a2, APTR mainpool), REG(a3, APTR dosBase),
++	REG(a6, struct ExecBase *execBase), REG(d0, APTR mathBase), REG(d1, APTR mathtransBase), REG(d2, APTR utilityBase),
++	REG(d3, APTR localeBase), REG(d4, long magic))
+ {
+ #ifdef IGNITION_LITE_EDITION
+ 	if (magic != MAKE_ID('I', 'G', 'N', '\0') &amp;&amp; magic != MAKE_ID('I', 'G', 'L', '\0'))
+
+Modified: trunk/add-ons/line.c
+===================================================================
+--- trunk/add-ons/line.c	2008-12-16 23:11:38 UTC (rev 19)
++++ trunk/add-ons/line.c	2008-12-17 21:50:42 UTC (rev 20)
+@@ -78,7 +78,7 @@
+ 
+   if (tstate)
+   {
+-    while(ti = NextTagItem(&amp;tstate))
++    while ((ti = NextTagItem(&amp;tstate)) != 0)
+     {
+       switch(ti-&gt;ti_Tag)
+       {
+@@ -125,7 +125,7 @@
+   switch(msg-&gt;MethodID)
+   {
+     case GCM_NEW:
+-      if (rc = gDoSuperMethodA(gc,go,msg))
++      if ((rc = gDoSuperMethodA(gc,go,msg)) != 0)
+       {
+         go = (struct gObject *)rc;  gl = GINST_DATA(gc,go);
+ 
+
+Modified: trunk/add-ons/mmakefile.src
+===================================================================
+--- trunk/add-ons/mmakefile.src	2008-12-16 23:11:38 UTC (rev 19)
++++ trunk/add-ons/mmakefile.src	2008-12-17 21:50:42 UTC (rev 20)
+@@ -65,9 +65,14 @@
+ 
+ %build_module_simple mmake=contrib-ignition-addon-line \
+ 	modname=line modtype=gc \
+-	files=&quot;gclass gradient&quot; moduledir=$(TARGETDIR) \
++	files=&quot;gclass line&quot; moduledir=$(TARGETDIR) \
+ 	uselibs=
+ 
++%build_module_simple mmake=contrib-ignition-addon-line_diagram \
++	modname=line_diagram modtype=gc \
++	files=&quot;gclass line_diagram&quot; moduledir=$(TARGETDIR) \
++	uselibs=
++
+ %build_module_simple mmake=contrib-ignition-addon-rectangle \
+ 	modname=rectangle modtype=gc \
+ 	files=&quot;gclass rectangle&quot; moduledir=$(TARGETDIR) \
+
+Modified: trunk/add-ons/turbocalc.c
+===================================================================
+--- trunk/add-ons/turbocalc.c	2008-12-16 23:11:38 UTC (rev 19)
++++ trunk/add-ons/turbocalc.c	2008-12-17 21:50:42 UTC (rev 20)
+@@ -14,7 +14,12 @@
+ 
+ const STRPTR __version = &quot;$VER: turbocalc.io 0.2 (4.3.2001)&quot;;
+ 
++/*extern sprintf(STRPTR,STRPTR,...);*/
++extern kprintf(STRPTR,...);
+ 
++#define bug kprintf
++#define D(x) ;
++
+ STRPTR
+ MapTCFuncs(UBYTE n)
+ {
+
+Modified: trunk/classes.c
+===================================================================
+--- trunk/classes.c	2008-12-16 23:11:38 UTC (rev 19)
++++ trunk/classes.c	2008-12-17 21:50:42 UTC (rev 20)
+@@ -1377,9 +1377,6 @@
+ BOOL
+ LoadGClass(struct gClass *gc)
+ {
+-#if defined(__AROS__)
+-	return FALSE;
+-#else
+ 	BOOL ASM (*initGCSegment)(REG(a0, APTR), REG(a1, APTR), REG(a2, APTR), REG(a3, APTR), REG(a6, APTR),
+ 		REG(d0, APTR), REG(d1, APTR), REG(d2, APTR), REG(d3, APTR), REG(d4, long));
+ 	BPTR dir,olddir,segment;
+@@ -1392,7 +1389,7 @@
+ 		olddir = CurrentDir(dir);
+ 		if ((segment = LoadSeg(gc-&gt;gc_ClassName)) != 0)
+ 		{
+-			initGCSegment = ((segment + 1) &lt;&lt; 2);
++			initGCSegment = MKBADDR(segment);
+ 			if (initGCSegment(gc, (UBYTE *)gClassFuncTable + gClassFuncTableSize, pool, GfxBase, SysBase, MathIeeeDoubBasBase,
+ 					MathIeeeDoubTransBase, UtilityBase, LocaleBase,
+ #ifdef IGNITION_LITE_EDITION
+@@ -1421,7 +1418,6 @@
+ 		return FALSE;
+ 	}
+ 	return TRUE;
+-#endif
+ }
+ 
+ 
+@@ -1543,5 +1539,3 @@
+ 
+ 	gEmbedDiagramInterface[0].gi_Label = GetString(&amp;gLocaleInfo, MSG_DIAGRAM_PREFS_GAD);
+ }
+-
+-
+
+Modified: trunk/io.c
+===================================================================
+--- trunk/io.c	2008-12-16 23:11:38 UTC (rev 19)
++++ trunk/io.c	2008-12-17 21:50:42 UTC (rev 20)
+@@ -2439,10 +2439,8 @@
+ void
+ InitIOType(struct IOType *io)
+ {
+-#if defined(__AROS__)
+-	return;
+-#else
+-	BOOL * ASM (*initIOSegment)(REG(a0, APTR), REG(a1, APTR *), REG(a2, APTR), REG(a3, APTR), REG(a6, APTR), REG(d0, APTR), REG(d1, APTR), REG(d3, APTR), REG(d4, APTR), REG(d2, long));
++	BOOL * ASM (*initIOSegment)(REG(a0, APTR), REG(a1, APTR *), REG(a2, APTR), REG(a3, APTR), REG(a6, APTR),
++		REG(d0, APTR), REG(d1, APTR), REG(d2, APTR), REG(d3, APTR), REG(d4, long));
+ 	BPTR dir,olddir,segment;
+ 
+ 	if (io-&gt;io_Segment || !io-&gt;io_Filename)
+@@ -2453,7 +2451,7 @@
+ 		olddir = CurrentDir(dir);
+ 		if ((segment = LoadSeg(io-&gt;io_Filename)) != 0)
+ 		{
+-			initIOSegment = ((segment+1) &lt;&lt; 2);
++			initIOSegment = MKBADDR(segment);
+ 			if (initIOSegment(io, (APTR)((UBYTE *)io_functable + sizeof(io_functable)), pool, DOSBase,
+ 					SysBase, MathIeeeDoubBasBase, MathIeeeDoubTransBase, UtilityBase, LocaleBase, MAKE_ID('I','G','N',0)))
+ 				io-&gt;io_Segment = segment;
+@@ -2465,7 +2463,6 @@
+ 		CurrentDir(olddir);
+ 		UnLock(dir);
+ 	}
+-#endif
+ }
+ 
+ 
+
+Modified: trunk/libs/include/SDI_compiler.h
+===================================================================
+--- trunk/libs/include/SDI_compiler.h	2008-12-16 23:11:38 UTC (rev 19)
++++ trunk/libs/include/SDI_compiler.h	2008-12-17 21:50:42 UTC (rev 20)
+@@ -263,8 +263,6 @@
+    // TODO write LIB_... macros
+ #  define LIBFUNC_INIT
+ #  define LIBFUNC_EXIT
+-
+-#  define bug kprintf
+ #endif
+ 
+ #if defined(__AROS__)
+
+Modified: trunk/mmakefile.src
+===================================================================
+--- trunk/mmakefile.src	2008-12-16 23:11:38 UTC (rev 19)
++++ trunk/mmakefile.src	2008-12-17 21:50:42 UTC (rev 20)
+@@ -10,7 +10,7 @@
+ 
+ #MM contrib-ignition-bin : linklibs includes contrib-ignition-textedit \
+ #MM contrib-ignition-scroller contrib-ignition-gtdrag contrib-ignition-catalogs \
+-#MM contrib-ignition-gcdescr
++#MM contrib-ignition-descr
+ 
+ EXE := Ignition
+ 
+@@ -64,23 +64,23 @@
+ 	libs/compatibility
+ 
+ %build_prog mmake=contrib-ignition-bin progname=$(EXE) files=$(FILES) \
+-    targetdir=$(TARGETDIR) uselibs=&quot;amiga arossupport arosc rexxsyslib m&quot;
++    targetdir=$(TARGETDIR) uselibs=&quot;amiga arossupport arosc rexxsyslib m mathieeedoubbas mathieeedoubtrans&quot;
+ 
+ %copy_dir_recursive mmake=contrib-ignition-icons src=icons dst=$(TARGETDIR)/icons
+ %copy_dir_recursive mmake=contrib-ignition-config src=config dst=$(TARGETDIR)/config
+ %copy_dir_recursive mmake=contrib-ignition-docs src=docs dst=$(TARGETDIR)/docs
+ %copy_dir_recursive mmake=contrib-ignition-help src=help dst=$(TARGETDIR)/help
+ %copy_dir_recursive mmake=contrib-ignition-rexx src=rexx dst=$(TARGETDIR)/rexx
+-%copy_dir_recursive mmake=contrib-ignition-sheets src=sheets dst=$(TARGETDIR)/sheets
++%copy_dir_recursive mmake=contrib-ignition-sheets src=distribution/full/sheets dst=$(TARGETDIR)/sheets
+ 
+ #MM
+-contrib-ignition-gcdescr :
+-FILES := $(wildcard add-ons/*.gcdescr)
+-%copy_files_q files=$(FILES) src=. dst=$(TARGETDIR) maketarget=contrib-ignition-gcdescr
++contrib-ignition-descr :
++DESCFILES := $(wildcard add-ons/*.gcdescr) $(wildcard add-ons/*.iodescr)
++%copy_files_q files=$(DESCFILES) src=$(TOP)/$(CURDIR) dst=$(TARGETDIR) maketarget=contrib-ignition-descr
+ 
+ #MM
+ contrib-ignition-files :
+-FILES := ignition.info LICENSE README
+-%copy_files_q files=$(FILES) src=. dst=$(TARGETDIR) maketarget=contrib-ignition-files
++CPYFILES := ignition.info LICENSE README
++%copy_files_q files=$(CPYFILES) src=. dst=$(TARGETDIR) maketarget=contrib-ignition-files
+ 
+ %common
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000031.html">[Ignition-commits] r19 - trunk/add-ons
+</A></li>
+	<LI>Next message: <A HREF="000033.html">[Ignition-commits] r20 - in trunk: . add-ons libs/include
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#32">[ date ]</a>
+              <a href="thread.html#32">[ thread ]</a>
+              <a href="subject.html#32">[ subject ]</a>
+              <a href="author.html#32">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

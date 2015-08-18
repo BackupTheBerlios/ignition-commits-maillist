@@ -1,0 +1,451 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r26 - in trunk: . add-ons
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2008-December/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r26%20-%20in%20trunk%3A%20.%20add-ons&In-Reply-To=%3C200812261056.mBQAutPi014648%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000041.html">
+   <LINK REL="Next"  HREF="000043.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r26 - in trunk: . add-ons</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r26%20-%20in%20trunk%3A%20.%20add-ons&In-Reply-To=%3C200812261056.mBQAutPi014648%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r26 - in trunk: . add-ons">marust at mail.berlios.de
+       </A><BR>
+    <I>Fri Dec 26 11:56:55 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000041.html">[Ignition-commits] r25 - trunk
+</A></li>
+        <LI>Next message: <A HREF="000043.html">[Ignition-commits] r27 - in trunk: . libs
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#42">[ date ]</a>
+              <a href="thread.html#42">[ thread ]</a>
+              <a href="subject.html#42">[ subject ]</a>
+              <a href="author.html#42">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2008-12-26 11:56:50 +0100 (Fri, 26 Dec 2008)
+New Revision: 26
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=26&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=26&amp;view=rev</A>
+
+Modified:
+   trunk/add-ons/gclass.c
+   trunk/add-ons/gclass.h
+   trunk/add-ons/iotype.c
+   trunk/add-ons/iotype.h
+   trunk/classes.c
+   trunk/graphic.c
+   trunk/io.c
+Log:
+* Little improvement for handling of core functions:
+  Pointer to *begin* of function table is forwarded to
+  segment init functions.
+* Removed JSR from function tables.
+
+
+Modified: trunk/add-ons/gclass.c
+===================================================================
+--- trunk/add-ons/gclass.c	2008-12-21 23:45:21 UTC (rev 25)
++++ trunk/add-ons/gclass.c	2008-12-26 10:56:50 UTC (rev 26)
+@@ -61,16 +61,9 @@
+ extern ULONG instanceSize;
+ extern const STRPTR superClass;
+ 
+-#ifdef __AROS__
+-// ensure that InitGClass becomes 1st function in segment
+-BOOL PUBLIC
+-InitGClass(REG(a0, struct __gClass *gc), REG(a1, TableEntry *table), REG(a2, APTR mainpool), REG(a3, APTR gfxbase),
+-	REG(a6, struct ExecBase *ExecBase), REG(d0, APTR mathbase), REG(d1, APTR mathtrans), REG(d2, APTR utilitybase), REG(d3, APTR localebase),
+-    REG(d4, long magic)) __attribute__((section(&quot;.aros.startup&quot;)));
+-#endif
+ 
+ BOOL PUBLIC
+-InitGClass(REG(a0, struct __gClass *gc), REG(a1, TableEntry *table), REG(a2, APTR mainpool), REG(a3, APTR gfxbase),
++InitGClass(REG(a0, struct __gClass *gc), REG(a1, APTR *functable), REG(a2, APTR mainpool), REG(a3, APTR gfxbase),
+ 	REG(a6, struct ExecBase *ExecBase), REG(d0, APTR mathbase), REG(d1, APTR mathtrans), REG(d2, APTR utilitybase), REG(d3, APTR localebase),
+     REG(d4, long magic))
+ {
+@@ -95,45 +88,45 @@
+     gc-&gt;gc_Interface = interface;
+ 	gc-&gt;gc_InstSize = gc-&gt;gc_InstOffset + instanceSize;
+ 
+-    gcBase = table;
++    gcBase = functable;
+     pool = mainpool;
+ 
+ 	// Initialize function pointers
+-	AllocStringLength = table[-1].func;
+-	AllocString = table[-2].func;
+-	FreeString = table[-3].func;
+-	gDoMethodA = table[-4].func;
+-	gDoSuperMethodA = table[-5].func;
+-	SetHighColor = table[-6].func;
+-	SetColors = table[-7].func;
+-	FindColorPen = table[-8].func;
+-	DrawRect = table[-9].func;
+-	DrawLine = table[-10].func;
+-	gAreaMove = table[-11].func;
+-	gAreaDraw = table[-12].func;
+-	gAreaEnd = table[-13].func;
+-	GetDPI = table[-14].func;
+-	GetOffset = table[-15].func;
+-	FreeFontInfo = table[-16].func;
+-	SetFontInfoA = table[-17].func;
+-	CopyFontInfo = table[-18].func;
+-	NewFontInfoA = table[-19].func;
+-	DrawText = table[-20].func;
+-	OutlineLength = table[-21].func;
+-	OutlineHeight = table[-22].func;
+-	pixel = table[-23].func;
+-	mm = table[-24].func;
+-	CreateTerm = table[-25].func;
+-	DeleteTerm = table[-26].func;
+-	CopyTerm = table[-27].func;
+-	CalcTerm = table[-28].func;
+-	gInsertRemoveCellsTablePos = table[-29].func;
+-	gInsertRemoveCellsTerm = table[-30].func;
+-	TintColor = table[-31].func;
+-	gSuperDraw = table[-32].func;
+-	gGetLink = table[-33].func;
+-	SetLowColor = table[-34].func;
+-	SetOutlineColor = table[-35].func;
++	AllocStringLength = functable[34];
++	AllocString = functable[33];
++	FreeString = functable[32];
++	gDoMethodA = functable[31];
++	gDoSuperMethodA = functable[30];
++	SetHighColor = functable[29];
++	SetColors = functable[28];
++	FindColorPen = functable[27];
++	DrawRect = functable[26];
++	DrawLine = functable[25];
++	gAreaMove = functable[24];
++	gAreaDraw = functable[23];
++	gAreaEnd = functable[22];
++	GetDPI = functable[21];
++	GetOffset = functable[20];
++	FreeFontInfo = functable[19];
++	SetFontInfoA = functable[18];
++	CopyFontInfo = functable[17];
++	NewFontInfoA = functable[16];
++	DrawText = functable[15];
++	OutlineLength = functable[14];
++	OutlineHeight = functable[13];
++	pixel = functable[12];
++	mm = functable[11];
++	CreateTerm = functable[10];
++	DeleteTerm = functable[9];
++	CopyTerm = functable[8];
++	CalcTerm = functable[7];
++	gInsertRemoveCellsTablePos = functable[6];
++	gInsertRemoveCellsTerm = functable[5];
++	TintColor = functable[4];
++	gSuperDraw = functable[3];
++	gGetLink = functable[2];
++	SetLowColor = functable[1];
++	SetOutlineColor = functable[0];
+ 
+ 	if (!initClass(gc))
+ 		return FALSE;
+
+Modified: trunk/add-ons/gclass.h
+===================================================================
+--- trunk/add-ons/gclass.h	2008-12-21 23:45:21 UTC (rev 25)
++++ trunk/add-ons/gclass.h	2008-12-26 10:56:50 UTC (rev 26)
+@@ -27,10 +27,6 @@
+ #include &quot;cell.h&quot;
+ #endif
+ 
+-typedef struct {
+-	UWORD jsr;
+-	APTR func;
+-} TableEntry;
+ 
+ /*** class ***/
+ 
+
+Modified: trunk/add-ons/iotype.c
+===================================================================
+--- trunk/add-ons/iotype.c	2008-12-21 23:45:21 UTC (rev 25)
++++ trunk/add-ons/iotype.c	2008-12-26 10:56:50 UTC (rev 26)
+@@ -80,17 +80,9 @@
+ 
+ #define MAKE_ID(a,b,c,d) ((a &lt;&lt; 24) | (b &lt;&lt; 16) | (c &lt;&lt; 8) | d)
+ 
+-#ifdef __AROS__
+-// ensure that InitModule becomes 1st function in segment
+ BOOL PUBLIC
+-InitModule(REG(a0, struct IOType *io), REG(a1, TableEntry *table), REG(a2, APTR mainpool), REG(a3, APTR dosBase),
++InitModule(REG(a0, struct IOType *io), REG(a1, APTR *functable), REG(a2, APTR mainpool), REG(a3, APTR dosBase),
+ 	REG(a6, struct ExecBase *execBase), REG(d0, APTR mathBase), REG(d1, APTR mathtransBase), REG(d2, APTR utilityBase),
+-	REG(d3, APTR localeBase), REG(d4, long magic)) __attribute__((section(&quot;.aros.startup&quot;)));
+-#endif
+-
+-BOOL PUBLIC
+-InitModule(REG(a0, struct IOType *io), REG(a1, TableEntry *table), REG(a2, APTR mainpool), REG(a3, APTR dosBase),
+-	REG(a6, struct ExecBase *execBase), REG(d0, APTR mathBase), REG(d1, APTR mathtransBase), REG(d2, APTR utilityBase),
+ 	REG(d3, APTR localeBase), REG(d4, long magic))
+ {
+ #ifdef IGNITION_LITE_EDITION
+@@ -115,25 +107,25 @@
+ 	io-&gt;io_OpenPrefsGUI = openPrefsGUI;
+ 	io-&gt;io_ClosePrefsGUI = closePrefsGUI;
+ 
+-	ioBase = table;
++	ioBase = functable;
+ 	pool = mainpool;
+ 
+ 	// Initialize function table
+-	ReportErrorA = table[-15].func;
+-	NewPage = table[-14].func;
+-	CalculatePageDPI = table[-13].func;
+-	NewCell = table[-12].func;
+-	UpdateCellText = table[-11].func;
+-	SetTableSize = table[-10].func;
+-	FindColorPen = table[-9].func;
+-	AddPen = table[-8].func;
+-	Coord2String = table[-7].func;
+-	pixel = table[-6].func;
+-	mm = table[-5].func;
+-	AllocStringLength = table[-4].func;
+-	AllocString = table[-3].func;
+-	FreeString = table[-2].func;
+-	ita = table[-1].func;
++	ReportErrorA = functable[0];
++	NewPage = functable[1];
++	CalculatePageDPI = functable[2];
++	NewCell = functable[3];
++	UpdateCellText = functable[4];
++	SetTableSize = functable[5];
++	FindColorPen = functable[6];
++	AddPen = functable[7];
++	Coord2String = functable[8];
++	pixel = functable[9];
++	mm = functable[10];
++	AllocStringLength = functable[11];
++	AllocString = functable[12];
++	FreeString = functable[13];
++	ita = functable[14];
+ 
+ 	setPrefs(io-&gt;io_Prefs);
+ 
+
+Modified: trunk/add-ons/iotype.h
+===================================================================
+--- trunk/add-ons/iotype.h	2008-12-21 23:45:21 UTC (rev 25)
++++ trunk/add-ons/iotype.h	2008-12-26 10:56:50 UTC (rev 26)
+@@ -38,10 +38,6 @@
+ #	include &quot;cell.h&quot;
+ #endif
+ 
+-typedef struct {
+-	UWORD jsr;
+-	APTR func;
+-} TableEntry;
+ 
+ /*** Project related ***/
+ 
+
+Modified: trunk/classes.c
+===================================================================
+--- trunk/classes.c	2008-12-21 23:45:21 UTC (rev 25)
++++ trunk/classes.c	2008-12-26 10:56:50 UTC (rev 26)
+@@ -1377,7 +1377,7 @@
+ BOOL
+ LoadGClass(struct gClass *gc)
+ {
+-	BOOL ASM (*initGCSegment)(REG(a0, APTR), REG(a1, APTR), REG(a2, APTR), REG(a3, APTR), REG(a6, APTR),
++	BOOL ASM (*initGCSegment)(REG(a0, APTR), REG(a1, APTR *), REG(a2, APTR), REG(a3, APTR), REG(a6, APTR),
+ 		REG(d0, APTR), REG(d1, APTR), REG(d2, APTR), REG(d3, APTR), REG(d4, long));
+ 	BPTR dir,olddir,segment;
+ 
+@@ -1390,7 +1390,7 @@
+ 		if ((segment = LoadSeg(gc-&gt;gc_ClassName)) != 0)
+ 		{
+ 			initGCSegment = MKBADDR(segment) + sizeof(APTR);
+-			if (initGCSegment(gc, (UBYTE *)gClassFuncTable + gClassFuncTableSize, pool, GfxBase, SysBase, MathIeeeDoubBasBase,
++			if (initGCSegment(gc, gClassFuncTable, pool, GfxBase, SysBase, MathIeeeDoubBasBase,
+ 					MathIeeeDoubTransBase, UtilityBase, LocaleBase,
+ #ifdef IGNITION_LITE_EDITION
+ 					MAKE_ID('I','G','L',0)))
+
+Modified: trunk/graphic.c
+===================================================================
+--- trunk/graphic.c	2008-12-21 23:45:21 UTC (rev 25)
++++ trunk/graphic.c	2008-12-26 10:56:50 UTC (rev 26)
+@@ -281,45 +281,43 @@
+ 
+ #define JSR 0x4ef9
+ 
+-struct {
+-	UWORD jsr;
+-	APTR func;
+-} gClassFuncTable[] = {
+-	/* -210 */		  {JSR, SetOutlineColor},
+-	/* -204 */		  {JSR, SetLowColor},
+-	/* -198 */		  {JSR, gGetLink},
+-	/* -192 */		  {JSR, gSuperDraw},
+-	/* -186 */		  {JSR, TintColor},
+-	/* -180 */		  {JSR, gInsertRemoveCellsTerm},
+-	/* -174 */		  {JSR, gInsertRemoveCellsTablePos},
+-	/* -168 */		  {JSR, CalcTerm},
+-	/* -162 */		  {JSR, CopyTerm},
+-	/* -156 */		  {JSR, DeleteTerm},
+-	/* -150 */		  {JSR, CreateTerm},
+-	/* -144 */		  {JSR, mm},
+-	/* -138 */		  {JSR, pixel},
+-	/* -132 */		  {JSR, OutlineHeight},
+-	/* -126 */		  {JSR, OutlineLength},
+-	/* -120 */		  {JSR, DrawText},
+-	/* -114 */		  {JSR, NewFontInfoA},
+-	/* -108 */		  {JSR, CopyFontInfo},
+-	/* -102 */		  {JSR, SetFontInfoA},
+-	/*  -96 */		  {JSR, FreeFontInfo},
+-	/*  -90 */		  {JSR, GetOffset},
+-	/*  -84 */		  {JSR, GetDPI},
+-	/*  -78 */		  {JSR, libAreaEnd},
+-	/*  -72 */		  {JSR, libAreaDraw},
+-	/*  -66 */		  {JSR, libAreaMove},
+-	/*  -60 */		  {JSR, DrawLine},
+-	/*  -54 */		  {JSR, DrawRect},
+-	/*  -48 */		  {JSR, FindColorPen},
+-	/*  -42 */		  {JSR, SetColors},
+-	/*  -36 */		  {JSR, SetHighColor},
+-	/*  -30 */		  {JSR, gDoSuperMethodA},
+-	/*  -24 */		  {JSR, gDoMethodA},
+-	/*  -18 */		  {JSR, FreeString},
+-	/*  -12 */		  {JSR, AllocString},
+-	/*   -6 */		  {JSR, AllocStringLength}
++const APTR gClassFuncTable[] = {
++	/*  0 */ SetOutlineColor,
++	/*  1 */ SetLowColor,
++	/*  2 */ gGetLink,
++	/*  3 */ gSuperDraw,
++	/*  4 */ TintColor,
++	/*  5 */ gInsertRemoveCellsTerm,
++	/*  6 */ gInsertRemoveCellsTablePos,
++	/*  7 */ CalcTerm,
++	/*  8 */ CopyTerm,
++	/*  9 */ DeleteTerm,
++	/* 10 */ CreateTerm,
++	/* 11 */ mm,
++	/* 12 */ pixel,
++	/* 13 */ OutlineHeight,
++	/* 14 */ OutlineLength,
++	/* 15 */ DrawText,
++	/* 16 */ NewFontInfoA,
++	/* 17 */ CopyFontInfo,
++	/* 18 */ SetFontInfoA,
++	/* 19 */ FreeFontInfo,
++	/* 20 */ GetOffset,
++	/* 21 */ GetDPI,
++	/* 22 */ libAreaEnd,
++	/* 23 */ libAreaDraw,
++	/* 24 */ libAreaMove,
++	/* 25 */ DrawLine,
++	/* 26 */ DrawRect,
++	/* 27 */ FindColorPen,
++	/* 28 */ SetColors,
++	/* 29 */ SetHighColor,
++	/* 30 */ gDoSuperMethodA,
++	/* 31 */ gDoMethodA,
++	/* 32 */ FreeString,
++	/* 33 */ AllocString,
++	/* 34 */ AllocStringLength,
++	NULL
+ };
+ 
+ int32 gClassFuncTableSize = sizeof(gClassFuncTable);
+
+Modified: trunk/io.c
+===================================================================
+--- trunk/io.c	2008-12-21 23:45:21 UTC (rev 25)
++++ trunk/io.c	2008-12-26 10:56:50 UTC (rev 26)
+@@ -2417,23 +2417,24 @@
+ 
+ #endif  // ENABLE_OLD_FORMAT
+ 
+-const struct {UWORD jsr;APTR func;} io_functable[] = {
+-		{0x4ef9, ErrorRequestA},
+-		{0x4ef9, NewPage},
+-		{0x4ef9, RecalcPageDPI},
+-		{0x4ef9, AllocTableField},
+-		{0x4ef9, ioUpdateTFText},
+-		{0x4ef9, AllocTableSize},
+-		{0x4ef9, FindColorPen},
+-		{0x4ef9, ioAddPen},
+-		{0x4ef9, AbsCoord2String},
+-		{0x4ef9, pixel},
+-		{0x4ef9, mm},
+-		{0x4ef9, AllocStringLength},
+-		{0x4ef9, AllocString},
+-		{0x4ef9, FreeString},
+-		{0x4ef9, ioita},
+-	};  /* to be continued */
++const APTR io_functable[] = {
++	/*  0 */ ErrorRequestA,
++	/*  1 */ NewPage,
++	/*  2 */ RecalcPageDPI,
++	/*  3 */ AllocTableField,
++	/*  4 */ ioUpdateTFText,
++	/*  5 */ AllocTableSize,
++	/*  6 */ FindColorPen,
++	/*  7 */ ioAddPen,
++	/*  8 */ AbsCoord2String,
++	/*  9 */ pixel,
++	/* 10 */ mm,
++	/* 11 */ AllocStringLength,
++	/* 12 */ AllocString,
++	/* 13 */ FreeString,
++	/* 14 */ ioita,
++	NULL
++};  /* to be continued */
+ 
+ 
+ void
+@@ -2452,7 +2453,7 @@
+ 		if ((segment = LoadSeg(io-&gt;io_Filename)) != 0)
+ 		{
+ 			initIOSegment = MKBADDR(segment) + sizeof(APTR);
+-			if (initIOSegment(io, (APTR)((UBYTE *)io_functable + sizeof(io_functable)), pool, DOSBase,
++			if (initIOSegment(io, io_functable, pool, DOSBase,
+ 					SysBase, MathIeeeDoubBasBase, MathIeeeDoubTransBase, UtilityBase, LocaleBase, MAKE_ID('I','G','N',0)))
+ 				io-&gt;io_Segment = segment;
+ 			else
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000041.html">[Ignition-commits] r25 - trunk
+</A></li>
+	<LI>Next message: <A HREF="000043.html">[Ignition-commits] r27 - in trunk: . libs
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#42">[ date ]</a>
+              <a href="thread.html#42">[ thread ]</a>
+              <a href="subject.html#42">[ subject ]</a>
+              <a href="author.html#42">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

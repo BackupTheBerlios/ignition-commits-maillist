@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r46 - in trunk: . config
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2009-April/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r46%20-%20in%20trunk%3A%20.%20config&In-Reply-To=%3C200904161746.n3GHk7Pq014306%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000073.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r46 - in trunk: . config</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r46%20-%20in%20trunk%3A%20.%20config&In-Reply-To=%3C200904161746.n3GHk7Pq014306%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r46 - in trunk: . config">marust at mail.berlios.de
+       </A><BR>
+    <I>Thu Apr 16 19:46:07 CEST 2009</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000073.html">[Ignition-commits] r46 - in trunk: . config
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#71">[ date ]</a>
+              <a href="thread.html#71">[ thread ]</a>
+              <a href="subject.html#71">[ subject ]</a>
+              <a href="author.html#71">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2009-04-16 19:46:04 +0200 (Thu, 16 Apr 2009)
+New Revision: 46
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=46&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=46&amp;view=rev</A>
+
+Modified:
+   trunk/config/ignition.prefs
+   trunk/config/ignition_english.prefs
+   trunk/mmakefile.src
+Log:
+Some fixes to AROS metamakefile:
+- Wrong include directory fixed
+- Changed target directory to Extras:Applications
+  (This is where the Icaros distribution currently has the applications)
+- Added an release target which copies all needed parts to one place
+
+Changed prefs to open Ignition on Workbench. Two tester have reported
+problems when Ignition tries to open a screen with the old settings.
+
+Modified: trunk/config/ignition.prefs
+===================================================================
+(Binary files differ)
+
+Modified: trunk/config/ignition_english.prefs
+===================================================================
+(Binary files differ)
+
+Modified: trunk/mmakefile.src
+===================================================================
+--- trunk/mmakefile.src	2009-01-24 11:09:43 UTC (rev 45)
++++ trunk/mmakefile.src	2009-04-16 17:46:04 UTC (rev 46)
+@@ -14,10 +14,11 @@
+ 
+ EXE := Ignition
+ 
+-TARGETDIR := $(AROS_CONTRIB)/Office/Ignition
++TARGETDIR := $(AROS_CONTRIB)/Applications/Ignition
++RELEASEDIR := $(TOP)/releases/Ignition
+ 
+ USER_CFLAGS :=
+-USER_INCLUDES := -Ilibs/include -Ilib/safeclip/gcc-generic -Ilibs
++USER_INCLUDES := -Ilibs/include -Ilib/safeclip/generic -Ilibs
+ 
+ FILES := \
+ 	boopsi \
+@@ -87,4 +88,19 @@
+ CPYFILES := ignition.info LICENSE README
+ %copy_files_q files=$(CPYFILES) src=. dst=$(TARGETDIR) maketarget=contrib-ignition-files
+ 
++#MM contrib-ignition-release : contrib-ignition
++
++#MM
++contrib-ignition-release :
++	$(RM) $(RELEASEDIR)
++	$(MKDIR) $(TOP)/releases
++	$(CP) -r $(TARGETDIR) $(RELEASEDIR)
++	$(CP) $(AROS_LIBS)/gtdrag.library $(RELEASEDIR)
++	$(CP) $(AROS_GADGETS)/pScroller.gadget $(RELEASEDIR)
++	$(CP) $(AROS_GADGETS)/pTextEdit.gadget $(RELEASEDIR)
++	$(TARGET_STRIP) $(RELEASEDIR)/Ignition
++	$(TARGET_STRIP) $(RELEASEDIR)/gtdrag.library
++	$(TARGET_STRIP) $(RELEASEDIR)/pScroller.gadget
++	$(TARGET_STRIP) $(RELEASEDIR)/pTextEdit.gadget
++
+ %common
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000073.html">[Ignition-commits] r46 - in trunk: . config
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#71">[ date ]</a>
+              <a href="thread.html#71">[ thread ]</a>
+              <a href="subject.html#71">[ subject ]</a>
+              <a href="author.html#71">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,482 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r62 - in trunk/libs/textedit: . include/proto
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2010-December/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r62%20-%20in%20trunk/libs/textedit%3A%20.%20include/proto&In-Reply-To=%3C20101227080917.60C56480585%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000092.html">
+   
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r62 - in trunk/libs/textedit: . include/proto</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r62%20-%20in%20trunk/libs/textedit%3A%20.%20include/proto&In-Reply-To=%3C20101227080917.60C56480585%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r62 - in trunk/libs/textedit: . include/proto">marust at mail.berlios.de
+       </A><BR>
+    <I>Mon Dec 27 09:09:17 CET 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000092.html">[Ignition-commits] r61 - in trunk/libs/textedit: . include	include/clib include/defines include/pragmas include/proto sfd
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#93">[ date ]</a>
+              <a href="thread.html#93">[ thread ]</a>
+              <a href="subject.html#93">[ subject ]</a>
+              <a href="author.html#93">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2010-12-27 09:09:17 +0100 (Mon, 27 Dec 2010)
+New Revision: 62
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=62&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=62&amp;view=rev</A>
+
+Added:
+   trunk/libs/textedit/Makefile
+Modified:
+   trunk/libs/textedit/TE_clip.c
+   trunk/libs/textedit/TextEdit.c
+   trunk/libs/textedit/TextEdit_includes.h
+   trunk/libs/textedit/TextEdit_lib.c
+   trunk/libs/textedit/include/proto/TextEdit.h
+Log:
+Attempt to create library with macros from SDI_lib.h
+
+
+Added: trunk/libs/textedit/Makefile
+===================================================================
+--- trunk/libs/textedit/Makefile	                        (rev 0)
++++ trunk/libs/textedit/Makefile	2010-12-27 08:09:17 UTC (rev 62)
+@@ -0,0 +1,26 @@
++# Copyright &#169;1999-2010 pinc Software. All Rights Reserved.
++# Licensed under the terms of the MIT License.
++
++CC = i386-aros-gcc
++CFLAGS = -Wall -Wno-pointer-sign -I../../include -Iinclude \
++	-D__GRAPHICS_NOLIBBASE__ -D__INTUITION_NOLIBBASE__ -D__UTILITY_NOLIBBASE__ \
++	-D__DOS_NOLIBBASE__ -D__IFFPARSE_NOLIBBASE__
++LDFLAGS = -lrom -nostartfiles
++
++EXE = ../pTextEdit.gadget
++
++OBJS = TextEdit_lib.o TE_clip.o TE_dispatch.o TE_draw.o TextEdit.o
++
++
++.PHONY: all
++all : $(EXE)
++
++$(EXE) : $(OBJS)
++	$(CC) -o $@ $(OBJS) $(LDFLAGS)
++
++.PHONY: clean
++clean :
++	rm -f $(OBJS) $(EXE)
++
++.PHONY: distclean
++distclean : clean
+
+
+Property changes on: trunk/libs/textedit/Makefile
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + LF
+
+Modified: trunk/libs/textedit/TE_clip.c
+===================================================================
+--- trunk/libs/textedit/TE_clip.c	2010-12-26 17:10:29 UTC (rev 61)
++++ trunk/libs/textedit/TE_clip.c	2010-12-27 08:09:17 UTC (rev 62)
+@@ -119,14 +119,11 @@
+ }
+ 
+ 
+-LIB_LH3(void, Text2Clipboard,
+-  LIB_LHA(UBYTE, clipunit, D0),
+-  LIB_LHA(STRPTR, t, A0),
+-  LIB_LHA(long, len, D1),
+-  struct ClassBase *, cb, 5, pTextEdit)
++LIBFUNC void Text2Clipboard(
++  REG(d0, UBYTE clipunit),
++  REG(a0, STRPTR t),
++  REG(d1, long len))
+ {
+-  LIBFUNC_INIT
+-
+   struct Task *this;
+ 
+   if (!t || !len || !cb-&gt;cb_IFFParseBase)
+@@ -153,18 +150,13 @@
+   }
+   else
+     internal_Text2Clipboard(clipunit,t,len,cb);
+-
+-  LIBFUNC_EXIT
+ }
+ 
+ 
+-LIB_LH2(STRPTR, TextFromClipboard,
+-  LIB_LHA(UBYTE, clipunit, A0),
+-  LIB_LHA(APTR, pool, A0),
+-  struct ClassBase *, cb, 6, pTextEdit)
++LIBFUNC STRPTR TextFromClipboard(
++  REG(d0, UBYTE clipunit),
++  REG(a0, APTR pool))
+ {
+-  LIBFUNC_INIT
+-
+   struct Task *this;
+ 
+   if (!pool || !cb-&gt;cb_IFFParseBase)
+@@ -197,6 +189,4 @@
+   }
+   else
+     return(internal_TextFromClipboard(clipunit,pool,cb));
+-
+-  LIBFUNC_EXIT
+ }
+
+Modified: trunk/libs/textedit/TextEdit.c
+===================================================================
+--- trunk/libs/textedit/TextEdit.c	2010-12-26 17:10:29 UTC (rev 61)
++++ trunk/libs/textedit/TextEdit.c	2010-12-27 08:09:17 UTC (rev 62)
+@@ -31,12 +31,8 @@
+ }
+ 
+ 
+-LIB_LH1(VOID, FreeEditList,
+-  LIB_LHA(struct EditGData *, ed, A0),
+-  struct ClassBase *, cb, 7, pTextEdit)
++LIBFUNC VOID FreeEditList(REG(a0, struct EditGData * ed))
+ {
+-  LIBFUNC_INIT
+-
+   struct MinNode *mln;
+   struct EditLine *el;
+   long   count;
+@@ -48,8 +44,6 @@
+   }
+   ed-&gt;ed_Top = ed-&gt;ed_List.mlh_Head;
+   ed-&gt;ed_TextLines = 0;
+-
+-  LIBFUNC_EXIT
+ }
+ 
+ 
+@@ -106,11 +100,10 @@
+ }
+ 
+ 
+-LIB_LH3(BOOL, PrepareEditText,
+-  LIB_LHA(struct EditGData *, ed, A0),
+-  LIB_LHA(struct RastPort *, rp, A1),
+-  LIB_LHA(STRPTR, t, A2),
+-  struct ClassBase *, cb, 8, pTextEdit)
++LIBFUNC BOOL PrepareEditText(
++  REG(a0, struct EditGData * ed),
++  REG(a1, struct RastPort * rp),
++  REG(a2, STRPTR t))
+ {
+   LIBFUNC_INIT
+ 
+
+Modified: trunk/libs/textedit/TextEdit_includes.h
+===================================================================
+--- trunk/libs/textedit/TextEdit_includes.h	2010-12-26 17:10:29 UTC (rev 61)
++++ trunk/libs/textedit/TextEdit_includes.h	2010-12-27 08:09:17 UTC (rev 62)
+@@ -12,6 +12,7 @@
+ #include &quot;TextEdit_private.h&quot;
+ 
+ #include &quot;SDI_compiler.h&quot;
++#include &quot;SDI_lib.h&quot;
+ #include &quot;compatibility.h&quot;
+ 
+ #include &lt;exec/execbase.h&gt;
+@@ -20,6 +21,7 @@
+ #include &lt;exec/lists.h&gt;
+ #include &lt;exec/ports.h&gt;
+ #include &lt;exec/memory.h&gt;
++#include &lt;exec/resident.h&gt;
+ #include &lt;devices/input.h&gt;
+ #include &lt;intuition/intuition.h&gt;
+ #include &lt;intuition/gadgetclass.h&gt;
+@@ -131,12 +133,17 @@
+ 
+ /** public functions **/
+ 
+-/* Mazze: ClassBase moved to end of argument list */
+-extern Class * PUBLIC GetClass(REG(a6, APTR cb));
+-extern void PUBLIC Text2Clipboard(REG(d0, UBYTE clipunit),REG(a0, STRPTR t),REG(d1, long len),REG(a6, struct ClassBase *cb));
+-extern STRPTR PUBLIC TextFromClipboard(REG(d0, UBYTE clipunit),REG(a0, APTR pool),REG(a6, struct ClassBase *cb));
++//extern Class * PUBLIC GetClass(REG(a6, APTR cb));
++LIBPROTO(GetClass, Class *);
++//extern void PUBLIC Text2Clipboard(REG(d0, UBYTE clipunit),REG(a0, STRPTR t),REG(d1, long len),REG(a6, struct ClassBase *cb));
++LIBPROTO(Text2Clipboard, void, REG(d0, UBYTE clipunit),REG(a0, STRPTR t),REG(d1, long len));
++//extern STRPTR PUBLIC TextFromClipboard(REG(d0, UBYTE clipunit),REG(a0, APTR pool),REG(a6, struct ClassBase *cb));
++LIBPROTO(TextFromClipboard, STRPTR, REG(d0, UBYTE clipunit),REG(a0, APTR pool));
++//extern void PUBLIC FreeEditList(REG(a0, struct EditGData *ed),REG(a6, struct ClassBase *cb));
++LIBPROTO(FreeEditList, void, REG(a0, struct EditGData *ed));
++//extern BOOL PUBLIC PrepareEditText(REG(a0, struct EditGData *ed),REG(a1, struct RastPort *rp),REG(a2, STRPTR t),REG(a6, struct ClassBase *cb));
++LIBPROTO(PrepareEditText, BOOL, REG(a0, struct EditGData *ed),REG(a1, struct RastPort *rp),REG(a2, STRPTR t));
++
+ extern IPTR PUBLIC DispatchEditGadget(REG(a0, Class *cl),REG(a2, Object *o),REG(a1, Msg msg));
+-extern void PUBLIC FreeEditList(REG(a0, struct EditGData *ed),REG(a6, struct ClassBase *cb));
+-extern BOOL PUBLIC PrepareEditText(REG(a0, struct EditGData *ed),REG(a1, struct RastPort *rp),REG(a2, STRPTR t),REG(a6, struct ClassBase *cb));
+ 
+ #endif    // TEXTEDIT_H
+
+Modified: trunk/libs/textedit/TextEdit_lib.c
+===================================================================
+--- trunk/libs/textedit/TextEdit_lib.c	2010-12-26 17:10:29 UTC (rev 61)
++++ trunk/libs/textedit/TextEdit_lib.c	2010-12-27 08:09:17 UTC (rev 62)
+@@ -9,19 +9,41 @@
+ #include &quot;TextEdit_includes.h&quot;
+ 
+ 
+-struct Library * PUBLIC LibInit(REG(a0, BPTR Segment),REG(d0, struct ClassBase *cb),REG(a6, struct ExecBase *ExecBase));
+-struct Library * PUBLIC LibOpen(REG(a6, struct ClassBase *cb));
+-BPTR PUBLIC LibExpunge(REG(a6, struct ClassBase *cb));
+-BPTR PUBLIC LibClose(REG(a6, struct ClassBase *cb));
+-LONG PUBLIC LibNull(REG(a6, struct ClassBase *cb));
++#define VERSION	        1
++#define REVISION        5
++#define DATE            &quot;26.12.2010&quot;
++#define VERS            &quot;pTextEdit.gadget&quot;
++#define VSTRING         &quot;pTextEdit.gadget 1.5 (26.12.2010)\r\n&quot;
++#define VERSTAG         &quot;\0$VER: pTextEdit.gadget 1.5 (26.10.2010)&quot;
+ 
++static const char UserLibName[] = VERS;
++static const char UserLibID[]   = VERSTAG;
+ 
+-Class * PUBLIC GetClass(REG(a6, APTR cb))
++LIBFUNC static struct ClassBase * LibInit(REG(a0, BPTR Segment), REG(d0, struct ClassBase *cb), REG(a6, struct ExecBase *sb));
++LIBFUNC static BPTR               LibExpunge (REG(a6, struct ClassBase *cb));
++LIBFUNC static struct ClassBase * LibOpen    (REG(a6, struct ClassBase *cb));
++LIBFUNC static BPTR               LibClose   (REG(a6, struct ClassBase *cb));
++LIBFUNC static LONG               LibNull    (void);
++
++
++int Main(void)
+ {
+-  return(((struct ClassBase *)cb)-&gt;cb_Class);
++  return RETURN_FAIL;
+ }
+ 
++LIBFUNC static LONG LibNull(VOID)
++{
++  return 0;
++}
+ 
++
++LIBFUNC Class * GetClass(void)
++{
++  // return(((struct ClassBase *)cb)-&gt;cb_Class);
++  return 0; // FIXME
++}
++
++
+ void PRIVATE TE_Exit(struct ClassBase *cb)
+ {
+   if (FreeClass(cb-&gt;cb_Class))
+@@ -40,25 +62,25 @@
+ 
+ int PRIVATE TE_Init(struct ClassBase *cb)
+ {
+-  if (cb-&gt;cb_IntuitionBase = OpenLibrary(&quot;intuition.library&quot;,37))
++  if ((cb-&gt;cb_IntuitionBase = OpenLibrary(&quot;intuition.library&quot;,37)) != NULL)
+   {
+-    if (cb-&gt;cb_GfxBase = (APTR)OpenLibrary(&quot;graphics.library&quot;,37))
++    if ((cb-&gt;cb_GfxBase = (APTR)OpenLibrary(&quot;graphics.library&quot;,37)) != NULL)
+     {
+-      if (cb-&gt;cb_UtilityBase = OpenLibrary(&quot;utility.library&quot;,37))
++      if ((cb-&gt;cb_UtilityBase = OpenLibrary(&quot;utility.library&quot;,37)) != NULL)
+       {
+         cb-&gt;cb_Console.io_Message.mn_Length = sizeof(struct IOStdReq);
+         if (!OpenDevice(&quot;console.device&quot;,-1,(struct IORequest *)&amp;cb-&gt;cb_Console,0))
+         {
+           Class *cl;
+ 
+-          if (cl = MakeClass(&quot;pinc-editgadget&quot;,GADGETCLASS,NULL,sizeof(struct EditGData),0))
++          if ((cl = MakeClass(&quot;pinc-editgadget&quot;,GADGETCLASS,NULL,sizeof(struct EditGData),0)) != NULL)
+           {
+             cl-&gt;cl_Dispatcher.h_Entry = (APTR)DispatchEditGadget;
+             cl-&gt;cl_Dispatcher.h_Data = cb;
+             cl-&gt;cl_UserData = (ULONG)cb;
+             AddClass(cl);
+ 
+-            if (cb-&gt;cb_IFFParseBase = OpenLibrary(&quot;iffparse.library&quot;,37))
++            if ((cb-&gt;cb_IFFParseBase = OpenLibrary(&quot;iffparse.library&quot;,37)) != NULL)
+               cb-&gt;cb_DOSBase = OpenLibrary(&quot;dos.library&quot;,37);
+             cb-&gt;cb_Class = cl;
+ 
+@@ -75,56 +97,70 @@
+   return(FALSE);
+ }
+ 
++#define libvector LFUNC_FAS(GetClass) \
++  LFUNC_FA_(Text2Clipboard) \
++  LFUNC_FA_(TextFromClipboard) \
++  LFUNC_FA_(FreeEditList) \
++  LFUNC_FA_(PrepareEditText)
+ 
+-STATIC APTR LibVectors[] =
++
++STATIC CONST_APTR LibVectors[] =
+ {
+   LibOpen,
+   LibClose,
+   LibExpunge,
+   LibNull,
+-
+-  GetClass,
+-  Text2Clipboard,
+-  TextFromClipboard,
+-  FreeEditList,
+-  PrepareEditText,
+-
++  libvector,
+   (APTR)-1
+ };
+ 
+-extern UBYTE __far LibName[], LibID[];
+-extern LONG __far LibVersion, LibRevision;
+ 
+-struct { ULONG DataSize; APTR Table; APTR Data; struct Library * (*Init)(); } __aligned LibInitTab =
++STATIC CONST IPTR LibInitTab[] =
+ {
+   sizeof(struct ClassBase),
+-  LibVectors,
+-  NULL,
+-  LibInit
++  (IPTR)LibVectors,
++  (IPTR)NULL,
++  (IPTR)LibInit
+ };
+ 
+ 
+-struct Library * PUBLIC LibInit(REG(a0, BPTR segment),REG(d0, struct ClassBase *cb),REG(a6, struct ExecBase *ExecBase))
++static const USED_VAR struct Resident ROMTag =
+ {
++  RTC_MATCHWORD,
++  (struct Resident *)&amp;ROMTag,
++  (struct Resident *)(&amp;ROMTag + 1),
++  RTF_AUTOINIT,
++  VERSION,
++  NT_LIBRARY,
++  0,
++  (char *)UserLibName,
++  (char *)UserLibID + 6,
++  (APTR)LibInitTab
++};
++
++
++struct ClassBase * LibInit(REG(a0, BPTR segment),REG(d0, struct ClassBase *cb),REG(a6, struct ExecBase *ExecBase))
++{
+   if(ExecBase-&gt;LibNode.lib_Version &lt; 37)
+     return(NULL);
+ 
+   cb-&gt;cb_LibNode.lib_Node.ln_Type = NT_LIBRARY;
+-  cb-&gt;cb_LibNode.lib_Node.ln_Name = LibName;
++  cb-&gt;cb_LibNode.lib_Node.ln_Pri  = 0;
++  cb-&gt;cb_LibNode.lib_Node.ln_Name = UserLibName;
+   cb-&gt;cb_LibNode.lib_Flags        = LIBF_CHANGED | LIBF_SUMUSED;
+-  cb-&gt;cb_LibNode.lib_Version      = LibVersion;
+-  cb-&gt;cb_LibNode.lib_Revision     = LibRevision;
+-  cb-&gt;cb_LibNode.lib_IdString     = (APTR)LibID;
++  cb-&gt;cb_LibNode.lib_Version      = VERSION;
++  cb-&gt;cb_LibNode.lib_Revision     = REVISION;
++  cb-&gt;cb_LibNode.lib_IdString     = (APTR)UserLibID;
+   cb-&gt;cb_LibSegment = segment;
+   cb-&gt;cb_SysBase = ExecBase;
+ 
+   InitSemaphore(&amp;cb-&gt;cb_LockSemaphore);
+ 
+-  return((struct Library *)cb);
++  return cb;
+ }
+ 
+ 
+-struct Library * PUBLIC LibOpen(REG(a6, struct ClassBase *cb))
++LIBFUNC struct ClassBase * LibOpen(REG(a6, struct ClassBase *cb))
+ {
+   cb-&gt;cb_LibNode.lib_Flags &amp;= ~LIBF_DELEXP;
+   cb-&gt;cb_LibNode.lib_OpenCnt++;
+@@ -143,11 +179,11 @@
+     }
+   }
+   ReleaseSemaphore(&amp;cb-&gt;cb_LockSemaphore);
+-  return((struct Library *)cb);
++  return (cb);
+ }
+ 
+ 
+-BPTR PUBLIC LibExpunge(REG(a6, struct ClassBase *cb))
++LIBFUNC BPTR LibExpunge(REG(a6, struct ClassBase *cb))
+ {
+   if (!cb-&gt;cb_LibNode.lib_OpenCnt &amp;&amp; cb-&gt;cb_LibSegment)
+   {
+@@ -165,7 +201,7 @@
+ }
+ 
+ 
+-BPTR PUBLIC LibClose(REG(a6, struct ClassBase *cb))
++LIBFUNC BPTR LibClose(REG(a6, struct ClassBase *cb))
+ {
+   if (cb-&gt;cb_LibNode.lib_OpenCnt)
+     cb-&gt;cb_LibNode.lib_OpenCnt--;
+@@ -181,9 +217,3 @@
+   }
+   return(NULL);
+ }
+-
+-
+-LONG PUBLIC LibNull(REG(a6, struct ClassBase *cb))
+-{
+-  return(NULL);
+-}
+
+Modified: trunk/libs/textedit/include/proto/TextEdit.h
+===================================================================
+--- trunk/libs/textedit/include/proto/TextEdit.h	2010-12-26 17:10:29 UTC (rev 61)
++++ trunk/libs/textedit/include/proto/TextEdit.h	2010-12-27 08:09:17 UTC (rev 62)
+@@ -3,7 +3,7 @@
+ #ifndef PROTO_TEXTEDIT_H
+ #define PROTO_TEXTEDIT_H
+ 
+-#include &lt;clib/textedit_protos.h&gt;
++#include &lt;clib/TextEdit_protos.h&gt;
+ 
+ #ifndef _NO_INLINE
+ # if defined(__GNUC__)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000092.html">[Ignition-commits] r61 - in trunk/libs/textedit: . include	include/clib include/defines include/pragmas include/proto sfd
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#93">[ date ]</a>
+              <a href="thread.html#93">[ thread ]</a>
+              <a href="subject.html#93">[ subject ]</a>
+              <a href="author.html#93">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

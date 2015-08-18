@@ -1,0 +1,1289 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r53 - in trunk: . add-ons config docs	help/deutsch help/english lib/safeclip lib/safeclip/gcc-68k	lib/safeclip/generic lib/safeclip/sasc-68k libs libs/gtdrag	libs/gtdrag/docs libs/gtdrag/examples libs/gtdrag/fd	libs/gtdrag/include/clib libs/gtdrag/include/libraries	libs/gtdrag/include/lvo libs/gtdrag/include/pragmas	libs/gtdrag/include/proto libs/include libs/scroller	libs/scroller/include/gadgets libs/textedit libs/textedit/fd	libs/textedit/include/clib libs/textedit/include/gadgets	libs/textedit/include/pragmas libs/textedit/include/proto	libs/textedit/test locale misc rexx
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2010-November/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r53%20-%20in%20trunk%3A%20.%20add-ons%20config%20docs%0A%09help/deutsch%20help/english%20lib/safeclip%20lib/safeclip/gcc-68k%0A%09lib/safeclip/generic%20lib/safeclip/sasc-68k%20libs%20libs/gtdrag%0A%09libs/gtdrag/docs%20libs/gtdrag/examples%20libs/gtdrag/fd%0A%09libs/gtdrag/include/clib%20libs/gtdrag/include/libraries%0A%09libs/gtdrag/include/lvo%20libs/gtdrag/include/pragmas%0A%09libs/gtdrag/include/proto%20libs/include%20libs/scroller%0A%09libs/scroller/include/gadgets%20libs/textedit%20libs/textedit/fd%0A%09libs/textedit/include/clib%20libs/textedit/include/gadgets%0A%09libs/textedit/include/pragmas%20libs/textedit/include/proto%0A%09libs/textedit/test%20locale%20misc%20rexx&In-Reply-To=%3C20101120142921.A4C55480C2F%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000082.html">
+   <LINK REL="Next"  HREF="000084.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r53 - in trunk: . add-ons config docs	help/deutsch help/english lib/safeclip lib/safeclip/gcc-68k	lib/safeclip/generic lib/safeclip/sasc-68k libs libs/gtdrag	libs/gtdrag/docs libs/gtdrag/examples libs/gtdrag/fd	libs/gtdrag/include/clib libs/gtdrag/include/libraries	libs/gtdrag/include/lvo libs/gtdrag/include/pragmas	libs/gtdrag/include/proto libs/include libs/scroller	libs/scroller/include/gadgets libs/textedit libs/textedit/fd	libs/textedit/include/clib libs/textedit/include/gadgets	libs/textedit/include/pragmas libs/textedit/include/proto	libs/textedit/test locale misc rexx</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r53%20-%20in%20trunk%3A%20.%20add-ons%20config%20docs%0A%09help/deutsch%20help/english%20lib/safeclip%20lib/safeclip/gcc-68k%0A%09lib/safeclip/generic%20lib/safeclip/sasc-68k%20libs%20libs/gtdrag%0A%09libs/gtdrag/docs%20libs/gtdrag/examples%20libs/gtdrag/fd%0A%09libs/gtdrag/include/clib%20libs/gtdrag/include/libraries%0A%09libs/gtdrag/include/lvo%20libs/gtdrag/include/pragmas%0A%09libs/gtdrag/include/proto%20libs/include%20libs/scroller%0A%09libs/scroller/include/gadgets%20libs/textedit%20libs/textedit/fd%0A%09libs/textedit/include/clib%20libs/textedit/include/gadgets%0A%09libs/textedit/include/pragmas%20libs/textedit/include/proto%0A%09libs/textedit/test%20locale%20misc%20rexx&In-Reply-To=%3C20101120142921.A4C55480C2F%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r53 - in trunk: . add-ons config docs	help/deutsch help/english lib/safeclip lib/safeclip/gcc-68k	lib/safeclip/generic lib/safeclip/sasc-68k libs libs/gtdrag	libs/gtdrag/docs libs/gtdrag/examples libs/gtdrag/fd	libs/gtdrag/include/clib libs/gtdrag/include/libraries	libs/gtdrag/include/lvo libs/gtdrag/include/pragmas	libs/gtdrag/include/proto libs/include libs/scroller	libs/scroller/include/gadgets libs/textedit libs/textedit/fd	libs/textedit/include/clib libs/textedit/include/gadgets	libs/textedit/include/pragmas libs/textedit/include/proto	libs/textedit/test locale misc rexx">marust at mail.berlios.de
+       </A><BR>
+    <I>Sat Nov 20 15:29:21 CET 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000082.html">[Ignition-commits] r52 - in trunk/libs: gtdrag scroller textedit
+</A></li>
+        <LI>Next message: <A HREF="000084.html">[Ignition-commits] r54 - in trunk: . libs
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#83">[ date ]</a>
+              <a href="thread.html#83">[ thread ]</a>
+              <a href="subject.html#83">[ subject ]</a>
+              <a href="author.html#83">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2010-11-20 15:29:20 +0100 (Sat, 20 Nov 2010)
+New Revision: 53
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/ignition?rev=53&amp;view=rev">http://svn.berlios.de/viewcvs/ignition?rev=53&amp;view=rev</A>
+
+Modified:
+   trunk/History
+   trunk/LICENSE
+   trunk/Makefile
+   trunk/README
+   trunk/SCOPTIONS
+   trunk/add-ons/Makefile
+   trunk/add-ons/SCOPTIONS
+   trunk/add-ons/area_diagram.c
+   trunk/add-ons/area_diagram.gcdescr
+   trunk/add-ons/ascii.c
+   trunk/add-ons/ascii.iodescr
+   trunk/add-ons/button.c
+   trunk/add-ons/button.gcdescr
+   trunk/add-ons/cell.h
+   trunk/add-ons/checkbox.c
+   trunk/add-ons/checkbox.gcdescr
+   trunk/add-ons/circle_diagram.c
+   trunk/add-ons/circle_diagram.gcdescr
+   trunk/add-ons/column_diagram.c
+   trunk/add-ons/column_diagram.gcdescr
+   trunk/add-ons/csv.c
+   trunk/add-ons/csv.iodescr
+   trunk/add-ons/frame.c
+   trunk/add-ons/frame.gcdescr
+   trunk/add-ons/gclass.c
+   trunk/add-ons/gclass.fd
+   trunk/add-ons/gclass.h
+   trunk/add-ons/gclass_functable.c
+   trunk/add-ons/gclass_makelib.with
+   trunk/add-ons/gclass_pragmas.h
+   trunk/add-ons/gclass_protos.h
+   trunk/add-ons/gclass_variadic.c
+   trunk/add-ons/gradient.c
+   trunk/add-ons/gradient.gcdescr
+   trunk/add-ons/iotype.c
+   trunk/add-ons/iotype.h
+   trunk/add-ons/iotype_variadic.c
+   trunk/add-ons/line.c
+   trunk/add-ons/line.gcdescr
+   trunk/add-ons/line_diagram.c
+   trunk/add-ons/line_diagram.gcdescr
+   trunk/add-ons/polygon.gcdescr
+   trunk/add-ons/rectangle.c
+   trunk/add-ons/rectangle.gcdescr
+   trunk/add-ons/text.c
+   trunk/add-ons/text.gcdescr
+   trunk/add-ons/turbocalc.c
+   trunk/add-ons/turbocalc.h
+   trunk/add-ons/turbocalc.iodescr
+   trunk/boopsi.c
+   trunk/calc.c
+   trunk/calc.h
+   trunk/cell.c
+   trunk/classes.c
+   trunk/classes.h
+   trunk/clip.c
+   trunk/cmd.c
+   trunk/color.c
+   trunk/config/deutsch.functions
+   trunk/config/english.functions
+   trunk/database.c
+   trunk/debug.c
+   trunk/debug.h
+   trunk/diagram.c
+   trunk/docs/Befehle.guide
+   trunk/docs/Grafik-System
+   trunk/docs/LiesMich.guide
+   trunk/docs/Merker
+   trunk/docs/ReadMe.html
+   trunk/docs/WDTs
+   trunk/edit.c
+   trunk/font.c
+   trunk/font.h
+   trunk/funcs.h
+   trunk/functions.c
+   trunk/gadgets.c
+   trunk/gadgets.h
+   trunk/graphic.c
+   trunk/graphic.h
+   trunk/handleprefs.c
+   trunk/handlewindows.c
+   trunk/help/deutsch/ignition.guide
+   trunk/help/deutsch/ignition.in.guide
+   trunk/help/english/ignition.guide
+   trunk/help/english/ignition.in.guide
+   trunk/hooks.c
+   trunk/ignition.c
+   trunk/images.c
+   trunk/images.h
+   trunk/initwindows.c
+   trunk/io.c
+   trunk/io.h
+   trunk/lib/safeclip/ReadMe.doc
+   trunk/lib/safeclip/gcc-68k/Makefile
+   trunk/lib/safeclip/gcc-68k/clip.s
+   trunk/lib/safeclip/gcc-68k/safeclip.c
+   trunk/lib/safeclip/gcc-68k/safeclip.h
+   trunk/lib/safeclip/generic/safeclip.c
+   trunk/lib/safeclip/generic/safeclip.h
+   trunk/lib/safeclip/safeclip.guide
+   trunk/lib/safeclip/sasc-68k/clip.s
+   trunk/lib/safeclip/sasc-68k/safeclip.c
+   trunk/lib/safeclip/sasc-68k/safeclip.h
+   trunk/lib/safeclip/sasc-68k/smakefile
+   trunk/libs/compatibility.c
+   trunk/libs/gtdrag/GTD_Apps.c
+   trunk/libs/gtdrag/GTD_Boopsi.c
+   trunk/libs/gtdrag/GTD_Drag.c
+   trunk/libs/gtdrag/GTD_DragObj.c
+   trunk/libs/gtdrag/GTD_DropMsgs.c
+   trunk/libs/gtdrag/GTD_Gadgets.c
+   trunk/libs/gtdrag/GTD_Highlight.c
+   trunk/libs/gtdrag/GTD_Hook.c
+   trunk/libs/gtdrag/GTD_IFFHook.c
+   trunk/libs/gtdrag/GTD_IMsgs.c
+   trunk/libs/gtdrag/GTD_ImageHook.c
+   trunk/libs/gtdrag/GTD_Tree.c
+   trunk/libs/gtdrag/GTD_TreeHook.c
+   trunk/libs/gtdrag/GTD_Windows.c
+   trunk/libs/gtdrag/SMakefile
+   trunk/libs/gtdrag/docs/gtdrag.doc
+   trunk/libs/gtdrag/docs/gtdrag.guide
+   trunk/libs/gtdrag/docs/gtdrag.readme
+   trunk/libs/gtdrag/examples/boopsi.c
+   trunk/libs/gtdrag/examples/dragtest.c
+   trunk/libs/gtdrag/examples/dragtest.info
+   trunk/libs/gtdrag/examples/mmakefile.src
+   trunk/libs/gtdrag/fd/gtdrag_lib.fd
+   trunk/libs/gtdrag/gtdrag.c
+   trunk/libs/gtdrag/gtdrag.conf
+   trunk/libs/gtdrag/gtdrag_includes.h
+   trunk/libs/gtdrag/gtdrag_lib.c
+   trunk/libs/gtdrag/gtdrag_lib_aros.c
+   trunk/libs/gtdrag/gtdrag_rev.i
+   trunk/libs/gtdrag/gtdrag_romtag.asm
+   trunk/libs/gtdrag/include/clib/gtdrag_protos.h
+   trunk/libs/gtdrag/include/libraries/gtdrag.h
+   trunk/libs/gtdrag/include/libraries/gtdrag.i
+   trunk/libs/gtdrag/include/lvo/gtdrag_lib.i
+   trunk/libs/gtdrag/include/pragmas/gtdrag_pragmas.h
+   trunk/libs/gtdrag/include/proto/gtdrag.h
+   trunk/libs/gtdrag/makelib.with
+   trunk/libs/gtdrag/mmakefile.src
+   trunk/libs/include/SDI_compiler.h
+   trunk/libs/include/SDI_endian.h
+   trunk/libs/include/compatibility.h
+   trunk/libs/scroller/Scroller.c
+   trunk/libs/scroller/Scroller_includes.h
+   trunk/libs/scroller/Scroller_lib.c
+   trunk/libs/scroller/Scroller_lib_aros.c
+   trunk/libs/scroller/Scroller_rev.i
+   trunk/libs/scroller/Scroller_romtag.asm
+   trunk/libs/scroller/include/gadgets/Scroller.h
+   trunk/libs/scroller/mmakefile.src
+   trunk/libs/scroller/pScroller.conf
+   trunk/libs/textedit/SMakefile
+   trunk/libs/textedit/TE_clip.c
+   trunk/libs/textedit/TE_dispatch.c
+   trunk/libs/textedit/TE_draw.c
+   trunk/libs/textedit/TextEdit.c
+   trunk/libs/textedit/TextEdit_includes.h
+   trunk/libs/textedit/TextEdit_lib.c
+   trunk/libs/textedit/TextEdit_lib_aros.c
+   trunk/libs/textedit/TextEdit_private.h
+   trunk/libs/textedit/TextEdit_rev.i
+   trunk/libs/textedit/TextEdit_romtag.asm
+   trunk/libs/textedit/fd/TextEdit_lib.fd
+   trunk/libs/textedit/include/clib/TextEdit_protos.h
+   trunk/libs/textedit/include/gadgets/TextEdit.h
+   trunk/libs/textedit/include/pragmas/TextEdit_pragmas.h
+   trunk/libs/textedit/include/proto/TextEdit.h
+   trunk/libs/textedit/mmakefile.src
+   trunk/libs/textedit/pTextEdit.conf
+   trunk/libs/textedit/test/mmakefile.src
+   trunk/libs/textedit/test/tedit.c
+   trunk/locale.c
+   trunk/locale/C_h_orig.sd
+   trunk/locale/ignition.cd
+   trunk/locale/ignition_english.ct
+   trunk/lock.c
+   trunk/menu.c
+   trunk/misc/ignition-DeInstall
+   trunk/misc/ignition-Installation
+   trunk/objects.c
+   trunk/pointer.c
+   trunk/popper.c
+   trunk/prefs.c
+   trunk/prefs.h
+   trunk/prefsgadgets.c
+   trunk/prefsio.c
+   trunk/printer.c
+   trunk/project.c
+   trunk/reference.c
+   trunk/rexx.c
+   trunk/rexx/context.ign
+   trunk/rexx/coords.ign
+   trunk/rexx/getsetcell.ign
+   trunk/rexx/request.ign
+   trunk/rexx/test.rexx
+   trunk/screen.c
+   trunk/search.c
+   trunk/support.c
+   trunk/table.c
+   trunk/table.h
+   trunk/types.h
+   trunk/undo.c
+   trunk/version.h
+   trunk/wdt.h
+   trunk/windefs.h
+   trunk/windows.c
+   trunk/windows.h
+Log:
+Changed line ending to LF.
+
+Some time ago I changed it to &quot;native&quot;. At that time AROS did
+it the same way to ensure that files can be edited on W*ndows
+and M*cOS. But in the meantime it was changed in AROS to LF.
+I'm assuming that AROS is right ;-).
+
+
+
+Property changes on: trunk/History
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/LICENSE
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/Makefile
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/README
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/SCOPTIONS
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/add-ons/Makefile
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/SCOPTIONS
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/area_diagram.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/area_diagram.gcdescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/ascii.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/ascii.iodescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/button.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/button.gcdescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/cell.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/checkbox.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/checkbox.gcdescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/circle_diagram.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/circle_diagram.gcdescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/column_diagram.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/column_diagram.gcdescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/csv.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/csv.iodescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/frame.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/frame.gcdescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/gclass.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/gclass.fd
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/gclass.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/gclass_functable.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/gclass_makelib.with
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/gclass_pragmas.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/gclass_protos.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/gclass_variadic.c
+___________________________________________________________________
+Modified: svn:keywords
+   - Id Date Revision Author
+   + Author Date Id Revision
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/add-ons/gradient.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/gradient.gcdescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/iotype.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/iotype.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/iotype_variadic.c
+___________________________________________________________________
+Modified: svn:keywords
+   - Id Date Revision Author
+   + Author Date Id Revision
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/add-ons/line.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/line.gcdescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/line_diagram.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/line_diagram.gcdescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/polygon.gcdescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/rectangle.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/rectangle.gcdescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/text.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/text.gcdescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/turbocalc.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/turbocalc.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/add-ons/turbocalc.iodescr
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/boopsi.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/calc.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/calc.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/cell.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/classes.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/classes.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/clip.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/cmd.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/color.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/config/deutsch.functions
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + LF
+
+
+Property changes on: trunk/config/english.functions
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + LF
+
+
+Property changes on: trunk/database.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/debug.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/debug.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/diagram.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/docs/Befehle.guide
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/docs/Grafik-System
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/docs/LiesMich.guide
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/docs/Merker
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/docs/ReadMe.html
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/docs/WDTs
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/edit.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/font.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/font.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/funcs.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/functions.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/gadgets.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/gadgets.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/graphic.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/graphic.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/handleprefs.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/handlewindows.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/help/deutsch/ignition.guide
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/help/deutsch/ignition.in.guide
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/help/english/ignition.guide
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/help/english/ignition.in.guide
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+Added: svn:keywords
+   + Author Date Id Revision
+
+
+Property changes on: trunk/hooks.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/ignition.c
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + LF
+
+
+Property changes on: trunk/images.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/images.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/initwindows.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/io.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/io.h
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/lib/safeclip/ReadMe.doc
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + LF
+
+
+Property changes on: trunk/lib/safeclip/gcc-68k/Makefile
+___________________________________________________________________
+Modified: svn:keywords
+   - Id Date Revision Author
+   + Author Date Id Revision
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/lib/safeclip/gcc-68k/clip.s
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + LF
+
+
+Property changes on: trunk/lib/safeclip/gcc-68k/safeclip.c
+___________________________________________________________________
+Modified: svn:keywords
+   - Id Date Revision Author
+   + Author Date Id Revision
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/lib/safeclip/gcc-68k/safeclip.h
+___________________________________________________________________
+Modified: svn:keywords
+   - Id Date Revision Author
+   + Author Date Id Revision
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/lib/safeclip/generic/safeclip.c
+___________________________________________________________________
+Modified: svn:keywords
+   - Id Date Revision Author
+   + Author Date Id Revision
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/lib/safeclip/generic/safeclip.h
+___________________________________________________________________
+Modified: svn:keywords
+   - Id Date Revision Author
+   + Author Date Id Revision
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/lib/safeclip/safeclip.guide
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + LF
+
+
+Property changes on: trunk/lib/safeclip/sasc-68k/clip.s
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + LF
+
+
+Property changes on: trunk/lib/safeclip/sasc-68k/safeclip.c
+___________________________________________________________________
+Modified: svn:keywords
+   - Id Date Revision Author
+   + Author Date Id Revision
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/lib/safeclip/sasc-68k/safeclip.h
+___________________________________________________________________
+Modified: svn:keywords
+   - Id Date Revision Author
+   + Author Date Id Revision
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/lib/safeclip/sasc-68k/smakefile
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + LF
+
+
+Property changes on: trunk/libs/compatibility.c
+___________________________________________________________________
+Modified: svn:keywords
+   - Id Date Revision Author
+   + Author Date Id Revision
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_Apps.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_Boopsi.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_Drag.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_DragObj.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_DropMsgs.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_Gadgets.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_Highlight.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_Hook.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_IFFHook.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_IMsgs.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_ImageHook.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_Tree.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_TreeHook.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/GTD_Windows.c
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/SMakefile
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/docs/gtdrag.doc
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/docs/gtdrag.guide
+___________________________________________________________________
+Modified: svn:eol-style
+   - native
+   + LF
+
+
+Property changes on: trunk/libs/gtdrag/docs/gtdrag.readme
+___________________________________________________________________
+Modified: svn:eol-style
+
+[... truncated: 667 lines follow ...]
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000082.html">[Ignition-commits] r52 - in trunk/libs: gtdrag scroller textedit
+</A></li>
+	<LI>Next message: <A HREF="000084.html">[Ignition-commits] r54 - in trunk: . libs
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#83">[ date ]</a>
+              <a href="thread.html#83">[ thread ]</a>
+              <a href="subject.html#83">[ subject ]</a>
+              <a href="author.html#83">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,347 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Ignition-commits] r10 - in trunk/libs: . include
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/ignition-commits/2008-December/index.html" >
+   <LINK REL="made" HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r10%20-%20in%20trunk/libs%3A%20.%20include&In-Reply-To=%3C200812130731.mBD7V6em030884%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000004.html">
+   <LINK REL="Next"  HREF="000015.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Ignition-commits] r10 - in trunk/libs: . include</H1>
+    <B>marust at mail.berlios.de</B> 
+    <A HREF="mailto:ignition-commits%40lists.berlios.de?Subject=Re%3A%20%5BIgnition-commits%5D%20r10%20-%20in%20trunk/libs%3A%20.%20include&In-Reply-To=%3C200812130731.mBD7V6em030884%40sheep.berlios.de%3E"
+       TITLE="[Ignition-commits] r10 - in trunk/libs: . include">marust at mail.berlios.de
+       </A><BR>
+    <I>Sat Dec 13 08:31:06 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000004.html">[Ignition-commits] r9 - in trunk/libs: . include
+</A></li>
+        <LI>Next message: <A HREF="000015.html">[Ignition-commits] r10 - in trunk/libs: . include
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5">[ date ]</a>
+              <a href="thread.html#5">[ thread ]</a>
+              <a href="subject.html#5">[ subject ]</a>
+              <a href="author.html#5">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: marust
+Date: 2008-12-13 08:31:02 +0100 (Sat, 13 Dec 2008)
+New Revision: 10
+ViewCVS: <A HREF="http://svn.berlios.de/viewcvs/haiku?rev=10&amp;view=rev">http://svn.berlios.de/viewcvs/haiku?rev=10&amp;view=rev</A>
+
+Added:
+   trunk/libs/compatibility.c
+   trunk/libs/include/SDI_endian.h
+   trunk/libs/include/compatibility.h
+Modified:
+   trunk/libs/include/SDI_compiler.h
+Log:
+* Added Ignition specific defines to SDI_compiler.h
+* Created SDI_endian.h with endian conversion macros
+* Added compatibility.[ch] with missing SASC functions
+
+Added: trunk/libs/compatibility.c
+===================================================================
+--- trunk/libs/compatibility.c	2008-12-13 07:14:36 UTC (rev 9)
++++ trunk/libs/compatibility.c	2008-12-13 07:31:02 UTC (rev 10)
+@@ -0,0 +1,82 @@
++/* Implementations of missing functions
++ *
++ * FIXME: license
++ */
++
++#include &quot;include/compatibility.h&quot;
++#include &quot;SDI_compiler.h&quot;
++
++#include &lt;strings.h&gt;
++#include &lt;stdlib.h&gt;
++
++
++#if !defined(__SASC)
++
++void swmem(char *dest, char *src, int s)
++{
++	int i;
++	char c;
++
++	for(i=0; i&lt;s; i++) {
++		c = dest[i];
++		dest[i] = src[i];
++		src[i] = c;
++	}
++}
++
++
++void strins(char *to, const char *from)
++{
++	unsigned int toLength;
++	unsigned int fromLength;
++	char *newTo;
++	char *oldTo;
++
++	if (!to || !from)
++		return;
++
++	toLength = strlen(to);
++	fromLength = strlen(from);
++
++	newTo = to + fromLength + toLength;
++	oldTo = to + toLength;
++	toLength++;
++	
++	while(toLength--) {
++		*newTo-- = *oldTo--;
++	}
++
++	while(fromLength--) {
++		*to++ = *from++;
++	}
++}
++
++
++static int dcomp(double *a, double *b)
++{
++	if(*a&gt;*b)
++		return 1;
++	else if(*a==*b)
++		return 0;
++	else
++		return -1;
++}
++
++
++void dqsort(double *x, int n)
++{
++	qsort(x,n,sizeof(double),(void *)(*dcomp));
++}
++
++
++ULONG SafeInit (ULONG nvertmax)
++{
++	return 0;
++}
++
++
++void SafeClose (void)
++{
++}
++
++#endif
+
+
+Property changes on: trunk/libs/compatibility.c
+___________________________________________________________________
+Name: svn:keywords
+   + Id Date Revision Author
+Name: svn:eol-style
+   + native
+
+Modified: trunk/libs/include/SDI_compiler.h
+===================================================================
+--- trunk/libs/include/SDI_compiler.h	2008-12-13 07:14:36 UTC (rev 9)
++++ trunk/libs/include/SDI_compiler.h	2008-12-13 07:31:02 UTC (rev 10)
+@@ -46,6 +46,7 @@
+  1.25  21.06.07 : added NEAR to be usable for __near specification for SAS/C
+  1.26  14.10.07 : added DEPRECATED macro which defaults to __attribute__((deprecated))
+                   for GCC compiles.
++       29.11.08   Added some defines for Ignition and support modules (Mazze)
+ */
+ 
+ /*
+@@ -223,6 +224,61 @@
+   #undef ASM
+   #define ASM
+ 
++  #undef REGARGS
++  #define REGARGS
++
+ #endif /* __AROS__ */
+ 
++/*************************************************************************/
++
++/* Ignition support */
++
++#define PUBLIC ASM SAVEDS
++#define PRIVATE REGARGS
++
++/* IPTR is an integer type which is large enough to store an address.*/
++#if !defined(__AROS__) &amp;&amp; !defined(__MORPHOS__)
++  typedef ULONG IPTR;
++#endif
++
++#if defined(__AROS__)
++#  define LIBFUNC_INIT AROS_LIBFUNC_INIT
++#  define LIBFUNC_EXIT AROS_LIBFUNC_EXIT
++#  define LIB_LH0 AROS_LH0
++#  define LIB_LH1 AROS_LH1
++#  define LIB_LH2 AROS_LH2
++#  define LIB_LH3 AROS_LH3
++#  define LIB_LH4 AROS_LH4
++#  define LIB_LH5 AROS_LH5
++#  define LIB_LHA AROS_LHA
++#  define min(a,b) ((a)&lt;(b)?(a):(b))
++#  define max(a,b) ((a)&gt;(b)?(a):(b))
++#  define PI (M_PI)
++
++#  undef CHIP
++#  define CHIP
++
++#  define ALIGNED __attribute__ ((aligned (4)))
++#else
++   // TODO write LIB_... macros
++#  define LIBFUNC_INIT
++#  define LIBFUNC_EXIT
++
++#  define bug kprintf
++#endif
++
++#if defined(__AROS__)
++   /* Platforms which need HookEntry from amiga.lib */
++   //#  define SETHOOK(hookname, funcname) hookname.h_Entry = HookEntry; hookname.h_SubEntry = (HOOKFUNC)funcname
++   // FIXME for now we set funcname to h_Entry. This must later be changed to h_SubEntry (uncomment
++   // the line above)
++#  define SETHOOK(hookname, funcname) hookname.h_Entry = (HOOKFUNC)funcname;
++
++#  define SETDISPATCHER(classname, funcname) classname-&gt;cl_Dispatcher.h_Entry = HookEntry; \
++   classname-&gt;cl_Dispatcher.h_SubEntry = (HOOKFUNC)funcname
++#else
++#  define SETHOOK(hookname, funcname) hookname.h_Entry = (HOOKFUNC)funcname
++#  define SETDISPATCHER(classname, funcname) classname-&gt;cl_Dispatcher.h_Entry = (HOOKFUNC)funcname
++#endif
++
+ #endif /* SDI_COMPILER_H */
+
+Added: trunk/libs/include/SDI_endian.h
+===================================================================
+--- trunk/libs/include/SDI_endian.h	2008-12-13 07:14:36 UTC (rev 9)
++++ trunk/libs/include/SDI_endian.h	2008-12-13 07:31:02 UTC (rev 10)
+@@ -0,0 +1,57 @@
++#ifndef SDI_ENDIAN_H
++#define SDI_ENDIAN_H
++
++/* Includeheader
++
++        Name:           SDI_endian.h
++        Versionstring:  $VER: SDI_endian.h 1.0 (06.12.2008)
++        Author:         Matthias Rustler
++        Distribution:   PD
++        Project page:   <A HREF="http://www.sf.net/projects/sditools/">http://www.sf.net/projects/sditools/</A>
++        Description:    endian check and conversion
++
++ 1.0   06.12.08 : initial version
++*/
++
++
++/*
++    Note that BIG_ENDIAN is always defined, so that you can use it
++    with both preprocessor &quot;#if&quot; and C &quot;if&quot;.
++*/
++#if defined(__AROS__)
++  #define SDI_BIG_ENDIAN (AROS_BIG_ENDIAN)
++#else
++  #define SDI_BIG_ENDIAN (1)
++#endif
++
++
++#if defined(__AROS__)
++  #include &lt;aros/macros.h&gt;
++  
++  /* Convert a word or long to big endian and vice versa on the current hardware */
++  #define WORD2BE(w) AROS_WORD2BE(w)
++  #define LONG2BE(l) AROS_LONG2BE(l)
++  #define BE2WORD(w) AROS_BE2WORD(w)
++  #define BE2LONG(l) AROS_BE2LONG(l)
++
++  /* Convert a word or long to little endian and vice versa on the current hardware */
++  #define WORD2LE(w) AROS_WORD2LE(w)
++  #define LONG2LE(l) AROS_LONG2LE(l)
++  #define LE2WORD(w) AROS_LE2WORD(w)
++  #define LE2LONG(l) AROS_LE2LONG(l)
++#else
++  /* Convert a word or long to big endian and vice versa on the current hardware */
++  #define WORD2BE(w) (w)
++  #define LONG2BE(l) (l)
++  #define BE2WORD(w) (w)
++  #define BE2LONG(l) (l)
++
++  /* Convert a word or long to little endian and vice versa on the current hardware */
++  #define WORD2LE(w) (w) (((w &gt;&gt; 8) &amp; 0x00ff) | ((w &lt;&lt; 8) &amp; 0xff00))
++  #define LONG2LE(l) (l) (((l &gt;&gt;24) &amp; 0x000000ff) | ((l &gt;&gt; 8) &amp; 0x0000ff00) | ((l &lt;&lt; 8) &amp; 0x00ff0000) | ((l &lt;&lt;24) &amp; 0xff000000))
++
++  #define LE2WORD(w) (w) (((w &gt;&gt; 8) &amp; 0x00ff) | ((w &lt;&lt; 8) &amp; 0xff00))
++  #define LE2LONG(l) (l) (((l &gt;&gt;24) &amp; 0x000000ff) | ((l &gt;&gt; 8) &amp; 0x0000ff00) | ((l &lt;&lt; 8) &amp; 0x00ff0000) | ((l &lt;&lt;24) &amp; 0xff000000))
++#endif
++
++#endif /* SDI_ENDIAN_H */
+
+
+Property changes on: trunk/libs/include/SDI_endian.h
+___________________________________________________________________
+Name: svn:keywords
+   + Id Date Revision Author
+Name: svn:eol-style
+   + native
+
+Added: trunk/libs/include/compatibility.h
+===================================================================
+--- trunk/libs/include/compatibility.h	2008-12-13 07:14:36 UTC (rev 9)
++++ trunk/libs/include/compatibility.h	2008-12-13 07:31:02 UTC (rev 10)
+@@ -0,0 +1,14 @@
++/* Missing SASC/C functions
++ *
++ * FIXME: license
++ *
++ */
++
++#ifndef COMPATIBILITY_H
++#define COMPATIBILITY_H
++
++void swmem(char *dest, char *src, int s);
++void strins(char *to,const char *from);
++void dqsort(double *x, int n);
++
++#endif
+
+
+Property changes on: trunk/libs/include/compatibility.h
+___________________________________________________________________
+Name: svn:keywords
+   + Id Date Revision Author
+Name: svn:eol-style
+   + native
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000004.html">[Ignition-commits] r9 - in trunk/libs: . include
+</A></li>
+	<LI>Next message: <A HREF="000015.html">[Ignition-commits] r10 - in trunk/libs: . include
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5">[ date ]</a>
+              <a href="thread.html#5">[ thread ]</a>
+              <a href="subject.html#5">[ subject ]</a>
+              <a href="author.html#5">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/ignition-commits">More information about the Ignition-commits
+mailing list</a><br>
+</body></html>
